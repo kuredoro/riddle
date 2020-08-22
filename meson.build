@@ -8,5 +8,7 @@ if get_option('build-tests')
   subdir('tests')
 endif
 
-executable('lexer_demo', 'demo/lexer_demo.cpp',
-           dependencies : lexer_dep)
+if get_option('build-demos')
+  executable('lexer_demo', 'demo/lexer_demo.cpp',
+             dependencies : lexer_dep)
+endif
