@@ -23,7 +23,21 @@ meson builddir
 ### On each compilation/execution
 
 ```
-meson compile -C builddir/
+meson compile -C builddir
 cd builddir
 ./lexer_demo
+```
+
+### Test iteration
+
+```
+meson test -v -C builddir
+```
+
+Add these commands to your text editor for fast access.
+
+For vim, you can add these options to .vimrc or .localvimrc
+```
+nmap <leader>cc meson compile -C builddir
+nmap <leader>ct meson test -C builddir
 ```
