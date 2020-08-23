@@ -35,4 +35,5 @@
 builddir/
 subprojects/*
 !subprojects/*.wrap
+.vscode/
 .clangd/
