@@ -1,6 +1,6 @@
-#include <string>
-
 #pragma once
+
+#include <string>
 
 enum class TokenType{
     VarDec, // var
