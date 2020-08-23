@@ -14,4 +14,3 @@ jobs:
       with:
         action: test
         meson-version: 0.55.1
-        ninja-version: 1.10.1
