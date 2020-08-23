@@ -1,6 +1,6 @@
 #include <string>
 
-enum token_code{
+enum class TokenType{
     VarDec, // var
     TypeDec, // type
     RoutineDec, // routine
@@ -35,7 +35,7 @@ enum token_code{
     PlusOp, // +
     MinusOp, // -
     IntegerLiteral, // int const
-    // RealLiteral, // Do we need it? I think that "IntegerLiteral Dot IntegerLiteral" may not be the best way because when we should accept integers like 00256
+    RealLiteral, // real const
     Identifier, // name
     Dot, // .
     TwoDots, // ..
@@ -46,15 +46,8 @@ enum token_code{
     SquareBracketClose // ]
 };
 
-class Token{
-public:
-    token_code code;
-    int coordinate;
+struct Token{
+    TokenType code;
+    int srcPos;
     std::string image;
-
-    Token(token_code n_code, int n_coordinate, std::string n_image){
-        code = n_code;
-        coordinate = n_coordinate;
-        image = n_image;
-    }
 };
