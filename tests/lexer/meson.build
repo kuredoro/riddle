@@ -4,4 +4,4 @@ lexer_test = executable('lexerTest', ['../test_main.cpp', 'lexer_test.cpp'],
                         dependencies :
                         [catch2_dep, lexer_dep])
 
-test('Lexer tests', lexer_test)
+test('lexer', lexer_test)
