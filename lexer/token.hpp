@@ -49,7 +49,7 @@ enum class TokenType{
 };
 
 struct Token{
-    TokenType code;
+    TokenType type;
     int srcPos;
     std::string image;
 };
