@@ -1,6 +1,6 @@
 project('riddle',
         'cpp',
-        default_options : ['cpp_std=c++2a'])
+        default_options : ['cpp_std=c++17'])
 
 subdir('lexer')
 subdir('parser')
