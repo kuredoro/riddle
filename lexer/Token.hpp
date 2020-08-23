@@ -1,5 +1,7 @@
 #include <string>
 
+#pragma once
+
 enum class TokenType{
     VarDec, // var
     TypeDec, // type
