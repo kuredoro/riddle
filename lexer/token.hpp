@@ -1,6 +1,6 @@
-#include <string>
-
 #pragma once
+
+#include <string>
 
 enum class TokenType{
     VarDec, // var
@@ -49,7 +49,7 @@ enum class TokenType{
 };
 
 struct Token{
-    TokenType code;
+    TokenType type;
     int srcPos;
     std::string image;
 };
