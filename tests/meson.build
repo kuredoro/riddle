@@ -8,7 +8,7 @@ common_test = executable('commonTest', ['test_main.cpp', 'common/trie_test.cpp']
 lexer_test = executable('lexerTest', ['test_main.cpp', 'lexer/lexer_test.cpp'],
                         include_directories : '.',
                         dependencies :
-                        [catch2_dep, lexer_dep])
+                        [catch2_dep, lexer_dep, fmt_dep, common_dep])
 
 parser_test = executable('parserTest', ['test_main.cpp', 'parser/parser_test.cpp'],
                         include_directories : '.',
