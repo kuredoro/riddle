@@ -7,36 +7,6 @@
 #include <fstream>
 using namespace std;
 
-int read()
-{
-    // get file (input - string)
-    string line;
-    string fileName = "./README.md";
-    cout << fileName;
-    // Read from the text file
-    ifstream InputFS(fileName);
-
-    while (getline(InputFS, line)) // get tokens by line, because we should save the 'coordinates'
-    {
-        // split by spaces
-        // for each splitted word:
-        // check in tree
-        // if there - add token
-        // else
-        // if string[0] literal - identifier (check if there are only literals and numbers or underscore)
-        // else
-        // if there is a dot - RealLiteral
-        // else IntegerLiteral
-        // add new-line token
-        // Output the text from the file
-        cout << line;
-    }
-
-    // Close the file
-    InputFS.close();
-    return 0;
-}
-
 common::Trie<int> initTrie()
 {
     common::Trie<int> trie;
@@ -44,6 +14,7 @@ common::Trie<int> initTrie()
     trie.Add("var", int(TokenType::VarDec));
     trie.Add("type", int(TokenType::TypeDec));
     trie.Add("routine", int(TokenType::RoutineDec));
+    trie.Add("return", int(TokenType::Return));
     trie.Add("is", int(TokenType::Is));
     trie.Add("integer", int(TokenType::IntegerType));
     trie.Add("real", int(TokenType::RealType));
@@ -59,6 +30,7 @@ common::Trie<int> initTrie()
     trie.Add("reverse", int(TokenType::ReverseRange));
     trie.Add("in", int(TokenType::InRange));
     trie.Add("if", int(TokenType::If));
+    trie.Add("then", int(TokenType::Then));
     trie.Add("else", int(TokenType::Else));
     trie.Add("and", int(TokenType::AndLogic));
     trie.Add("or", int(TokenType::OrLogic));
@@ -79,6 +51,7 @@ common::Trie<int> initTrie()
     /* WARN     IntegerLiteral, // int const
         RealLiteral, // real const
         Identifier, // name
+        and NewLine
     */
     // signs
     trie.Add(".", int(TokenType::Dot));
@@ -89,6 +62,36 @@ common::Trie<int> initTrie()
     trie.Add(").", int(TokenType::BracketClose));
     trie.Add("[", int(TokenType::SquareBracketOpen));
     trie.Add("]", int(TokenType::SquareBracketClose));
-
+    trie.Add("//", int(TokenType::SingleLineComment));
+    trie.Add("\n", int(TokenType::SingleLineComment));
     return trie;
+}
+
+int read()
+{
+    // get file (input - string)
+    string line;
+    string fileName = "./README.md";
+    cout << fileName;
+    // Read from the text file
+    ifstream InputFS(fileName);
+
+    // while (getline(InputFS, line)) // get tokens by line, because we should save the 'coordinates'
+    // {
+    // split by spaces
+    // for each splitted word:
+    // check in tree
+    // if there - add token
+    // else
+    // if string[0] literal - identifier (check if there are only literals and numbers or underscore)
+    // else
+    // if there is a dot - RealLiteral
+    // else IntegerLiteral
+    // add new-line token
+    // Output the text from the file
+    // }
+
+    // Close the file
+    InputFS.close();
+    return 0;
 }
