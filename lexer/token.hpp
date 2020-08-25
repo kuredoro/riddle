@@ -2,10 +2,13 @@
 
 #include <string>
 
+namespace lexer {
+
 enum class TokenType{
-    VarDec, // var
-    TypeDec, // type
-    RoutineDec, // routine
+    Nil,
+    VarDecl, // var
+    TypeDecl, // type
+    RoutineDecl, // routine
     Is, // is
     IntegerType, // integer
     RealType, // real
@@ -32,10 +35,10 @@ enum class TokenType{
     EqComp, // =
     NeqComp, // /=
     MultOp, // *
-    DevOp, // /
-    RemainderOp, // %
-    PlusOp, // +
-    MinusOp, // -
+    DivOp, // /
+    ModOp, // %
+    AddOp, // +
+    SubOp, // -
     IntegerLiteral, // int const
     RealLiteral, // real const
     Identifier, // name
@@ -45,11 +48,18 @@ enum class TokenType{
     BracketOpen, // (
     BracketClose, // )
     SquareBracketOpen, // [
-    SquareBracketClose // ]
+    SquareBracketClose, // ]
+    Colon,
+    Semicolon,
+    NewLine,
 };
 
-struct Token{
+struct Token {
     TokenType type;
-    int srcPos;
+    size_t line;
+    size_t srcPos;
     std::string image;
 };
+
+
+}
