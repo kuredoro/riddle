@@ -1,4 +1,5 @@
 #pragma once
+#include <initializer_list>
 #include <optional>
 #include <string_view>
 #include <string>
@@ -8,13 +9,17 @@
 
 namespace common {
 
+template <typename T>
+struct TriePayload {
+    std::string key;
+    T value;
+};
 
 template <typename T>
 class Trie {
 public:
-    Trie() {
-        m_tree.emplace_back();
-    }
+    Trie() = default;
+    Trie(std::initializer_list<TriePayload<T>> initList);
 
     void Add(const std::string_view key, T value);
     std::optional<T> Find(const std::string_view key) const;
@@ -32,7 +37,18 @@ private:
 };
 
 template <typename T>
+Trie<T>::Trie(std::initializer_list<TriePayload<T>> initList) {
+    for (auto it = initList.begin(); it != initList.end(); it++) {
+        Add(it->key, it->value);
+    }
+}
+
+template <typename T>
 void Trie<T>::Add(std::string_view key, T value) {
+    if (m_tree.empty()) {
+        m_tree.emplace_back();
+    }
+
     size_t head = 0;
     size_t chi = 0;
     for (; chi < key.size(); chi++) {
@@ -60,6 +76,10 @@ void Trie<T>::Add(std::string_view key, T value) {
 
 template <typename T>
 std::optional<T> Trie<T>::Find(const std::string_view key) const {
+    if (m_tree.empty()) {
+        return std::nullopt;
+    }
+
     size_t head = 0;
     for (auto ch : key) {
         if (m_tree[head].next.count(ch) == 0) {
