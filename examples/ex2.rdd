@@ -1,0 +1,13 @@
+routine factorial(number: i nteger) : integer
+is
+    if num /= 1 then
+        return num * factorial(num - 1);
+    else
+        return 1;
+    end
+end
+
+routine main(num : integer) : integer is
+    var a is factorial(num);
+    return a;
+end

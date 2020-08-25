@@ -1,0 +1,25 @@
+routine main(time : integer) is
+    type Array1D is array [ 4 ] integer;
+    type Array2D is array [ 4 ] Array1D;
+    // initialization
+    var array1 : Array2D;
+    var array2 : Array2D;
+    var array3 : Array2D;
+    // arrays filling
+    for i in 1..4 loop
+        for j in 1..4 loop
+            array1[i][j] := i + j;
+            array2[j][i] := i - j;
+        end
+    end
+    // multiplication of array1 and array2
+    for i in 1..4 loop
+        for j in 1..4 loop
+            // (i, j) - coordinates in the new array
+            for k in 1..4 loop
+                // k - itterator for "parent" cols and rows
+                array3[i][j] := array3[i][j] + array1[i][k] * array2[k][j];
+            end
+        end
+    end
+end

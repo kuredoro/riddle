@@ -1,0 +1,47 @@
+routine main(a : integer) : integer is
+    type Node is record
+        var value       :   real
+        var previous    :   Node
+        var next        :   Node
+        var is_last     :   boolean
+        var is_first    :   boolean
+    end
+
+    // create first node
+
+    var node : Node;
+    node.value := 0.3;
+    node.is_last := 1;
+    node.is_first := 1;
+    // append new node
+    var node1 : Node;
+    node1.value := 0.7;
+    node1.is_last := true;
+    node1.is_first := 0;
+
+    node.is_last := false;
+    node.next := node1;
+
+    node1.previous := node;
+
+    // insert a node at the middle
+
+    var node2 : Node;
+    node2.value := 5.8;
+    node2.is_last := false;
+    node2.is_first := 0;
+
+    node2.next := node.next;
+    node2.previlos := node2.previous;
+
+    node.next := node2;
+    node1.previous := node.next;
+
+    // create some fantom nodes
+    var some : Node;
+    some.value := 7;
+    some.previous.value := 6;
+    some.previous := node2;
+
+    return node.next.next.previous.previous.value + true;
+end

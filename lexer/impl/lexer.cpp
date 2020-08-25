@@ -5,6 +5,9 @@
 #include "trie.hpp"
 #include <iostream>
 #include <fstream>
+#include <vector>
+#include <sstream>
+#include <ctype.h>
 using namespace std;
 
 common::Trie<int> initTrie()
@@ -69,16 +72,54 @@ common::Trie<int> initTrie()
 
 int read()
 {
+    vector<int> result;
     // get file (input - string)
-    string line;
-    string fileName = "./README.md";
-    cout << fileName;
+    string line, word;
+    string fileName = "./examples/ex1.rdd";
     // Read from the text file
     ifstream InputFS(fileName);
+    common::Trie<int> trie = initTrie();
 
-    // while (getline(InputFS, line)) // get tokens by line, because we should save the 'coordinates'
+    while (std::getline(InputFS, line))
+    {
+        std::istringstream iss(line);
+        while (std::getline(iss, word, ' '))
+        {
+            auto res = trie.Find(word);
+            if (res)
+            {
+                // cout << res.value_or(-1) << "\n";
+                int val = res.value_or(-1);
+                result.insert(result.end(), val);
+                cout << result[result.size() - 1] << "\n";
+                if (val == int(TokenType::SingleLineComment))
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                // check not tab sequence
+                if (int(word[0]) == 0 || isspace(word[0]))
+                {
+                    continue;
+                }
+                cout << word << "\n";
+                // read char-by-char:
+                // if first literal -> suggest it is a variable name
+                // run throught all word if number/_/letter
+                // else if num-> int or 1..4 or real
+                // else
+            }
+        }
+        // word = strtok(line, " ");
+        // cout << word << "\n";
+    }
+    // while (word != NULL)
     // {
-    // split by spaces
+    //     cout << word << "\t\t";
+
+    // // split by spaces???
     // for each splitted word:
     // check in tree
     // if there - add token
@@ -89,7 +130,6 @@ int read()
     // else IntegerLiteral
     // add new-line token
     // Output the text from the file
-    // }
 
     // Close the file
     InputFS.close();
