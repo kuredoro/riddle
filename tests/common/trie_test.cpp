@@ -8,13 +8,7 @@ namespace testing {
 
 
 template <typename T>
-struct TriePayload {
-    std::string key;
-    T value;
-};
-
-template <typename T>
-void AssertTrieContains(const common::Trie<T>& trie, const testing::TriePayload<T>& payload) {
+void AssertTrieContains(const common::Trie<T>& trie, const common::TriePayload<T>& payload) {
     auto result = trie.Find(payload.key);
 
     CHECK_MESSAGE((bool)result, 
@@ -48,7 +42,7 @@ SCENARIO("Basic word lookup via trie") {
     };
 
     GIVEN("A set of words<->ints") {
-        std::vector<testing::TriePayload<int>> words{
+        std::vector<common::TriePayload<int>> words{
             {"a", 1},
             {"b", 2},
             {"abc", 3},
@@ -75,7 +69,7 @@ SCENARIO("Basic word lookup via trie") {
     }
     
     GIVEN("A set of words<->strings") {
-        std::vector<testing::TriePayload<std::string>> words{
+        std::vector<common::TriePayload<std::string>> words{
             {"first", "nyan"},
             {"fir", "cat"},
             {"secon", "tsukue"},
@@ -104,3 +98,32 @@ SCENARIO("Basic word lookup via trie") {
     }
 }
 
+SCENARIO("Initalizer-list initialization of a trie") {
+
+    GIVEN("A set of words with integer payload") {
+
+        common::Trie<int> trie{
+            {"abc", 5},
+            {"bcd", 6},
+            {"xyz", 0},
+            {"acb", -5},
+            {"xxx", 18},
+            {"ans", 42},
+        };
+
+        std::vector<common::TriePayload<int>> words{
+            {"abc", 5},
+            {"bcd", 6},
+            {"xyz", 0},
+            {"acb", -5},
+            {"xxx", 18},
+            {"ans", 42},
+        };
+
+        THEN("These words exist and report correct payloads") {
+            for (auto& pl : words) {
+                testing::AssertTrieContains(trie, pl);
+            }
+        }
+    }
+}
