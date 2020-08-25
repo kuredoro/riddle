@@ -42,7 +42,7 @@ SCENARIO("Trie initialization")
                 testing::checkInTrie(kw, trie);
             }
         }
-        THEN("Boolean ops are in the tire")
+        THEN("Boolean ops are in the trie")
         {
             string boolOps[]{">", "<", ">=", "<=", "=", "/="};
             for (string op : boolOps)
