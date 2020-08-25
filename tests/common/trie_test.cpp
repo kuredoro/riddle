@@ -26,7 +26,8 @@ void AssertTrieContains(const common::Trie<T>& trie, const testing::TriePayload<
     }
 }
 
-void AssertTrieDoesNotContain(const auto& trie, const std::string& key) {
+template <typename T>
+void AssertTrieDoesNotContain(const common::Trie<T>& trie, const std::string& key) {
     auto result = trie.Find(key);
 
     CHECK_MESSAGE(!(bool)result, 
