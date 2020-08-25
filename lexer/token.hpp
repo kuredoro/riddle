@@ -2,64 +2,64 @@
 
 #include <string>
 
-enum class TokenType
-{
-    InvalidToken,
-    VarDec,             // var
-    TypeDec,            // type
-    RoutineDec,         // routine
-    Return,             // return
-    Is,                 // is
-    IntegerType,        // integer
-    RealType,           // real
-    BooleanType,        // boolean
-    RecordType,         // record
-    ArrayType,          // array
-    True,               // true
-    False,              // false
-    WhileLoop,          // while
-    ForLoop,            // for
-    LoopBegin,          // loop
-    End,                // end
-    ReverseRange,       // reverse
-    InRange,            // in
-    If,                 // if
-    Then,               // then
-    Else,               // else
-    AndLogic,           // and
-    OrLogic,            // or
-    XorLogic,           // xor
-    SmallerComp,        // <
-    SeqComp,            // <=
-    BiggerComp,         // >
-    BeqComp,            // >=
-    EqComp,             // =
-    NeqComp,            // /=
-    MultOp,             // *
-    DivOp,              // /
-    RemainderOp,        // %
-    PlusOp,             // +
-    MinusOp,            // -
-    IntegerLiteral,     // int const
-    RealLiteral,        // real const
-    Identifier,         // name
-    Dot,                // .
-    TwoDots,            // ..
-    Comma,              // ,
-    BracketOpen,        // (
-    BracketClose,       // )
-    SquareBracketOpen,  // [
+namespace lexer {
+
+enum class TokenType{
+    Nil,
+    VarDecl, // var
+    TypeDecl, // type
+    RoutineDecl, // routine
+    Is, // is
+    IntegerType, // integer
+    RealType, // real
+    BooleanType, // boolean
+    RecordType, // record
+    ArrayType, // array
+    True, // true
+    False, // false
+    WhileLoop, // while
+    ForLoop, // for
+    LoopBegin, // loop
+    End, // end
+    ReverseRange, // reverse
+    InRange, // in
+    If, // if
+    Else, // else
+    AndLogic, // and
+    OrLogic, // or
+    XorLogic, // xor
+    SmallerComp, // <
+    SeqComp, // <=
+    BiggerComp, // >
+    BeqComp, // >=
+    EqComp, // =
+    NeqComp, // /=
+    MultOp, // *
+    DivOp, // /
+    ModOp, // %
+    AddOp, // +
+    SubOp, // -
+    IntegerLiteral, // int const
+    RealLiteral, // real const
+    Identifier, // name
+    Dot, // .
+    TwoDots, // ..
+    Comma, // ,
+    BracketOpen, // (
+    BracketClose, // )
+    SquareBracketOpen, // [
     SquareBracketClose, // ]
-    SingleLineComment,  // //
-    NewLine,            // \n
-    Semicolon,          // ;
-    Assignment,         // :=
-    Colon,              // :
+    Colon,
+    Semicolon,
+    NewLine,
 };
 
-struct Token
-{
+struct Token {
     TokenType type;
-    int srcPos;
+    size_t line;
+    size_t srcPos;
     std::string image;
 };
+
+
+}
