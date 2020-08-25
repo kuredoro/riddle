@@ -40,14 +40,14 @@ SCENARIO("Trie initialization")
     GIVEN("A command to initialize the trie")
     {
         common::Trie<int> trie = initTrie();
-        THEN("All 24 keywords ar in the trie")
+
+        THEN("All the keywords are in the trie")
         {
             std::vector<std::string> keywords{"var", "type", "routine", "is", "integer",
                                               "real", "boolean", "record", "array", "true",
                                               "false", "while", "for", "loop", "end",
                                               "reverse", "in", "if", "else", "and",
                                               "or", "xor", "then", "return"};
-
             checkTokens(keywords, trie);
         }
         THEN("Boolean ops are in the trie")
