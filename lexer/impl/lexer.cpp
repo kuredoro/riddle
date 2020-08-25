@@ -66,7 +66,7 @@ common::Trie<int> initTrie()
     trie.Add("[", int(TokenType::SquareBracketOpen));
     trie.Add("]", int(TokenType::SquareBracketClose));
     trie.Add("//", int(TokenType::SingleLineComment));
-    trie.Add("\n", int(TokenType::SingleLineComment));
+    trie.Add("\n", int(TokenType::NewLine));
     return trie;
 }
 
