@@ -8,7 +8,6 @@
 #include <vector>
 #include <sstream>
 #include <ctype.h>
-using namespace std;
 
 common::Trie<int> initTrie()
 {
@@ -72,12 +71,12 @@ common::Trie<int> initTrie()
 
 int read()
 {
-    vector<int> result;
+    std::vector<int> result;
     // get file (input - string)
-    string line, word;
-    string fileName = "./examples/ex1.rdd";
+    std::string line, word;
+    std::string fileName = "./examples/ex1.rdd";
     // Read from the text file
-    ifstream InputFS(fileName);
+    std::ifstream InputFS(fileName);
     common::Trie<int> trie = initTrie();
 
     while (std::getline(InputFS, line))
@@ -91,7 +90,7 @@ int read()
                 // cout << res.value_or(-1) << "\n";
                 int val = res.value_or(-1);
                 result.insert(result.end(), val);
-                cout << result[result.size() - 1] << "\n";
+                std::cout << result[result.size() - 1] << "\n";
                 if (val == int(TokenType::SingleLineComment))
                 {
                     continue;
@@ -104,7 +103,7 @@ int read()
                 {
                     continue;
                 }
-                cout << word << "\n";
+                std::cout << word << "\n";
                 // read char-by-char:
                 // if first literal -> suggest it is a variable name
                 // run throught all word if number/_/letter
