@@ -4,6 +4,7 @@
 #include "fmt/format.h"
 #include "trie.hpp"
 #include "catch_helpers.hpp"
+#include <vector>
 
 using namespace std;
 namespace testing
@@ -16,7 +17,17 @@ namespace testing
         CHECK_MESSAGE((bool)result,
                       "expected to find key \"{}\", but didn't", key);
     }
+
 } // namespace testing
+
+void checkTokens(vector<string> tokens, common::Trie<int> trie)
+{
+    for (string token : tokens)
+    {
+        testing::checkInTrie(token, trie);
+    }
+}
+
 SCENARIO("Trie initialization")
 {
 
@@ -32,39 +43,28 @@ SCENARIO("Trie initialization")
         common::Trie<int> trie = initTrie();
         THEN("All 24 keywords ar in the trie")
         {
-            string keywords[]{"var", "type", "routine", "is", "integer",
-                              "real", "boolean", "record", "array", "true",
-                              "false", "while", "for", "loop", "end",
-                              "reverse", "in", "if", "else", "and",
-                              "or", "xor", "then", "return"};
-            for (string kw : keywords)
-            {
-                testing::checkInTrie(kw, trie);
-            }
+            vector<string> keywords{"var", "type", "routine", "is", "integer",
+                                    "real", "boolean", "record", "array", "true",
+                                    "false", "while", "for", "loop", "end",
+                                    "reverse", "in", "if", "else", "and",
+                                    "or", "xor", "then", "return"};
+
+            checkTokens(keywords, trie);
         }
         THEN("Boolean ops are in the trie")
         {
-            string boolOps[]{">", "<", ">=", "<=", "=", "/="};
-            for (string op : boolOps)
-            {
-                testing::checkInTrie(op, trie);
-            }
+            vector<string> boolOps{">", "<", ">=", "<=", "=", "/="};
+            checkTokens(boolOps, trie);
         }
         THEN("Math ops are in the tire")
         {
-            string mathOps[]{"+", "-", "*", "/", "%"};
-            for (string op : mathOps)
-            {
-                testing::checkInTrie(op, trie);
-            }
+            vector<string> mathOps{"+", "-", "*", "/", "%"};
+            checkTokens(mathOps, trie);
         }
         THEN("Special chars are in the tire")
         {
-            string specChars[]{"+", "-", "*", "/", "%", "\n"};
-            for (string spec : specChars)
-            {
-                testing::checkInTrie(spec, trie);
-            }
+            vector<string> specChars{"+", "-", "*", "/", "%", "\n"};
+            checkTokens(specChars, trie);
         }
     }
 }

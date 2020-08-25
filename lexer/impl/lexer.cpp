@@ -112,24 +112,9 @@ int read()
                 // else
             }
         }
-        // word = strtok(line, " ");
+        // word = strtok(line, " "); an
         // cout << word << "\n";
     }
-    // while (word != NULL)
-    // {
-    //     cout << word << "\t\t";
-
-    // // split by spaces???
-    // for each splitted word:
-    // check in tree
-    // if there - add token
-    // else
-    // if string[0] literal - identifier (check if there are only literals and numbers or underscore)
-    // else
-    // if there is a dot - RealLiteral
-    // else IntegerLiteral
-    // add new-line token
-    // Output the text from the file
 
     // Close the file
     InputFS.close();
