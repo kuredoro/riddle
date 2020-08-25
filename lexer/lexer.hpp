@@ -3,10 +3,26 @@
 #include "trie.hpp"
 #pragma once
 
-namespace lexer
-{
-    std::vector<Token> read(std::string);
-    common::Trie<TokenType> getTrie();
-    std::vector<Token> splitLine(std::string);
-    void freeResult();
+#include "trie.hpp"
+#include "token.hpp"
+
+namespace lexer {
+
+//extern common::Trie<TokenType> trie;
+
+class Lexer {
+public:
+    Lexer(std::string src) : buf(src) {
+
+    }
+
+    Token Next() {
+        return {};
+    }
+
+private:
+    std::string buf;
+    
+};
+
 } // namespace lexer
