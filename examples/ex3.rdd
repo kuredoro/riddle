@@ -1,0 +1,24 @@
+routine main(input: integer) : integer is
+    // initialization
+    var counter : integer is 0;
+
+
+    // input is binary encoding 0-left 1-right brace,
+    // the goal is to validate if the expression is valid (input is readen from right to left)
+
+    // var input : integer;
+    // /*input := 2345;
+
+    while input > 0 loop
+        if input % 2 = 0 then
+            counter := counter + 1;
+            input := input / 2;
+        else
+            counter := counter - 1;
+            input := (input - 1) / 2;
+        end
+    end
+    if counter then
+        return counter
+    end
+end
