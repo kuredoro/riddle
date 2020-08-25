@@ -50,7 +50,7 @@ SCENARIO("Trie initialization")
 
             checkTokens(keywords, trie);
         }
-        THEN("Boolean ops are in the tire")
+        THEN("Boolean ops are in the trie")
         {
             std::vector<std::string> boolOps{">", "<", ">=", "<=", "=", "/="};
             checkTokens(boolOps, trie);
