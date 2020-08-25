@@ -9,6 +9,7 @@
 
 namespace common {
 
+
 template <typename T>
 struct TriePayload {
     std::string key;
