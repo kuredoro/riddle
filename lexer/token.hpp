@@ -4,6 +4,7 @@
 
 enum class TokenType
 {
+    InvalidToken,
     VarDec,             // var
     TypeDec,            // type
     RoutineDec,         // routine
