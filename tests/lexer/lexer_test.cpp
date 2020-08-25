@@ -1,5 +1,6 @@
 #include "catch2/catch.hpp"
 #include "lexer.hpp"
+#include "token.hpp"
 #include <string>
 #include "fmt/format.h"
 #include "trie.hpp"
@@ -9,7 +10,7 @@
 namespace testing
 {
 
-    void checkInTrie(std::string key, common::Trie<int>
+    void checkInTrie(std::string key, common::Trie<TokenType>
                                           trie)
     {
         auto result = trie.Find(key);
@@ -19,7 +20,7 @@ namespace testing
 
 } // namespace testing
 
-void checkTokens(std::vector<std::string> tokens, common::Trie<int> trie)
+void checkTokens(std::vector<std::string> tokens, common::Trie<TokenType> trie)
 {
     for (std::string token : tokens)
     {
@@ -39,7 +40,7 @@ SCENARIO("Trie initialization")
     }
     GIVEN("A command to initialize the trie")
     {
-        common::Trie<int> trie = initTrie();
+        common::Trie<TokenType> trie = initTrie();
 
         THEN("All the keywords are in the trie")
         {

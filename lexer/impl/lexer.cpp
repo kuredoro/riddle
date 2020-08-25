@@ -9,75 +9,75 @@
 #include <sstream>
 #include <ctype.h>
 
-common::Trie<int> initTrie()
+common::Trie<TokenType> initTrie()
 {
-    common::Trie<int> trie;
+    common::Trie<TokenType> trie;
     // keywords
-    trie.Add("var", int(TokenType::VarDec));
-    trie.Add("type", int(TokenType::TypeDec));
-    trie.Add("routine", int(TokenType::RoutineDec));
-    trie.Add("return", int(TokenType::Return));
-    trie.Add("is", int(TokenType::Is));
-    trie.Add("integer", int(TokenType::IntegerType));
-    trie.Add("real", int(TokenType::RealType));
-    trie.Add("boolean", int(TokenType::BooleanType));
-    trie.Add("record", int(TokenType::RecordType));
-    trie.Add("array", int(TokenType::ArrayType));
-    trie.Add("true", int(TokenType::True));
-    trie.Add("false", int(TokenType::False));
-    trie.Add("while", int(TokenType::WhileLoop));
-    trie.Add("for", int(TokenType::ForLoop));
-    trie.Add("loop", int(TokenType::LoopBegin));
-    trie.Add("end", int(TokenType::End));
-    trie.Add("reverse", int(TokenType::ReverseRange));
-    trie.Add("in", int(TokenType::InRange));
-    trie.Add("if", int(TokenType::If));
-    trie.Add("then", int(TokenType::Then));
-    trie.Add("else", int(TokenType::Else));
-    trie.Add("and", int(TokenType::AndLogic));
-    trie.Add("or", int(TokenType::OrLogic));
-    trie.Add("xor", int(TokenType::XorLogic));
+    trie.Add("var", TokenType::VarDec);
+    trie.Add("type", TokenType::TypeDec);
+    trie.Add("routine", TokenType::RoutineDec);
+    trie.Add("return", TokenType::Return);
+    trie.Add("is", TokenType::Is);
+    trie.Add("integer", TokenType::IntegerType);
+    trie.Add("real", TokenType::RealType);
+    trie.Add("boolean", TokenType::BooleanType);
+    trie.Add("record", TokenType::RecordType);
+    trie.Add("array", TokenType::ArrayType);
+    trie.Add("true", TokenType::True);
+    trie.Add("false", TokenType::False);
+    trie.Add("while", TokenType::WhileLoop);
+    trie.Add("for", TokenType::ForLoop);
+    trie.Add("loop", TokenType::LoopBegin);
+    trie.Add("end", TokenType::End);
+    trie.Add("reverse", TokenType::ReverseRange);
+    trie.Add("in", TokenType::InRange);
+    trie.Add("if", TokenType::If);
+    trie.Add("then", TokenType::Then);
+    trie.Add("else", TokenType::Else);
+    trie.Add("and", TokenType::AndLogic);
+    trie.Add("or", TokenType::OrLogic);
+    trie.Add("xor", TokenType::XorLogic);
     // comparison
-    trie.Add("<", int(TokenType::SmallerComp));
-    trie.Add("<=", int(TokenType::SeqComp));
-    trie.Add(">", int(TokenType::BiggerComp));
-    trie.Add(">=", int(TokenType::BeqComp));
-    trie.Add("=", int(TokenType::EqComp));
-    trie.Add("/=", int(TokenType::NeqComp));
+    trie.Add("<", TokenType::SmallerComp);
+    trie.Add("<=", TokenType::SeqComp);
+    trie.Add(">", TokenType::BiggerComp);
+    trie.Add(">=", TokenType::BeqComp);
+    trie.Add("=", TokenType::EqComp);
+    trie.Add("/=", TokenType::NeqComp);
     // math ops
-    trie.Add("*", int(TokenType::MultOp));
-    trie.Add("/", int(TokenType::DevOp));
-    trie.Add("%", int(TokenType::RemainderOp));
-    trie.Add("+", int(TokenType::PlusOp));
-    trie.Add("-", int(TokenType::MinusOp));
+    trie.Add("*", TokenType::MultOp);
+    trie.Add("/", TokenType::DevOp);
+    trie.Add("%", TokenType::RemainderOp);
+    trie.Add("+", TokenType::PlusOp);
+    trie.Add("-", TokenType::MinusOp);
     /* WARN     IntegerLiteral, // int const
         RealLiteral, // real const
         Identifier, // name
         and NewLine
     */
     // signs
-    trie.Add(".", int(TokenType::Dot));
-    trie.Add("..", int(TokenType::TwoDots));
-    trie.Add(",", int(TokenType::Comma));
+    trie.Add(".", TokenType::Dot);
+    trie.Add("..", TokenType::TwoDots);
+    trie.Add(",", TokenType::Comma);
     // braces and parenthesis
-    trie.Add("(", int(TokenType::BracketOpen));
-    trie.Add(").", int(TokenType::BracketClose));
-    trie.Add("[", int(TokenType::SquareBracketOpen));
-    trie.Add("]", int(TokenType::SquareBracketClose));
-    trie.Add("//", int(TokenType::SingleLineComment));
-    trie.Add("\n", int(TokenType::NewLine));
+    trie.Add("(", TokenType::BracketOpen);
+    trie.Add(").", TokenType::BracketClose);
+    trie.Add("[", TokenType::SquareBracketOpen);
+    trie.Add("]", TokenType::SquareBracketClose);
+    trie.Add("//", TokenType::SingleLineComment);
+    trie.Add("\n", TokenType::NewLine);
     return trie;
 }
 
 int read()
 {
-    std::vector<int> result;
+    std::vector<TokenType> result;
     // get file (input - string)
     std::string line, word;
     std::string fileName = "./examples/ex1.rdd";
     // Read from the text file
     std::ifstream InputFS(fileName);
-    common::Trie<int> trie = initTrie();
+    common::Trie<TokenType> trie = initTrie();
 
     while (std::getline(InputFS, line))
     {
@@ -88,10 +88,11 @@ int read()
             if (res)
             {
                 // cout << res.value_or(-1) << "\n";
-                int val = res.value_or(-1);
+                TokenType invalidToken = TokenType::InvalidToken;
+                TokenType val = res.value_or(invalidToken);
                 result.insert(result.end(), val);
-                std::cout << result[result.size() - 1] << "\n";
-                if (val == int(TokenType::SingleLineComment))
+                std::cout << int(result[result.size() - 1]) << "\n";
+                if (val == TokenType::SingleLineComment)
                 {
                     continue;
                 }
