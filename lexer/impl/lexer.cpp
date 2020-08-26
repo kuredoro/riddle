@@ -7,7 +7,7 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
-#include <ctype.h>
+#include <cctype>
 
 /**
  * Paks values to the Token struct instance
@@ -39,10 +39,9 @@ std::string toStr(char c)
 
 namespace lexer
 {
-    common::Trie<TokenType> trie;                     // tire to search for the keywords of the language
-    std::vector<Token> result;                        // list of tokens to be returned
-    TokenType invalidToken = TokenType::InvalidToken; // empty token
-    int lineNum = 1;                                  // line counter, start with 1, because it is file-lines enumeration
+    common::Trie<TokenType> trie; // trie to search for the keywords of the language
+    std::vector<Token> result;    // list of tokens to be returned
+    int lineNum = 1;              // line counter, start with 1, because it is file-lines enumeration
 
     /**
      * Iniialization of trie with a list of tokens, eqiavalent
@@ -116,13 +115,13 @@ namespace lexer
      * @param tt2 - TokenType if all chars are equal
      * 
     */
-    void checkTwoCharToken(int *indexPointer, std::string word, std::string longToken,
+    void checkTwoCharToken(int &index, std::string word, std::string longToken,
                            TokenType tt1, TokenType tt2)
     {
         char firstChar = longToken[0];
-        if (*indexPointer < int(word.length()) && word[*indexPointer] == firstChar)
+        if (index < int(word.length()) && word[index] == firstChar)
         {
-            (*indexPointer)++;
+            index++;
             result.push_back(makeToken(tt2, lineNum, longToken));
         }
         else
@@ -132,16 +131,16 @@ namespace lexer
     }
 
     /**
-     * Itterates throught word while it is a number ()
+     * Iterates through word while it is a number ()
      * 
     */
     std::string readWhileNum(int &index, std::string word)
     {
         std::string num;
-        while (index < int(word.length()) && isdigit(word[index]))
+        while (index < int(word.length()) && std::isdigit(word[index]))
         {
             char c = word[index++];
-            num.append(toStr(c));
+            num.push_back(c);
         }
         return num;
     }
@@ -152,7 +151,7 @@ namespace lexer
         if (res)
         {
             // if value is defenetly a keyword
-            TokenType val = res.value_or(invalidToken);
+            TokenType val = res.value_or(TokenType::InvalidToken);
             // don't read single line comments till the end
             if (val == TokenType::SingleLineComment)
             {
@@ -189,28 +188,28 @@ namespace lexer
                 case ';':
                 case ',':
                     sign = toStr(c);
-                    val = trie.Find(sign).value_or(invalidToken);
+                    val = trie.Find(sign).value_or(TokenType::InvalidToken);
                     result.push_back(makeToken(val, lineNum, sign));
                     break;
                 case '.':
-                    checkTwoCharToken(&index, word, "..", TokenType::Dot, TokenType::TwoDots);
+                    checkTwoCharToken(index, word, "..", TokenType::Dot, TokenType::TwoDots);
                     break;
                 case '<':
-                    checkTwoCharToken(&index, word, "<=", TokenType::SmallerComp, TokenType::SeqComp);
+                    checkTwoCharToken(index, word, "<=", TokenType::SmallerComp, TokenType::SeqComp);
                     break;
                 case '>':
-                    checkTwoCharToken(&index, word, ">=", TokenType::BiggerComp, TokenType::BeqComp);
+                    checkTwoCharToken(index, word, ">=", TokenType::BiggerComp, TokenType::BeqComp);
                     break;
                 case '/':
-                    checkTwoCharToken(&index, word, "/=", TokenType::DivOp, TokenType::NeqComp);
+                    checkTwoCharToken(index, word, "/=", TokenType::DivOp, TokenType::NeqComp);
                     break;
                 case ':':
-                    checkTwoCharToken(&index, word, ":=", TokenType::Colon, TokenType::Assignment);
+                    checkTwoCharToken(index, word, ":=", TokenType::Colon, TokenType::Assignment);
                     break;
 
                 default:
 
-                    if (isdigit(c))
+                    if (std::isdigit(c))
                     { // if number constant
                         index--;
                         std::string num = readWhileNum(index, word);
@@ -220,7 +219,7 @@ namespace lexer
                             int oldIndex = index;
                             index++;
                             std::string floatPart = readWhileNum(index, word);
-                            if (floatPart.length() < 1)
+                            if (floatPart.length() == 0)
                             { //eg ..
                                 index = oldIndex;
                                 result.push_back(makeToken(type, lineNum, num));
@@ -232,18 +231,18 @@ namespace lexer
                         }
                         result.push_back(makeToken(type, lineNum, num));
                     }
-                    else if (iswalpha(c))
+                    else if (std::isalpha(c))
                     { // if var name
                         std::string name = toStr(c);
-                        while (index < int(word.length()) && (iswalpha(word[index]) || isdigit(word[index]) || word[index] == '_'))
+                        while (index < int(word.length()) && (std::isalpha(word[index]) || std::isdigit(word[index]) || word[index] == '_'))
                         {
-                            name.append(toStr(word[index++]));
+                            name.push_back(word[index++]);
                         }
                         result.push_back(makeToken(TokenType::Identifier, lineNum, name));
                     }
                     else
                     { // non-valid construction
-                        std::cout << "INVALID CHAR" << c << "\n";
+                        // std::cout << "INVALID CHAR" << c << "\n";
                         result.push_back(makeToken(TokenType::InvalidToken, lineNum, toStr(c)));
                     }
 
@@ -316,7 +315,6 @@ std::vector<Token> read(std::string fileName)
     {
         lexer::processLine(line);
     }
-    InputFS.close();
     std::vector<Token> res = lexer::result;
     freeResult();
     return res;
