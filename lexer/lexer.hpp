@@ -18,16 +18,16 @@ public:
     Token Next() {
 
         // Ignore spaces
-        for (; m_pos < m_buf.size() && Lexer::isSpace(m_buf[m_pos]); m_pos++) {}
+        for (; m_pos < m_buf.size() && Lexer::isspace(m_buf[m_pos]); m_pos++) {}
 
         if (m_pos == m_buf.size()) {
             return { .type = TokenType::Eof };
         }
 
         // If alpha -> either a keyword or identifier -> read until space
-        if (std::isalpha(m_buf[m_pos])) {
+        if (Lexer::isidstart(m_buf[m_pos])) {
             int len = 1;
-            for (; m_pos + len < m_buf.size() && std::isalnum(m_buf[m_pos + len]); len++) {}
+            for (; m_pos + len < m_buf.size() && Lexer::isidsuf(m_buf[m_pos + len]); len++) {}
 
             Token tok;
 
@@ -67,8 +67,16 @@ private:
     size_t m_pos = 0, m_lastAfterNewLine = 0;
     size_t m_lineNum = 1;
 
-    bool isSpace(char ch) {
+    bool isspace(char ch) {
         return ch != '\n' && std::isspace(ch);
+    }
+
+    bool isidstart(char ch) {
+        return ch == '_' || std::isalpha(ch);
+    }
+
+    bool isidsuf(char ch) {
+        return ch == '_' || std::isalnum(ch);
     }
 };
 
