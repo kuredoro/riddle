@@ -16,14 +16,6 @@
  *  @param image - string, source string of token
  *  @return structure with all the fields
 */
-Token makeToken(TokenType type, int srcPos, std::string image)
-{
-    Token res;
-    res.type = type;
-    res.srcPos = srcPos;
-    res.image = image;
-    return res;
-}
 
 /**
  * Parsing of a single char to String
@@ -122,13 +114,13 @@ namespace lexer
         if (index < int(word.length()) && word[index] == firstChar)
         {
             index++;
-            result.push_back(makeToken(tt2, lineNum, longToken));
+            result.push_back({tt2, lineNum, longToken});
         }
         else
         {
-            result.push_back(makeToken(tt1, lineNum, toStr(firstChar)));
+            result.push_back({tt1, lineNum, toStr(firstChar)});
         }
-    }
+    } // namespace lexer
 
     /**
      * Iterates through word while it is a number ()
@@ -157,7 +149,7 @@ namespace lexer
             {
                 return -1;
             }
-            result.push_back(makeToken(val, lineNum, word));
+            result.push_back({val, lineNum, word});
         }
         else
         {
@@ -189,7 +181,7 @@ namespace lexer
                 case ',':
                     sign = toStr(c);
                     val = trie.Find(sign).value_or(TokenType::InvalidToken);
-                    result.push_back(makeToken(val, lineNum, sign));
+                    result.push_back({val, lineNum, sign});
                     break;
                 case '.':
                     checkTwoCharToken(index, word, "..", TokenType::Dot, TokenType::TwoDots);
@@ -222,14 +214,14 @@ namespace lexer
                             if (floatPart.length() == 0)
                             { //eg ..
                                 index = oldIndex;
-                                result.push_back(makeToken(type, lineNum, num));
+                                result.push_back({type, lineNum, num});
                                 break;
                             }
                             num.append(".");
                             num.append(floatPart);
                             type = TokenType::RealLiteral;
                         }
-                        result.push_back(makeToken(type, lineNum, num));
+                        result.push_back({type, lineNum, num});
                     }
                     else if (std::isalpha(c))
                     { // if var name
@@ -238,12 +230,12 @@ namespace lexer
                         {
                             name.push_back(word[index++]);
                         }
-                        result.push_back(makeToken(TokenType::Identifier, lineNum, name));
+                        result.push_back({TokenType::Identifier, lineNum, name});
                     }
                     else
                     { // non-valid construction
                         // std::cout << "INVALID CHAR" << c << "\n";
-                        result.push_back(makeToken(TokenType::InvalidToken, lineNum, toStr(c)));
+                        result.push_back({TokenType::InvalidToken, lineNum, toStr(c)});
                     }
 
                     break;
@@ -270,7 +262,7 @@ namespace lexer
                 return;
             }
         }
-        result.push_back(makeToken(TokenType::NewLine, lineNum, "\n"));
+        result.push_back({TokenType::NewLine, lineNum, "\n"});
     }
 
 } // namespace lexer
