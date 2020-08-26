@@ -48,6 +48,7 @@ common::Trie<TokenType> g_operatorTrie{
     {">=", TokenType::GeqComp},
     {"=", TokenType::EqComp},
     {"/=", TokenType::NeqComp},
+    {":=", TokenType::AssignmentOp},
     {"*", TokenType::MultOp},
     {"/", TokenType::DivOp},
     {"%", TokenType::ModOp},

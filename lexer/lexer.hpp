@@ -44,6 +44,30 @@ public:
             return tok;
         }
 
+        if (std::isdigit(m_buf[m_pos])) {
+            size_t truncLen = 1;
+            for(; m_pos + truncLen < m_buf.size() && std::isdigit(m_buf[m_pos + truncLen]); truncLen++) {}
+
+            size_t fracLen = 0;
+            if (m_pos + truncLen < m_buf.size() && m_buf[m_pos + truncLen] == '.') {
+                size_t offset = m_pos + truncLen + 1;
+                for (; offset + fracLen < m_buf.size() && std::isdigit(m_buf[offset + fracLen]); fracLen++) {}
+            }
+
+            if (fracLen != 0) {
+                truncLen += 1 + fracLen;
+                tok.type = TokenType::RealLiteral;
+            } else {
+                tok.type = TokenType::IntegerLiteral;
+            }
+
+            tok.image = m_buf.substr(m_pos, truncLen);
+
+            m_pos += truncLen;
+
+            return tok;
+        }
+
         if (m_buf[m_pos] == '\n') {
             tok.type = TokenType::NewLine;
             tok.image = "\n";
