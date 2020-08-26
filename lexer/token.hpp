@@ -36,7 +36,7 @@ enum class TokenType
     EqComp,             // =
     NeqComp,            // /=
     MultOp,             // *
-    DevOp,              // /
+    DivOp,              // /
     RemainderOp,        // %
     PlusOp,             // +
     MinusOp,            // -
