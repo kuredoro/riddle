@@ -1,0 +1,16 @@
+type BigArray is array [100000]
+
+var nums: BigArray  // initialized with zeros
+
+routine collatz (n: integer)
+    var i is 1;
+    while nums[i] /= 1 loop
+        if nums[i] % 2 = 0 then
+            nums[i+1] := nums[i] / 2
+        else
+            nums[i+1] := nums[i] * 3 + 1
+        end
+        i := i + 1
+    end
+    print(i)
+end

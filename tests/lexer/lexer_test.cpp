@@ -46,10 +46,14 @@ SCENARIO("Trie initialization")
 
     GIVEN("The file name")
     {
-        THEN("it s readen")
+        THEN("it's readen without errors")
         {
-            std::vector<Token> res = read("examples/ex1.rdd");
-            REQUIRE(coutInvalidTokens(res) == 0);
+            for (int i = 1; i < 12; i++)
+            {
+                std::string fileName = fmt::format("examples/ex{}.rdd", i);
+                std::vector<Token> res = read(fileName);
+                REQUIRE(coutInvalidTokens(res) == 0);
+            }
         }
     }
     GIVEN("A command to initialize the trie")

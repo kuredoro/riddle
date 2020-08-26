@@ -1,0 +1,24 @@
+var a : integer
+var b is 5 + 8
+var ans : integer
+
+routine Sum(a : integer) : integer is
+    var sum is 0
+    for i in 0 .. a loop
+        sum := sum + i
+    end
+    return sum
+end
+
+routine main(m : integer) is
+    if a <= b
+    then
+        var sum is 0
+        for i in 0 .. 10 loop
+            sum := sum + i
+        end
+        ans := sum
+    else
+        ans := Sum(10)
+    end
+end
