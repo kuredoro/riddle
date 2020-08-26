@@ -273,6 +273,7 @@ namespace lexer
         }
         result.push_back(makeToken(TokenType::NewLine, lineNum, "\n"));
     }
+
 } // namespace lexer
 
 /**
@@ -285,6 +286,18 @@ common::Trie<TokenType> getTrie()
 {
     lexer::initTrie();
     return lexer::trie;
+}
+
+std::vector<Token> splitLine(std::string line)
+{
+    lexer::initTrie();
+    lexer::processLine(line);
+    return lexer::result;
+}
+
+void freeResult()
+{
+    lexer::result = {};
 }
 
 /**
@@ -304,5 +317,7 @@ std::vector<Token> read(std::string fileName)
         lexer::processLine(line);
     }
     InputFS.close();
-    return lexer::result;
+    std::vector<Token> res = lexer::result;
+    freeResult();
+    return res;
 }
