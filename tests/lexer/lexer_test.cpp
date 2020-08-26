@@ -38,6 +38,7 @@ SCENARIO("Lexer is fed source code") {
     std::vector<std::string> code{
         "if sausage loop end is near",
         "if sausage loop\n    var end is near\nend\n",
+        "var an_int: integer\n",
         //"var xxx__35: integer is  4.5\n",
     };
 
@@ -53,9 +54,15 @@ SCENARIO("Lexer is fed source code") {
             {TokenType::Identifier, 2, 15, "near"}, {TokenType::NewLine, 2, 19, "\n"},
             {TokenType::End, 3, 0, "end"}, {TokenType::NewLine, 3, 3, "\n"},
         },
-        { {TokenType::VarDecl, 1, 1, "var"}, {TokenType::Identifier, 1, 5, "xxx__35"},
-          {TokenType::Colon, 1, 12, ":"}, {TokenType::IntegerType, 1, 14, "integer"}, 
-          {TokenType::Is, 1, 22, "is"}, {TokenType::RealLiteral, 1, 26, "4.5"},
+        { 
+            {TokenType::VarDecl, 1, 1, "var"}, {TokenType::Identifier, 1, 5, "an_int"},
+            {TokenType::Colon, 1, 11, ":"}, {TokenType::IntegerType, 1, 13, "integer"}, 
+            {TokenType::NewLine, 1, 20, "\n"},
+        },
+        { 
+            {TokenType::VarDecl, 1, 1, "var"}, {TokenType::Identifier, 1, 5, "xxx__35"},
+            {TokenType::Colon, 1, 12, ":"}, {TokenType::IntegerType, 1, 14, "integer"}, 
+            {TokenType::Is, 1, 22, "is"}, {TokenType::RealLiteral, 1, 26, "4.5"},
         },
     };
 
