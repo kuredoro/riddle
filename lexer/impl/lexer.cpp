@@ -46,7 +46,7 @@ common::Trie<TokenType> initTrie()
     trie.Add("/=", TokenType::NeqComp);
     // math ops
     trie.Add("*", TokenType::MultOp);
-    trie.Add("/", TokenType::DevOp);
+    trie.Add("/", TokenType::DivOp);
     trie.Add("%", TokenType::RemainderOp);
     trie.Add("+", TokenType::PlusOp);
     trie.Add("-", TokenType::MinusOp);
@@ -214,7 +214,7 @@ int read()
                         }
                         else
                         {
-                            result.push_back(makeToken(TokenType::DevOp, lineNum, toStr(c)));
+                            result.push_back(makeToken(TokenType::DivOp, lineNum, toStr(c)));
                         }
                         break;
                     case ':':
