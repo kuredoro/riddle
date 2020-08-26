@@ -39,6 +39,8 @@ SCENARIO("Lexer is fed source code") {
         "if sausage loop end is near",
         "if sausage loop\n    var end is near\nend\n",
         "var an_int: integer\n",
+        "if (x+y)<=z then\n",
+        "TokenType::Colon;",
         //"var xxx__35: integer is  4.5\n",
     };
 
@@ -55,9 +57,19 @@ SCENARIO("Lexer is fed source code") {
             {TokenType::End, 3, 0, "end"}, {TokenType::NewLine, 3, 3, "\n"},
         },
         { 
-            {TokenType::VarDecl, 1, 1, "var"}, {TokenType::Identifier, 1, 5, "an_int"},
-            {TokenType::Colon, 1, 11, ":"}, {TokenType::IntegerType, 1, 13, "integer"}, 
-            {TokenType::NewLine, 1, 20, "\n"},
+            {TokenType::VarDecl, 1, 0, "var"}, {TokenType::Identifier, 1, 4, "an_int"},
+            {TokenType::Colon, 1, 10, ":"}, {TokenType::IntegerType, 1, 12, "integer"}, 
+            {TokenType::NewLine, 1, 19, "\n"},
+        },
+        {
+            {TokenType::If, 1, 0, "if"}, {TokenType::ParenOpen, 1, 3, "("}, {TokenType::Identifier, 1, 4, "x"},
+            {TokenType::AddOp, 1, 5, "+"}, {TokenType::Identifier, 1, 6, "y"}, {TokenType::ParenClose, 1, 7, ")"},
+            {TokenType::LeqComp, 1, 8, "<="}, {TokenType::Identifier, 1, 10, "z"},
+            {TokenType::Then, 1, 12, "then"}, {TokenType::NewLine, 1, 16, "\n"},
+        },
+        {
+            {TokenType::Identifier, 1, 0, "TokenType"}, {TokenType::Colon, 1, 9, ":"}, {TokenType::Colon, 1, 10, ":"},
+            {TokenType::Identifier, 1, 11, "Colon"}, {TokenType::Semicolon, 1, 16, ";"},
         },
         { 
             {TokenType::VarDecl, 1, 1, "var"}, {TokenType::Identifier, 1, 5, "xxx__35"},
@@ -87,8 +99,8 @@ SCENARIO("Lexer is fed source code") {
 
             for (size_t ti = 0; ti < result[i].size(); ti++) {
                 if (tokStream[ti] != result[i][ti]) {
-                    FMT_INFO("got {}", testing::TokenToString(tokStream[ti]))
-                    FMT_INFO("want {}", testing::TokenToString(result[i][ti]));
+                    FMT_UINFO("got {}", testing::TokenToString(tokStream[ti]));
+                    FMT_UINFO("want {}", testing::TokenToString(result[i][ti]));
                 }
                 CHECK(tokStream[ti] == result[i][ti]);
             }

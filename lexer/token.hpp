@@ -25,14 +25,15 @@ enum class TokenType{
     ReverseRange, // reverse
     InRange, // in
     If, // if
+    Then, // then
     Else, // else
     AndLogic, // and
     OrLogic, // or
     XorLogic, // xor
-    SmallerComp, // <
-    SeqComp, // <=
-    BiggerComp, // >
-    BeqComp, // >=
+    LessComp, // <
+    LeqComp, // <=
+    GreaterComp, // >
+    GeqComp, // >=
     EqComp, // =
     NeqComp, // /=
     MultOp, // *
@@ -46,12 +47,12 @@ enum class TokenType{
     Dot, // .
     TwoDots, // ..
     Comma, // ,
-    BracketOpen, // (
-    BracketClose, // )
-    SquareBracketOpen, // [
-    SquareBracketClose, // ]
-    Colon,
-    Semicolon,
+    ParenOpen, // (
+    ParenClose, // )
+    BracketOpen, // [
+    BracketClose, // ]
+    Colon, // :
+    Semicolon, // ;
     NewLine,
 };
 
