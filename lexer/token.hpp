@@ -52,9 +52,9 @@ enum class TokenType
     SquareBracketClose, // ]
     SingleLineComment,  // //
     NewLine,            // \n
-    Semicolumn,         // ;
+    Semicolon,          // ;
     Assignment,         // :=
-    Column,             // ;
+    Colon,              // :
 };
 
 struct Token
