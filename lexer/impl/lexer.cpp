@@ -99,9 +99,9 @@ namespace lexer
         trie.Add("]", TokenType::SquareBracketClose);
         trie.Add("//", TokenType::SingleLineComment);
         trie.Add("\n", TokenType::NewLine);
-        trie.Add(";", TokenType::Semicolumn);
+        trie.Add(";", TokenType::Semicolon);
         trie.Add(":=", TokenType::Assignment);
-        trie.Add(";", TokenType::Column);
+        trie.Add(":", TokenType::Colon);
     }
 
     /**
@@ -135,14 +135,13 @@ namespace lexer
      * Itterates throught word while it is a number ()
      * 
     */
-    std::string readWhileNum(int *indexPointer, std::string word)
+    std::string readWhileNum(int &index, std::string word)
     {
         std::string num;
-        while (*indexPointer < int(word.length()) && isdigit(word[*indexPointer]))
+        while (index < int(word.length()) && isdigit(word[index]))
         {
-            char c = word[*indexPointer];
+            char c = word[index++];
             num.append(toStr(c));
-            (*indexPointer)++;
         }
         return num;
     }
@@ -206,7 +205,7 @@ namespace lexer
                     checkTwoCharToken(&index, word, "/=", TokenType::DivOp, TokenType::NeqComp);
                     break;
                 case ':':
-                    checkTwoCharToken(&index, word, ":=", TokenType::Column, TokenType::Assignment);
+                    checkTwoCharToken(&index, word, ":=", TokenType::Colon, TokenType::Assignment);
                     break;
 
                 default:
@@ -214,13 +213,13 @@ namespace lexer
                     if (isdigit(c))
                     { // if number constant
                         index--;
-                        std::string num = readWhileNum(&index, word);
+                        std::string num = readWhileNum(index, word);
                         TokenType type = TokenType::IntegerLiteral;
                         if (index < int(word.length()) && word[index] == '.')
                         { // if real
                             int oldIndex = index;
                             index++;
-                            std::string floatPart = readWhileNum(&index, word);
+                            std::string floatPart = readWhileNum(index, word);
                             if (floatPart.length() < 1)
                             { //eg ..
                                 index = oldIndex;

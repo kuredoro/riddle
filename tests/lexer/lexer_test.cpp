@@ -28,7 +28,7 @@ void checkTokens(std::vector<std::string> tokens, common::Trie<TokenType> trie)
     }
 }
 
-int coutInvalidTokens(std::vector<Token> vector)
+int countInvalidTokens(std::vector<Token> vector)
 {
     int counter = 0;
     for (Token tk : vector)
@@ -52,7 +52,7 @@ SCENARIO("Trie initialization")
             {
                 std::string fileName = fmt::format("examples/ex{}.rdd", i);
                 std::vector<Token> res = read(fileName);
-                REQUIRE(coutInvalidTokens(res) == 0);
+                REQUIRE(countInvalidTokens(res) == 0);
             }
         }
     }
