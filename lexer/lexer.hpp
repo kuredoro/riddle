@@ -1,6 +1,6 @@
 #include "trie.hpp"
 #include "token.hpp"
 #pragma once
-int sum(int a, int b);
-int read();
+
+std::vector<Token> read(std::string);
 common::Trie<TokenType> initTrie();

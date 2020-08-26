@@ -92,12 +92,11 @@ std::string toStr(char x)
     return s;
 }
 
-int read()
+std::vector<Token> read(std::string fileName)
 {
     std::vector<Token> result;
     // get file (input - string)
     std::string line, word;
-    std::string fileName = "./examples/ex2.rdd";
     // Read from the text file
     std::ifstream InputFS(fileName);
     common::Trie<TokenType> trie = initTrie();
@@ -287,5 +286,5 @@ int read()
     }
     // Close the file
     InputFS.close();
-    return 0;
+    return result;
 }
