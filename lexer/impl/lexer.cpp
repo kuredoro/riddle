@@ -66,6 +66,9 @@ common::Trie<TokenType> initTrie()
     trie.Add("]", TokenType::SquareBracketClose);
     trie.Add("//", TokenType::SingleLineComment);
     trie.Add("\n", TokenType::NewLine);
+    trie.Add(";", TokenType::Semicolumn);
+    trie.Add(":=", TokenType::Assignment);
+    trie.Add(";", TokenType::Column);
     return trie;
 }
 
@@ -135,6 +138,20 @@ int read()
                     char c = word[index++];
                     switch (c)
                     {
+                    // math ops
+                    case '+':
+                        result.push_back(makeToken(TokenType::PlusOp, lineNum, toStr(c)));
+                        break;
+                    case '-':
+                        result.push_back(makeToken(TokenType::MinusOp, lineNum, toStr(c)));
+                        break;
+                    case '%':
+                        result.push_back(makeToken(TokenType::RemainderOp, lineNum, toStr(c)));
+                        break;
+                    case '*':
+                        result.push_back(makeToken(TokenType::MultOp, lineNum, toStr(c)));
+                        break;
+                    // braces & parenthesis
                     case '(':
                         result.push_back(makeToken(TokenType::BracketOpen, lineNum, toStr(c)));
                         break;
@@ -147,22 +164,31 @@ int read()
                     case ']':
                         result.push_back(makeToken(TokenType::SquareBracketClose, lineNum, toStr(c)));
                         break;
+                    case '=':
+                        result.push_back(makeToken(TokenType::EqComp, lineNum, toStr(c)));
+                        break;
+                    case ';':
+                        result.push_back(makeToken(TokenType::Semicolumn, lineNum, toStr(c)));
+                        break;
+
+                    // dots
                     case '.':
                         if (index < int(word.length()) && word[index] == '.')
                         {
                             index++;
-                            result.push_back(makeToken(TokenType::TwoDots, lineNum, toStr(c)));
+                            result.push_back(makeToken(TokenType::TwoDots, lineNum, ".."));
                         }
                         else
                         {
                             result.push_back(makeToken(TokenType::Dot, lineNum, toStr(c)));
                         }
                         break;
+                    // comparisons
                     case '<':
                         if (index < int(word.length()) && word[index] == '=')
                         {
                             index++;
-                            result.push_back(makeToken(TokenType::SeqComp, lineNum, toStr(c)));
+                            result.push_back(makeToken(TokenType::SeqComp, lineNum, "<="));
                         }
                         else
                         {
@@ -173,7 +199,7 @@ int read()
                         if (index < int(word.length()) && word[index] == '=')
                         {
                             index++;
-                            result.push_back(makeToken(TokenType::BeqComp, lineNum, toStr(c)));
+                            result.push_back(makeToken(TokenType::BeqComp, lineNum, ">="));
                         }
                         else
                         {
@@ -184,24 +210,23 @@ int read()
                         if (index < int(word.length()) && word[index] == '=')
                         {
                             index++;
-                            result.push_back(makeToken(TokenType::NeqComp, lineNum, toStr(c)));
+                            result.push_back(makeToken(TokenType::NeqComp, lineNum, "/="));
                         }
                         else
                         {
                             result.push_back(makeToken(TokenType::DevOp, lineNum, toStr(c)));
                         }
                         break;
-                    case '+':
-                        result.push_back(makeToken(TokenType::PlusOp, lineNum, toStr(c)));
-                        break;
-                    case '-':
-                        result.push_back(makeToken(TokenType::MinusOp, lineNum, toStr(c)));
-                        break;
-                    case '%':
-                        result.push_back(makeToken(TokenType::RemainderOp, lineNum, toStr(c)));
-                        break;
-                    case '*':
-                        result.push_back(makeToken(TokenType::MultOp, lineNum, toStr(c)));
+                    case ':':
+                        if (index < int(word.length()) && word[index] == '=')
+                        {
+                            index++;
+                            result.push_back(makeToken(TokenType::Assignment, lineNum, ":="));
+                        }
+                        else
+                        {
+                            result.push_back(makeToken(TokenType::Column, lineNum, toStr(c)));
+                        }
                         break;
 
                     default:
