@@ -67,7 +67,7 @@ SCENARIO("Trie initialization")
             for (int i = 1; i < 12; i++)
             {
                 std::string fileName = fmt::format("examples/ex{}.rdd", i);
-                std::vector<Token> res = read(fileName);
+                std::vector<Token> res = lexer::read(fileName);
                 REQUIRE(countInvalidTokens(res) == 0);
             }
         }
@@ -85,14 +85,14 @@ SCENARIO("Trie initialization")
              TokenType::RealLiteral, TokenType::TwoDots, TokenType::RealLiteral, TokenType::NewLine}};
         for (size_t i = 0; i < code.size(); i++)
         {
-            std::vector<Token> res = splitLine(code[i]);
+            std::vector<Token> res = lexer::splitLine(code[i]);
             testing::checkVectorTypeEquality(result[i], res);
-            freeResult();
+            lexer::freeResult();
         }
     }
     GIVEN("A command to initialize the trie")
     {
-        common::Trie<TokenType> trie = getTrie();
+        common::Trie<TokenType> trie = lexer::getTrie();
 
         THEN("All the keywords are in the trie")
         {
