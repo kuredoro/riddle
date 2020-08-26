@@ -17,6 +17,9 @@ struct TriePayload {
 };
 
 template <typename T>
+class TrieConstIterator;
+
+template <typename T>
 class Trie {
 public:
     Trie() = default;
@@ -25,9 +28,15 @@ public:
     void Add(const std::string_view key, T value);
     std::optional<T> Find(const std::string_view key) const;
 
+    TrieConstIterator<T> Head() const {
+        return {&m_tree, 0};
+    }
+
     std::vector<std::string> PrintContents() const;
 
 private:
+
+    friend struct TrieConstIterator<T>;
 
     struct Node {
         std::optional<T> value;
@@ -36,6 +45,48 @@ private:
 
     std::vector<Node> m_tree;
 };
+
+
+template <typename T>
+class TrieConstIterator {
+public:
+
+    using Node = typename Trie<T>::Node;
+
+    TrieConstIterator(const std::vector<Node>* const ref, size_t id)
+        : m_tree_ref(ref), m_id(id)
+    {}
+
+    void Next(char ch) {
+        if (m_id == -1) {
+            return;
+        }
+
+        if (m_tree_ref->at(m_id).next.count(ch) == 0) {
+            m_id = -1;
+            return;
+        }
+
+        m_id = m_tree_ref->at(m_id).next.at(ch);
+    }
+
+    bool Valid() {
+        return m_id != -1;
+    }
+
+    bool Terminal() {
+        if (!Valid()) {
+            return false;
+        }       
+
+        return *m_tree_ref->at(m_id).value;
+    }
+
+private:
+    const std::vector<Node>* const m_tree_ref;
+    int m_id = -1;
+};
+
 
 template <typename T>
 Trie<T>::Trie(std::initializer_list<TriePayload<T>> initList) {
