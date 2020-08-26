@@ -151,10 +151,13 @@ SCENARIO("Trie traversal via iterators") {
             std::string word{"abcd"};
             for (size_t ci = 0; ci < word.size(); ci++) {
                 REQUIRE_MESSAGE(!head.Terminal(), "before feeding i={} in word {}, got terminal node, but want otherwise", ci, word); 
+                REQUIRE_MESSAGE(!(bool)head.Value(), "before feeding i={} in word {}, got some value in node, expected none", ci, word); 
                 head.Next(word[ci]);
             }
 
             REQUIRE_MESSAGE(head.Terminal(), "got head after {} non-terminal, want otherwise", word);
+            REQUIRE_MESSAGE((bool)head.Value(), "got value in head after {} empty, expected something", word);
+            REQUIRE_MESSAGE(*head.Value() == 1, "got value in head {}, want {}", *head.Value(), 1);
         }
 
         THEN("Feeding it a foreign word char by char, yields non-terminal node") {
@@ -163,6 +166,7 @@ SCENARIO("Trie traversal via iterators") {
             std::string word{"sosiska"};
             for (size_t ci = 0; ci < word.size(); ci++) {
                 REQUIRE_MESSAGE(!head.Terminal(), "before feeding i={} in word {}, got terminal node, but want otherwise", ci, word); 
+                REQUIRE_MESSAGE(!(bool)head.Value(), "before feeding i={} in word {}, got some value in node, expected none", ci, word); 
                 head.Next(word[ci]);
             }
 
