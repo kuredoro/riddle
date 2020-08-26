@@ -39,9 +39,10 @@ std::string toStr(char c)
 
 namespace lexer
 {
-    common::Trie<TokenType> trie; // tire to search for the keywords of the language
-    std::vector<Token> result;    // list of tokens to be returned
-    int lineNum = 1;              // line counter, start with 1, because it is file-lines enumeration
+    common::Trie<TokenType> trie;                     // tire to search for the keywords of the language
+    std::vector<Token> result;                        // list of tokens to be returned
+    TokenType invalidToken = TokenType::InvalidToken; // empty token
+    int lineNum = 1;                                  // line counter, start with 1, because it is file-lines enumeration
 
     /**
      * Iniialization of trie with a list of tokens, eqiavalent
@@ -93,7 +94,7 @@ namespace lexer
         trie.Add(",", TokenType::Comma);
         // braces and parenthesis
         trie.Add("(", TokenType::BracketOpen);
-        trie.Add(").", TokenType::BracketClose);
+        trie.Add(")", TokenType::BracketClose);
         trie.Add("[", TokenType::SquareBracketOpen);
         trie.Add("]", TokenType::SquareBracketClose);
         trie.Add("//", TokenType::SingleLineComment);
@@ -109,7 +110,6 @@ namespace lexer
         if (res)
         {
             // if value is defenetly a keyword
-            TokenType invalidToken = TokenType::InvalidToken;
             TokenType val = res.value_or(invalidToken);
             // don't read single line comments till the end
             if (val == TokenType::SingleLineComment)
@@ -127,44 +127,28 @@ namespace lexer
             }
             // read char-by-char:
             int index = 0;
+            std::string sign;
+            TokenType val;
             while (index < int(word.length()))
             {
                 char c = word[index++];
                 switch (c)
                 {
-                // math ops
+                // single-char tokens
                 case '+':
-                    result.push_back(makeToken(TokenType::PlusOp, lineNum, toStr(c)));
-                    break;
                 case '-':
-                    result.push_back(makeToken(TokenType::MinusOp, lineNum, toStr(c)));
-                    break;
                 case '%':
-                    result.push_back(makeToken(TokenType::RemainderOp, lineNum, toStr(c)));
-                    break;
                 case '*':
-                    result.push_back(makeToken(TokenType::MultOp, lineNum, toStr(c)));
-                    break;
-                // braces & parenthesis
                 case '(':
-                    result.push_back(makeToken(TokenType::BracketOpen, lineNum, toStr(c)));
-                    break;
                 case ')':
-                    result.push_back(makeToken(TokenType::BracketClose, lineNum, toStr(c)));
-                    break;
                 case '[':
-                    result.push_back(makeToken(TokenType::SquareBracketOpen, lineNum, toStr(c)));
-                    break;
                 case ']':
-                    result.push_back(makeToken(TokenType::SquareBracketClose, lineNum, toStr(c)));
-                    break;
                 case '=':
-                    result.push_back(makeToken(TokenType::EqComp, lineNum, toStr(c)));
-                    break;
                 case ';':
-                    result.push_back(makeToken(TokenType::Semicolumn, lineNum, toStr(c)));
+                    sign = toStr(c);
+                    val = trie.Find(sign).value_or(invalidToken);
+                    result.push_back(makeToken(val, lineNum, sign));
                     break;
-
                 // dots
                 case '.':
                     if (index < int(word.length()) && word[index] == '.')
@@ -300,12 +284,25 @@ namespace lexer
     }
 } // namespace lexer
 
+/**
+ * Gets the trie from the lexer's namespace. 
+ * Method should be used for testing and debugging only
+ * 
+ * @return trie, used during parsing (debugging purposes)
+*/
 common::Trie<TokenType> getTrie()
 {
     lexer::initTrie();
     return lexer::trie;
 }
 
+/**
+ * Reading of the file and it's separaion on the tokens
+ * 
+ * @param fileName - path to the file to be parsed
+ * @return vector of Tokens, founded in the given file, if file doesn't exist, the empty
+ * vector is returned
+*/
 std::vector<Token> read(std::string fileName)
 {
     std::string line;
