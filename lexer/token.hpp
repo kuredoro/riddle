@@ -36,6 +36,7 @@ enum class TokenType{
     GeqComp, // >=
     EqComp, // =
     NeqComp, // /=
+    AssignmentOp, // :=
     MultOp, // *
     DivOp, // /
     ModOp, // %
