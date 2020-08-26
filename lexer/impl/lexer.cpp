@@ -188,6 +188,7 @@ namespace lexer
                 case ']':
                 case '=':
                 case ';':
+                case ',':
                     sign = toStr(c);
                     val = trie.Find(sign).value_or(invalidToken);
                     result.push_back(makeToken(val, lineNum, sign));
