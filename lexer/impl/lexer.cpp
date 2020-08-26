@@ -69,29 +69,53 @@ common::Trie<TokenType> initTrie()
     return trie;
 }
 
+Token makeToken(TokenType tt, int ln, std::string str)
+{
+    Token res;
+    res.type = tt;
+    res.srcPos = ln;
+    res.image = str;
+    return res;
+}
+std::string toStr(char x)
+{
+    // string class has a constructor
+    // that allows us to specify size of
+    // string as first parameter and character
+    // to be filled in given size as second
+    // parameter.
+    std::string s(1, x);
+
+    return s;
+}
+
 int read()
 {
-    std::vector<TokenType> result;
+    std::vector<Token> result;
     // get file (input - string)
     std::string line, word;
-    std::string fileName = "./examples/ex1.rdd";
+    std::string fileName = "./examples/ex2.rdd";
     // Read from the text file
     std::ifstream InputFS(fileName);
     common::Trie<TokenType> trie = initTrie();
-
+    int lineNum = 0;
     while (std::getline(InputFS, line))
     {
+        lineNum++;
         std::istringstream iss(line);
         while (std::getline(iss, word, ' '))
         {
+            if (result.size() > 0 && result[result.size() - 1].type == TokenType::SingleLineComment)
+            {
+                continue;
+            }
             auto res = trie.Find(word);
             if (res)
             {
                 // cout << res.value_or(-1) << "\n";
                 TokenType invalidToken = TokenType::InvalidToken;
                 TokenType val = res.value_or(invalidToken);
-                result.insert(result.end(), val);
-                std::cout << int(result[result.size() - 1]) << "\n";
+                result.push_back(makeToken(val, lineNum, word));
                 if (val == TokenType::SingleLineComment)
                 {
                     continue;
@@ -104,18 +128,138 @@ int read()
                 {
                     continue;
                 }
-                std::cout << word << "\n";
                 // read char-by-char:
-                // if first literal -> suggest it is a variable name
-                // run throught all word if number/_/letter
-                // else if num-> int or 1..4 or real
-                // else
+                int index = 0;
+                while (index < int(word.length()))
+                {
+                    char c = word[index++];
+                    switch (c)
+                    {
+                    case '(':
+                        result.push_back(makeToken(TokenType::BracketOpen, lineNum, toStr(c)));
+                        break;
+                    case ')':
+                        result.push_back(makeToken(TokenType::BracketClose, lineNum, toStr(c)));
+                        break;
+                    case '[':
+                        result.push_back(makeToken(TokenType::SquareBracketOpen, lineNum, toStr(c)));
+                        break;
+                    case ']':
+                        result.push_back(makeToken(TokenType::SquareBracketClose, lineNum, toStr(c)));
+                        break;
+                    case '.':
+                        if (index < int(word.length()) && word[index] == '.')
+                        {
+                            index++;
+                            result.push_back(makeToken(TokenType::TwoDots, lineNum, toStr(c)));
+                        }
+                        else
+                        {
+                            result.push_back(makeToken(TokenType::Dot, lineNum, toStr(c)));
+                        }
+                        break;
+                    case '<':
+                        if (index < int(word.length()) && word[index] == '=')
+                        {
+                            index++;
+                            result.push_back(makeToken(TokenType::SeqComp, lineNum, toStr(c)));
+                        }
+                        else
+                        {
+                            result.push_back(makeToken(TokenType::SmallerComp, lineNum, toStr(c)));
+                        }
+                        break;
+                    case '>':
+                        if (index < int(word.length()) && word[index] == '=')
+                        {
+                            index++;
+                            result.push_back(makeToken(TokenType::BeqComp, lineNum, toStr(c)));
+                        }
+                        else
+                        {
+                            result.push_back(makeToken(TokenType::BiggerComp, lineNum, toStr(c)));
+                        }
+                        break;
+                    case '/':
+                        if (index < int(word.length()) && word[index] == '=')
+                        {
+                            index++;
+                            result.push_back(makeToken(TokenType::NeqComp, lineNum, toStr(c)));
+                        }
+                        else
+                        {
+                            result.push_back(makeToken(TokenType::DevOp, lineNum, toStr(c)));
+                        }
+                        break;
+                    case '+':
+                        result.push_back(makeToken(TokenType::PlusOp, lineNum, toStr(c)));
+                        break;
+                    case '-':
+                        result.push_back(makeToken(TokenType::MinusOp, lineNum, toStr(c)));
+                        break;
+                    case '%':
+                        result.push_back(makeToken(TokenType::RemainderOp, lineNum, toStr(c)));
+                        break;
+                    case '*':
+                        result.push_back(makeToken(TokenType::MultOp, lineNum, toStr(c)));
+                        break;
+
+                    default:
+
+                        if (isdigit(c))
+                        {
+                            // if int
+                            std::string num = toStr(c);
+                            while (index < int(word.length()) && isdigit(word[index]))
+                            {
+                                char c = word[index++];
+                                num.append(toStr(c));
+                            }
+                            // if float
+                            if (index < int(word.length()) && word[index] == '.')
+                            {
+                                // add dot
+                                char c = word[index++];
+                                num.append(toStr(c));
+                                // get float part
+                                while (index < int(word.length()) && isdigit(word[index]))
+                                {
+                                    char c = word[index++];
+                                    num.append(toStr(c));
+                                }
+                                // save
+                                result.push_back(makeToken(TokenType::RealLiteral, lineNum, num));
+                            }
+                            else
+                            {
+                                // save as int
+                                result.push_back(makeToken(TokenType::IntegerLiteral, lineNum, num));
+                            }
+                        }
+                        else if (iswalpha(c))
+                        {
+                            // get var name
+                            std::string name = toStr(c);
+                            while (index < int(word.length()) && (isdigit(word[index]) || isdigit(word[index]) || word[index] == '_'))
+                            {
+                                char c = word[index++];
+                                name.append(toStr(c));
+                            }
+                            result.push_back(makeToken(TokenType::Identifier, lineNum, name));
+                        }
+                        else
+                        {
+                            std::cout << c << "\n";
+                            result.push_back(makeToken(TokenType::InvalidToken, lineNum, toStr(c)));
+                        }
+
+                        break;
+                    }
+                }
             }
         }
-        // word = strtok(line, " "); an
-        // cout << word << "\n";
+        result.push_back(makeToken(TokenType::NewLine, lineNum, "\n"));
     }
-
     // Close the file
     InputFS.close();
     return 0;
