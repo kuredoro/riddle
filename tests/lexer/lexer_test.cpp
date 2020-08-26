@@ -26,7 +26,7 @@ namespace testing
         CHECK_MESSAGE(res,
                       "expected to get vectors of equal size");
 
-        for (int i = 0; i < int(expected.size()); i++)
+        for (size_t i = 0; i < expected.size(); i++)
         {
             bool result = real[i].type == expected[i];
             CHECK_MESSAGE(result,
@@ -83,7 +83,7 @@ SCENARIO("Trie initialization")
              TokenType::End, TokenType::Is, TokenType::Identifier, TokenType::NewLine},
             {TokenType::ForLoop, TokenType::Identifier, TokenType::InRange,
              TokenType::RealLiteral, TokenType::TwoDots, TokenType::RealLiteral, TokenType::NewLine}};
-        for (int i = 0; i < int(code.size()); i++)
+        for (size_t i = 0; i < code.size(); i++)
         {
             std::vector<Token> res = splitLine(code[i]);
             testing::checkVectorTypeEquality(result[i], res);
