@@ -7,6 +7,7 @@ namespace lexer {
 enum class TokenType{
     Eof,
     Error,
+    OneLineComment, // //
     VarDecl, // var
     TypeDecl, // type
     RoutineDecl, // routine
