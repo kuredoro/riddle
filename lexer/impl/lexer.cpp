@@ -25,11 +25,34 @@ common::Trie<TokenType> g_keywordTrie{
     {"reverse", TokenType::ReverseRange},
     {"in", TokenType::InRange},
     {"if", TokenType::If},
+    {"then", TokenType::Then},
     {"else", TokenType::Else},
     {"and", TokenType::AndLogic},
     {"or", TokenType::OrLogic},
     {"xor", TokenType::XorLogic},
 };
 
+common::Trie<TokenType> g_operatorTrie{
+    {"<", TokenType::LessComp},
+    {"<=", TokenType::LeqComp},
+    {">", TokenType::GreaterComp},
+    {">=", TokenType::GeqComp},
+    {"=", TokenType::EqComp},
+    {"/=", TokenType::NeqComp},
+    {"*", TokenType::MultOp},
+    {"/", TokenType::DivOp},
+    {"%", TokenType::ModOp},
+    {"+", TokenType::AddOp},
+    {"-", TokenType::SubOp},
+    {".", TokenType::Dot},
+    {"..", TokenType::TwoDots},
+    {",", TokenType::Comma},
+    {"(", TokenType::ParenOpen},
+    {")", TokenType::ParenClose},
+    {"[", TokenType::BracketOpen},
+    {"]", TokenType::BracketClose},
+    {":", TokenType::Colon},
+    {";", TokenType::Semicolon},
+};
 
 } // namespace lexer
