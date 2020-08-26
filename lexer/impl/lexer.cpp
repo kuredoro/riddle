@@ -132,6 +132,22 @@ namespace lexer
         }
     }
 
+    /**
+     * Itterates throught word while it is a number ()
+     * 
+    */
+    std::string readWhileNum(int *indexPointer, std::string word)
+    {
+        int index = *indexPointer;
+        std::string num;
+        while (index < int(word.length()) && isdigit(word[index]))
+        {
+            char c = word[index++];
+            num.append(toStr(c));
+        }
+        return num;
+    }
+
     int processWord(std::string word)
     {
         auto res = trie.Find(word);
@@ -196,48 +212,37 @@ namespace lexer
                 default:
 
                     if (isdigit(c))
-                    {
-                        // if int
-                        std::string num = toStr(c);
-                        while (index < int(word.length()) && isdigit(word[index]))
-                        {
-                            char c = word[index++];
-                            num.append(toStr(c));
-                        }
-                        // if float
+                    { // if number constant
+                        std::string num = toStr(word[index - 1]);
+                        num.append(readWhileNum(&index, word));
+                        TokenType type = TokenType::IntegerLiteral;
                         if (index < int(word.length()) && word[index] == '.')
-                        {
-                            // add dot
-                            char c = word[index++];
-                            num.append(toStr(c));
-                            // get float part
-                            while (index < int(word.length()) && isdigit(word[index]))
-                            {
-                                char c = word[index++];
-                                num.append(toStr(c));
+                        { // if real
+                            int oldIndex = index++;
+                            std::string floatPart = readWhileNum(&index, word);
+                            if (floatPart.length() < 1)
+                            { //eg ..
+                                index = oldIndex;
+                                result.push_back(makeToken(type, lineNum, num));
+                                break;
                             }
-                            // save
-                            result.push_back(makeToken(TokenType::RealLiteral, lineNum, num));
+                            num.append(".");
+                            num.append(floatPart);
+                            type = TokenType::RealLiteral;
                         }
-                        else
-                        {
-                            // save as int
-                            result.push_back(makeToken(TokenType::IntegerLiteral, lineNum, num));
-                        }
+                        result.push_back(makeToken(type, lineNum, num));
                     }
                     else if (iswalpha(c))
-                    {
-                        // get var name
+                    { // if var name
                         std::string name = toStr(c);
                         while (index < int(word.length()) && (iswalpha(word[index]) || isdigit(word[index]) || word[index] == '_'))
                         {
-                            char c = word[index++];
-                            name.append(toStr(c));
+                            name.append(toStr(word[index++]));
                         }
                         result.push_back(makeToken(TokenType::Identifier, lineNum, name));
                     }
                     else
-                    {
+                    { // non-valid construction
                         std::cout << "INVALID CHAR" << c << "\n";
                         result.push_back(makeToken(TokenType::InvalidToken, lineNum, toStr(c)));
                     }
