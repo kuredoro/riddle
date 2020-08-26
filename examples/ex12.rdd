@@ -1,0 +1,16 @@
+type BigArray is array [100000]
+
+type Human is record
+    var id                  :   integer     
+    var height              :   real
+    var hasHighterEducation :   boolean
+    var test                :   BigArray
+end
+
+routine collatz (n: integer)
+    var i : Human;
+    i.height := 167.8;
+    i.id := 12345;
+    i.test[5] = 345;
+    print(i)
+end
