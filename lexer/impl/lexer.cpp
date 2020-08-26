@@ -120,8 +120,7 @@ namespace lexer
                            TokenType tt1, TokenType tt2)
     {
         char firstChar = longToken[0];
-        int index = *indexPointer;
-        if (index < int(word.length()) && word[index] == firstChar)
+        if (*indexPointer < int(word.length()) && word[*indexPointer] == firstChar)
         {
             (*indexPointer)++;
             result.push_back(makeToken(tt2, lineNum, longToken));
@@ -138,12 +137,12 @@ namespace lexer
     */
     std::string readWhileNum(int *indexPointer, std::string word)
     {
-        int index = *indexPointer;
         std::string num;
-        while (index < int(word.length()) && isdigit(word[index]))
+        while (*indexPointer < int(word.length()) && isdigit(word[*indexPointer]))
         {
-            char c = word[index++];
+            char c = word[*indexPointer];
             num.append(toStr(c));
+            (*indexPointer)++;
         }
         return num;
     }
@@ -213,12 +212,13 @@ namespace lexer
 
                     if (isdigit(c))
                     { // if number constant
-                        std::string num = toStr(word[index - 1]);
-                        num.append(readWhileNum(&index, word));
+                        index--;
+                        std::string num = readWhileNum(&index, word);
                         TokenType type = TokenType::IntegerLiteral;
                         if (index < int(word.length()) && word[index] == '.')
                         { // if real
-                            int oldIndex = index++;
+                            int oldIndex = index;
+                            index++;
                             std::string floatPart = readWhileNum(&index, word);
                             if (floatPart.length() < 1)
                             { //eg ..
