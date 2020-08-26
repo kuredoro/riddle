@@ -43,6 +43,8 @@ SCENARIO("Lexer is fed source code") {
         "TokenType::Colon;",
         "var ans:  integer is\t42\n",
         "if 0.0 /= 42.424 then\n    good := true\nend\n",
+        "for i in reverse 1..42 loop\n",
+        "type MyRecord record\nvar x : integer\nvar ok : boolean;\nend\n",
     };
 
     std::vector<std::vector<lexer::Token>> result{
@@ -83,6 +85,23 @@ SCENARIO("Lexer is fed source code") {
             {TokenType::RealLiteral, 1, 10, "42.424"}, {TokenType::Then, 1, 17, "then"}, {TokenType::NewLine, 1, 21, "\n"},
             {TokenType::Identifier, 2, 4, "good"}, {TokenType::AssignmentOp, 2, 9, ":="}, {TokenType::True, 2, 12, "true"},
             {TokenType::NewLine, 2, 16, "\n"}, {TokenType::End, 3, 0, "end"}, {TokenType::NewLine, 3, 3, "\n"},
+        },
+        {
+            {TokenType::ForLoop, 1, 0, "for"}, {TokenType::Identifier, 1, 4, "i"}, {TokenType::InRange, 1, 6, "in"},
+            {TokenType::ReverseRange, 1, 9, "reverse"}, {TokenType::IntegerLiteral, 1, 17, "1"},
+            {TokenType::TwoDots, 1, 18, ".."}, {TokenType::IntegerLiteral, 1, 20, "42"},
+            {TokenType::LoopBegin, 1, 23, "loop"}, {TokenType::NewLine, 1, 27, "\n"},
+        },
+        {
+            {TokenType::TypeDecl, 1, 0, "type"}, {TokenType::Identifier, 1, 5, "MyRecord"},
+            {TokenType::RecordType, 1, 14, "record"}, {TokenType::NewLine, 1, 20, "\n"},
+            {TokenType::VarDecl, 2, 0, "var"}, {TokenType::Identifier, 2, 4, "x"},
+            {TokenType::Colon, 2, 6, ":"}, {TokenType::IntegerType, 2, 8, "integer"},
+            {TokenType::NewLine, 2, 15, "\n"}, {TokenType::VarDecl, 3, 0, "var"},
+            {TokenType::Identifier, 3, 4, "ok"}, {TokenType::Colon, 3, 7, ":"},
+            {TokenType::BooleanType, 3, 9, "boolean"}, {TokenType::Semicolon, 3, 16, ";"},
+            {TokenType::NewLine, 3, 17, "\n"}, {TokenType::End, 4, 0, "end"},
+            {TokenType::NewLine, 4, 3, "\n"},
         },
     };
 
