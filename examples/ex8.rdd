@@ -1,0 +1,11 @@
+routine main (x: integer): integer is
+    var sum is 0
+    var squaredSum: integer
+    for num in 1..x loop
+        sum := sum + num
+        squaredSum := squaredSum + num * num
+    end
+
+    var sumSquared is sum*sum
+    return sumSquared - squaredSum
+end

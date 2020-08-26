@@ -1,0 +1,18 @@
+routine tailFactorial (x: integer, result: integer): integer is
+    if x = 0 then
+        return 1
+    end
+    return tailFactorial(x-1, result*x)
+end
+
+routine factorial (x: integer) : integer is
+    return tailFactorial(x, 1)
+end
+
+routine main () : integer is
+    if factorial(5) = 120 then
+        return 0
+    end
+
+    return 1
+end

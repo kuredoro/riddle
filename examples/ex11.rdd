@@ -1,0 +1,26 @@
+type float is real
+type vector is record
+    var x : float
+    var y : float
+end
+
+routine Add_Vr(a : vector, b : vector) : vector is
+    var c : vector
+    c.x := a.x + b.x
+    c.y := a.y + b.y
+    return c
+end
+
+routine main(m : integer) is
+    var a : vector
+    var b : vector
+    var c : vector
+    a.x := 1.0
+    a.y := 1.0
+    b.x := -1.0
+    b.y := -1.0
+    c.x := -1.0
+    c.y := 1.0
+    a := c
+    c := Add_Vr(a, b)
+end
