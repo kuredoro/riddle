@@ -42,7 +42,7 @@ SCENARIO("Lexer is fed source code") {
         "if (x+y)<=z then\n",
         "TokenType::Colon;",
         "var ans:  integer is\t42\n",
-        "if 0.0 /= 42.424 then\n    good := true\nend\n",
+        "if 0.0 /= 42.424 then\n    g_od := true\nend\n",
         "for i in reverse 1..42 loop\n",
         "type MyRecord record\nvar x : integer\nvar ok : boolean;\nend\n",
     };
@@ -83,7 +83,7 @@ SCENARIO("Lexer is fed source code") {
         {
             {TokenType::If, 1, 0, "if"}, {TokenType::RealLiteral, 1, 3, "0.0"}, {TokenType::NeqComp, 1, 7, "/="},
             {TokenType::RealLiteral, 1, 10, "42.424"}, {TokenType::Then, 1, 17, "then"}, {TokenType::NewLine, 1, 21, "\n"},
-            {TokenType::Identifier, 2, 4, "good"}, {TokenType::AssignmentOp, 2, 9, ":="}, {TokenType::True, 2, 12, "true"},
+            {TokenType::Identifier, 2, 4, "g_od"}, {TokenType::AssignmentOp, 2, 9, ":="}, {TokenType::True, 2, 12, "true"},
             {TokenType::NewLine, 2, 16, "\n"}, {TokenType::End, 3, 0, "end"}, {TokenType::NewLine, 3, 3, "\n"},
         },
         {
