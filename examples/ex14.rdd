@@ -1,0 +1,14 @@
+type int is integer
+type bool is boolean
+var b : float
+
+routine main(m : integer) :integer is
+    b := 5.2
+    var i is 1
+    while i <= 5 loop
+        if i%2 = 0 then
+            b := b + 0.5
+        end
+    end
+    return b
+end
