@@ -77,12 +77,33 @@ SCENARIO("Trie initialization")
         std::vector<std::string> code{
             "if true loop end is near ",
             "for x in 5.3..26.789",
+            "var an_int: integer",
+            "if (x+y)<=z then",
+            "TokenType::Colon;",
+            "var ans:  integer is\t42",
+            "if 0.0 /= 42.424 then   good := true\tend",
+            "for i in reverse 1..42 loop",
+            "type MyRecord record\tvar x : integer\tvar ok : boolean;\tend",
         };
         std::vector<std::vector<TokenType>> result{
             {TokenType::If, TokenType::True, TokenType::LoopBegin,
              TokenType::End, TokenType::Is, TokenType::Identifier, TokenType::NewLine},
             {TokenType::ForLoop, TokenType::Identifier, TokenType::InRange,
-             TokenType::RealLiteral, TokenType::TwoDots, TokenType::RealLiteral, TokenType::NewLine}};
+             TokenType::RealLiteral, TokenType::TwoDots, TokenType::RealLiteral, TokenType::NewLine},
+            {TokenType::VarDec, TokenType::Identifier, TokenType::Colon, TokenType::IntegerType, TokenType::NewLine},
+            {TokenType::If, TokenType::BracketOpen, TokenType::Identifier, TokenType::PlusOp, TokenType::Identifier,
+             TokenType::BracketClose, TokenType::SeqComp, TokenType::Identifier, TokenType::Then, TokenType::NewLine},
+            {TokenType::Identifier, TokenType::Colon, TokenType::Colon, TokenType::Identifier,
+             TokenType::Semicolon, TokenType::NewLine},
+            {TokenType::VarDec, TokenType::Identifier, TokenType::Colon, TokenType::IntegerType,
+             TokenType::Is, TokenType::IntegerLiteral, TokenType::NewLine},
+            {TokenType::If, TokenType::RealLiteral, TokenType::NeqComp, TokenType::RealLiteral, TokenType::Then,
+             TokenType::Identifier, TokenType::Assignment, TokenType::True, TokenType::End, TokenType::NewLine},
+            {TokenType::ForLoop, TokenType::Identifier, TokenType::InRange, TokenType::ReverseRange, TokenType::IntegerLiteral,
+             TokenType::TwoDots, TokenType::IntegerLiteral, TokenType::LoopBegin, TokenType::NewLine},
+            {TokenType::TypeDec, TokenType::Identifier, TokenType::RecordType, TokenType::VarDec, TokenType::Identifier,
+             TokenType::Colon, TokenType::IntegerType, TokenType::VarDec, TokenType::Identifier, TokenType::Colon,
+             TokenType::BooleanType, TokenType::Semicolon, TokenType::End, TokenType::NewLine}};
         for (size_t i = 0; i < code.size(); i++)
         {
             std::vector<Token> res = lexer::splitLine(code[i]);

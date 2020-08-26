@@ -111,7 +111,7 @@ namespace lexer
                            TokenType tt1, TokenType tt2)
     {
         char firstChar = longToken[0];
-        if (index < word.length() && word[index] == firstChar)
+        if (index < word.length() && word[index] == longToken[1])
         {
             index++;
             result.push_back({tt2, lineNum, longToken});
@@ -230,12 +230,23 @@ namespace lexer
                         {
                             name.push_back(word[index++]);
                         }
-                        result.push_back({TokenType::Identifier, lineNum, name});
+                        val = trie.Find(name).value_or(TokenType::InvalidToken);
+                        if (val == TokenType::InvalidToken)
+                        {
+                            result.push_back({TokenType::Identifier, lineNum, name});
+                        }
+                        else
+                        {
+                            result.push_back({val, lineNum, sign});
+                        }
                     }
                     else
-                    { // non-valid construction
+                    { // non-valid construction or space
                         // std::cout << "INVALID CHAR" << c << "\n";
-                        result.push_back({TokenType::InvalidToken, lineNum, toStr(c)});
+                        if (!std::isspace(c))
+                        {
+                            result.push_back({TokenType::InvalidToken, lineNum, toStr(c)});
+                        }
                     }
 
                     break;
