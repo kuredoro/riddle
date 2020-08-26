@@ -3,7 +3,10 @@
 #include "trie.hpp"
 #pragma once
 
-std::vector<Token> read(std::string);
-common::Trie<TokenType> getTrie();
-std::vector<Token> splitLine(std::string);
-void freeResult();
+namespace lexer
+{
+    std::vector<Token> read(std::string);
+    common::Trie<TokenType> getTrie();
+    std::vector<Token> splitLine(std::string);
+    void freeResult();
+} // namespace lexer
