@@ -1,2 +1,2 @@
 executable('lexer_demo', 'lexer_demo.cpp',
-          dependencies : [lexer_dep, common_dep])
+          dependencies : [lexer_dep, common_dep, fmt_dep])

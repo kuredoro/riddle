@@ -264,7 +264,7 @@ std::vector<Token> read(std::string fileName)
                         {
                             // get var name
                             std::string name = toStr(c);
-                            while (index < int(word.length()) && (isdigit(word[index]) || isdigit(word[index]) || word[index] == '_'))
+                            while (index < int(word.length()) && (iswalpha(word[index]) || isdigit(word[index]) || word[index] == '_'))
                             {
                                 char c = word[index++];
                                 name.append(toStr(c));
