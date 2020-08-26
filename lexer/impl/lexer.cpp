@@ -28,12 +28,12 @@ std::string toStr(char c)
     std::string s(1, c);
     return s;
 }
-
 namespace lexer
 {
-    common::Trie<TokenType> trie; // trie to search for the keywords of the language
-    std::vector<Token> result;    // list of tokens to be returned
-    int lineNum = 1;              // line counter, start with 1, because it is file-lines enumeration
+    common::Trie<TokenType>
+        trie;                  // trie to search for the keywords of the language
+    std::vector<Token> result; // list of tokens to be returned
+    int lineNum = 1;           // line counter, start with 1, because it is file-lines enumeration
 
     /**
      * Iniialization of trie with a list of tokens, eqiavalent
@@ -264,50 +264,49 @@ namespace lexer
         }
         result.push_back({TokenType::NewLine, lineNum, "\n"});
     }
-
-} // namespace lexer
-
-/**
+    // ==================================PUBLIC================================
+    /**
  * Gets the trie from the lexer's namespace. 
  * Method should be used for testing and debugging only
  * 
  * @return trie, used during parsing (debugging purposes)
 */
-common::Trie<TokenType> getTrie()
-{
-    lexer::initTrie();
-    return lexer::trie;
-}
+    common::Trie<TokenType> getTrie()
+    {
+        initTrie();
+        return trie;
+    }
 
-std::vector<Token> splitLine(std::string line)
-{
-    lexer::initTrie();
-    lexer::processLine(line);
-    return lexer::result;
-}
+    std::vector<Token> splitLine(std::string line)
+    {
+        initTrie();
+        processLine(line);
+        return result;
+    }
 
-void freeResult()
-{
-    lexer::result = {};
-}
+    void freeResult()
+    {
+        result = {};
+    }
 
-/**
+    /**
  * Reading of the file and it's separaion on the tokens
  * 
  * @param fileName - path to the file to be parsed
  * @return vector of Tokens, founded in the given file, if file doesn't exist, the empty
  * vector is returned
 */
-std::vector<Token> read(std::string fileName)
-{
-    std::string line;
-    std::ifstream InputFS(fileName);
-    lexer::initTrie();
-    while (std::getline(InputFS, line))
+    std::vector<Token> read(std::string fileName)
     {
-        lexer::processLine(line);
+        std::string line;
+        std::ifstream InputFS(fileName);
+        initTrie();
+        while (std::getline(InputFS, line))
+        {
+            processLine(line);
+        }
+        std::vector<Token> res = result;
+        freeResult();
+        return res;
     }
-    std::vector<Token> res = lexer::result;
-    freeResult();
-    return res;
-}
+} // namespace lexer
