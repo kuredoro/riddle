@@ -41,7 +41,8 @@ SCENARIO("Lexer is fed source code") {
         "var an_int: integer\n",
         "if (x+y)<=z then\n",
         "TokenType::Colon;",
-        //"var xxx__35: integer is  4.5\n",
+        "var ans:  integer is\t42\n",
+        "if 0.0 /= 42.424 then\n    good := true\nend\n",
     };
 
     std::vector<std::vector<lexer::Token>> result{
@@ -72,9 +73,16 @@ SCENARIO("Lexer is fed source code") {
             {TokenType::Identifier, 1, 11, "Colon"}, {TokenType::Semicolon, 1, 16, ";"},
         },
         { 
-            {TokenType::VarDecl, 1, 1, "var"}, {TokenType::Identifier, 1, 5, "xxx__35"},
-            {TokenType::Colon, 1, 12, ":"}, {TokenType::IntegerType, 1, 14, "integer"}, 
-            {TokenType::Is, 1, 22, "is"}, {TokenType::RealLiteral, 1, 26, "4.5"},
+            {TokenType::VarDecl, 1, 0, "var"}, {TokenType::Identifier, 1, 4, "ans"},
+            {TokenType::Colon, 1, 7, ":"}, {TokenType::IntegerType, 1, 10, "integer"}, 
+            {TokenType::Is, 1, 18, "is"}, {TokenType::IntegerLiteral, 1, 21, "42"},
+            {TokenType::NewLine, 1, 23, "\n"},
+        },
+        {
+            {TokenType::If, 1, 0, "if"}, {TokenType::RealLiteral, 1, 3, "0.0"}, {TokenType::NeqComp, 1, 7, "/="},
+            {TokenType::RealLiteral, 1, 10, "42.424"}, {TokenType::Then, 1, 17, "then"}, {TokenType::NewLine, 1, 21, "\n"},
+            {TokenType::Identifier, 2, 4, "good"}, {TokenType::AssignmentOp, 2, 9, ":="}, {TokenType::True, 2, 12, "true"},
+            {TokenType::NewLine, 2, 16, "\n"}, {TokenType::End, 3, 0, "end"}, {TokenType::NewLine, 3, 3, "\n"},
         },
     };
 
@@ -85,7 +93,7 @@ SCENARIO("Lexer is fed source code") {
             lexer::Lexer lx{code[i]};
 
             std::vector<lexer::Token> tokStream;
-            for (auto tok = lx.Next(); tok.type != TokenType::Eof; tok = lx.Next()) {
+            for (auto tok = lx.Next(); tok.type != TokenType::Eof && tok.type != TokenType::Error; tok = lx.Next()) {
                 tokStream.push_back(tok);
             }
 
