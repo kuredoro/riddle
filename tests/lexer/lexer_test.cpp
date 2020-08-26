@@ -6,6 +6,7 @@
 #include "trie.hpp"
 #include "catch_helpers.hpp"
 #include <vector>
+#include <iostream>
 
 namespace testing
 {
@@ -16,6 +17,21 @@ namespace testing
         auto result = trie.Find(key);
         CHECK_MESSAGE((bool)result,
                       "expected to find key \"{}\", but didn't", key);
+    }
+
+    void checkVectorTypeEquality(std::vector<TokenType> expected,
+                                 std::vector<Token> real)
+    {
+        bool res = expected.size() == real.size();
+        CHECK_MESSAGE(res,
+                      "expected to get vectors of equal size");
+
+        for (int i = 0; i < int(expected.size()); i++)
+        {
+            bool result = real[i].type == expected[i];
+            CHECK_MESSAGE(result,
+                          "expected to find type {}, but find {} (\"{}\")", expected[i], real[i].type, real[i].image);
+        }
     }
 
 } // namespace testing
@@ -54,6 +70,24 @@ SCENARIO("Trie initialization")
                 std::vector<Token> res = read(fileName);
                 REQUIRE(countInvalidTokens(res) == 0);
             }
+        }
+    }
+    GIVEN("A line of riddle code")
+    {
+        std::vector<std::string> code{
+            "if true loop end is near ",
+            "for x in 5.3..26.789",
+        };
+        std::vector<std::vector<TokenType>> result{
+            {TokenType::If, TokenType::True, TokenType::LoopBegin,
+             TokenType::End, TokenType::Is, TokenType::Identifier, TokenType::NewLine},
+            {TokenType::ForLoop, TokenType::Identifier, TokenType::InRange,
+             TokenType::RealLiteral, TokenType::TwoDots, TokenType::RealLiteral, TokenType::NewLine}};
+        for (int i = 0; i < int(code.size()); i++)
+        {
+            std::vector<Token> res = splitLine(code[i]);
+            testing::checkVectorTypeEquality(result[i], res);
+            freeResult();
         }
     }
     GIVEN("A command to initialize the trie")

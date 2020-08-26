@@ -5,3 +5,5 @@
 
 std::vector<Token> read(std::string);
 common::Trie<TokenType> getTrie();
+std::vector<Token> splitLine(std::string);
+void freeResult();
