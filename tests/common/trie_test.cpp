@@ -95,6 +95,12 @@ SCENARIO("Basic word lookup via trie") {
                 testing::AssertTrieDoesNotContain(trie, w);
             }
         }
+
+        THEN("Prefixes of the words are not reported as present") {
+            testing::AssertTrieDoesNotContain(trie, "sel");
+            testing::AssertTrieDoesNotContain(trie, "f");
+            testing::AssertTrieDoesNotContain(trie, "ss");
+        }
     }
 }
 
@@ -124,6 +130,43 @@ SCENARIO("Initalizer-list initialization of a trie") {
             for (auto& pl : words) {
                 testing::AssertTrieContains(trie, pl);
             }
+        }
+    }
+}
+
+SCENARIO("Trie traversal via iterators") {
+
+    GIVEN("A set of words") {
+
+        common::Trie<int> trie{
+            {"abcd", 1},
+            {"abdd", 1},
+            {"bcde", 1},
+            {"bccc", 1},
+        };
+
+        THEN("Feeding it a word from this set char by char, yields terminal node") {
+            auto head = trie.Head();
+
+            std::string word{"abcd"};
+            for (size_t ci = 0; ci < word.size(); ci++) {
+                REQUIRE_MESSAGE(!head.Terminal(), "before feeding i={} in word {}, got terminal node, but want otherwise", ci, word); 
+                head.Next(word[ci]);
+            }
+
+            REQUIRE_MESSAGE(head.Terminal(), "got head after {} non-terminal, want otherwise", word);
+        }
+
+        THEN("Feeding it a foreign word char by char, yields non-terminal node") {
+            auto head = trie.Head();
+
+            std::string word{"sosiska"};
+            for (size_t ci = 0; ci < word.size(); ci++) {
+                REQUIRE_MESSAGE(!head.Terminal(), "before feeding i={} in word {}, got terminal node, but want otherwise", ci, word); 
+                head.Next(word[ci]);
+            }
+
+            REQUIRE_MESSAGE(!head.Terminal(), "got head after {} terminal, want otherwise", word);
         }
     }
 }
