@@ -28,6 +28,19 @@ void checkTokens(std::vector<std::string> tokens, common::Trie<TokenType> trie)
     }
 }
 
+int coutInvalidTokens(std::vector<Token> vector)
+{
+    int counter = 0;
+    for (Token tk : vector)
+    {
+        if (tk.type == TokenType::InvalidToken)
+        {
+            counter++;
+        }
+    }
+    return counter;
+}
+
 SCENARIO("Trie initialization")
 {
 
@@ -35,7 +48,8 @@ SCENARIO("Trie initialization")
     {
         THEN("it s readen")
         {
-            REQUIRE(read() == 0);
+            std::vector<Token> res = read("examples/ex1.rdd");
+            REQUIRE(coutInvalidTokens(res) == 0);
         }
     }
     GIVEN("A command to initialize the trie")
