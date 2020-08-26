@@ -22,13 +22,15 @@ class TrieConstIterator;
 template <typename T>
 class Trie {
 public:
+    using const_iterator = TrieConstIterator<T>;
+
     Trie() = default;
     Trie(std::initializer_list<TriePayload<T>> initList);
 
     void Add(const std::string_view key, T value);
     std::optional<T> Find(const std::string_view key) const;
 
-    TrieConstIterator<T> Head() const {
+    const_iterator Head() const {
         return {&m_tree, 0};
     }
 
@@ -70,16 +72,24 @@ public:
         m_id = m_tree_ref->at(m_id).next.at(ch);
     }
 
-    bool Valid() {
+    bool Valid() const {
         return m_id != -1;
     }
 
-    bool Terminal() {
+    bool Terminal() const {
         if (!Valid()) {
             return false;
         }       
 
-        return *m_tree_ref->at(m_id).value;
+        return (bool)m_tree_ref->at(m_id).value;
+    }
+
+    std::optional<T> Value() const {
+        if (m_id == -1) {
+            return std::nullopt;
+        }
+
+        return m_tree_ref->at(m_id).value;
     }
 
 private:
