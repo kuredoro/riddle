@@ -33,6 +33,7 @@ common::Trie<TokenType> g_keywordTrie{
 };
 
 common::Trie<TokenType> g_operatorTrie{
+    {"//", TokenType::OneLineComment},
     {"<", TokenType::LessComp},
     {"<=", TokenType::LeqComp},
     {">", TokenType::GreaterComp},
@@ -140,6 +141,15 @@ Token Lexer::Next() {
     tok.image = m_buf.substr(m_pos, lastTerminalLength);
 
     m_pos += lastTerminalLength;
+
+    // I'll use the fact that // can be considered an operator
+    // If we got it, then we'll just skip to the next newline and start over
+    // as if nothing happened.
+    if (tok.type == TokenType::OneLineComment) {
+        for (; m_pos < m_buf.size() && m_buf[m_pos] != '\n'; m_pos++) {}
+
+        return Next();
+    }
 
     return tok;
 }
