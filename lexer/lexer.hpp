@@ -10,6 +10,7 @@
 namespace lexer {
 
 extern common::Trie<TokenType> g_keywordTrie;
+extern common::Trie<TokenType> g_operatorTrie;
 
 class Lexer {
 public:
@@ -24,16 +25,18 @@ public:
             return { .type = TokenType::Eof };
         }
 
+        Token tok{
+            .type = TokenType::Error,
+            .line = m_lineNum,
+            .srcPos = m_pos - m_lastAfterNewLine,
+        };
+
         // If alpha -> either a keyword or identifier -> read until space
         if (Lexer::isidstart(m_buf[m_pos])) {
-            int len = 1;
+            size_t len = 1;
             for (; m_pos + len < m_buf.size() && Lexer::isidsuf(m_buf[m_pos + len]); len++) {}
 
-            Token tok;
-
             tok.image = m_buf.substr(m_pos, len);
-            tok.line = m_lineNum;
-            tok.srcPos = m_pos - m_lastAfterNewLine;
             tok.type = g_keywordTrie.Find(tok.image).value_or(TokenType::Identifier);
  
             m_pos += len;
@@ -42,10 +45,7 @@ public:
         }
 
         if (m_buf[m_pos] == '\n') {
-            Token tok;
             tok.type = TokenType::NewLine;
-            tok.line = m_lineNum;
-            tok.srcPos = m_pos - m_lastAfterNewLine;
             tok.image = "\n";
 
             m_pos++;
@@ -56,10 +56,27 @@ public:
         }
 
         // If not -> some operator, do maximal munch
-        
-        // Last failed? -> Error Token
-        
-        return {};
+        size_t len = 0;
+        size_t lastTerminalLength = 0;
+
+        auto head = g_operatorTrie.Head();
+        while (m_pos + len < m_buf.size() && head.Valid()) {
+            head.Next(m_buf[m_pos + len]);
+            len++;
+
+            // Basically, if this will never execute, the tok.type will be error
+            // and positional data already filled.
+            if (head.Terminal()) {
+                lastTerminalLength = len;
+                tok.type = *head.Value();
+            }
+        }
+
+        tok.image = m_buf.substr(m_pos, lastTerminalLength);
+
+        m_pos += lastTerminalLength;
+
+        return tok;
     }
 
 private:
