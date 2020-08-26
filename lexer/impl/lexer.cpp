@@ -104,6 +104,34 @@ namespace lexer
         trie.Add(";", TokenType::Column);
     }
 
+    /**
+     * Checks of the longToken is in the word from position *indexPoiter
+     * UPDATES the index, in case of full equality
+     * ADDS required tokens to the result vector
+     * 
+     * @param indexPointer - pointer to int index in the word
+     * @param word - the word, we are searching at
+     * @param longToken - string of length 2, e.g. ">=", "<="...
+     * @param tt1 - TokenType if only the first chars are equal
+     * @param tt2 - TokenType if all chars are equal
+     * 
+    */
+    void checkTwoCharToken(int *indexPointer, std::string word, std::string longToken,
+                           TokenType tt1, TokenType tt2)
+    {
+        char firstChar = longToken[0];
+        int index = *indexPointer;
+        if (index < int(word.length()) && word[index] == firstChar)
+        {
+            (*indexPointer)++;
+            result.push_back(makeToken(tt2, lineNum, longToken));
+        }
+        else
+        {
+            result.push_back(makeToken(tt1, lineNum, toStr(firstChar)));
+        }
+    }
+
     int processWord(std::string word)
     {
         auto res = trie.Find(word);
@@ -149,62 +177,20 @@ namespace lexer
                     val = trie.Find(sign).value_or(invalidToken);
                     result.push_back(makeToken(val, lineNum, sign));
                     break;
-                // dots
                 case '.':
-                    if (index < int(word.length()) && word[index] == '.')
-                    {
-                        index++;
-                        result.push_back(makeToken(TokenType::TwoDots, lineNum, ".."));
-                    }
-                    else
-                    {
-                        result.push_back(makeToken(TokenType::Dot, lineNum, toStr(c)));
-                    }
+                    checkTwoCharToken(&index, word, "..", TokenType::Dot, TokenType::TwoDots);
                     break;
-                // comparisons
                 case '<':
-                    if (index < int(word.length()) && word[index] == '=')
-                    {
-                        index++;
-                        result.push_back(makeToken(TokenType::SeqComp, lineNum, "<="));
-                    }
-                    else
-                    {
-                        result.push_back(makeToken(TokenType::SmallerComp, lineNum, toStr(c)));
-                    }
+                    checkTwoCharToken(&index, word, "<=", TokenType::SmallerComp, TokenType::SeqComp);
                     break;
                 case '>':
-                    if (index < int(word.length()) && word[index] == '=')
-                    {
-                        index++;
-                        result.push_back(makeToken(TokenType::BeqComp, lineNum, ">="));
-                    }
-                    else
-                    {
-                        result.push_back(makeToken(TokenType::BiggerComp, lineNum, toStr(c)));
-                    }
+                    checkTwoCharToken(&index, word, ">=", TokenType::BiggerComp, TokenType::BeqComp);
                     break;
                 case '/':
-                    if (index < int(word.length()) && word[index] == '=')
-                    {
-                        index++;
-                        result.push_back(makeToken(TokenType::NeqComp, lineNum, "/="));
-                    }
-                    else
-                    {
-                        result.push_back(makeToken(TokenType::DivOp, lineNum, toStr(c)));
-                    }
+                    checkTwoCharToken(&index, word, "/=", TokenType::DivOp, TokenType::NeqComp);
                     break;
                 case ':':
-                    if (index < int(word.length()) && word[index] == '=')
-                    {
-                        index++;
-                        result.push_back(makeToken(TokenType::Assignment, lineNum, ":="));
-                    }
-                    else
-                    {
-                        result.push_back(makeToken(TokenType::Column, lineNum, toStr(c)));
-                    }
+                    checkTwoCharToken(&index, word, ":=", TokenType::Column, TokenType::Assignment);
                     break;
 
                 default:
