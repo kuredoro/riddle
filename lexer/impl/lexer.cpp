@@ -107,11 +107,11 @@ namespace lexer
      * @param tt2 - TokenType if all chars are equal
      * 
     */
-    void checkTwoCharToken(int &index, std::string word, std::string longToken,
+    void checkTwoCharToken(size_t &index, std::string word, std::string longToken,
                            TokenType tt1, TokenType tt2)
     {
         char firstChar = longToken[0];
-        if (index < int(word.length()) && word[index] == firstChar)
+        if (index < word.length() && word[index] == firstChar)
         {
             index++;
             result.push_back({tt2, lineNum, longToken});
@@ -126,10 +126,10 @@ namespace lexer
      * Iterates through word while it is a number ()
      * 
     */
-    std::string readWhileNum(int &index, std::string word)
+    std::string readWhileNum(size_t &index, std::string word)
     {
         std::string num;
-        while (index < int(word.length()) && std::isdigit(word[index]))
+        while (index < word.length() && std::isdigit(word[index]))
         {
             char c = word[index++];
             num.push_back(c);
@@ -159,10 +159,10 @@ namespace lexer
                 return 0; // take next word
             }
             // read char-by-char:
-            int index = 0;
+            size_t index = 0;
             std::string sign;
             TokenType val;
-            while (index < int(word.length()))
+            while (index < word.length())
             {
                 char c = word[index++];
                 switch (c)
@@ -206,7 +206,7 @@ namespace lexer
                         index--;
                         std::string num = readWhileNum(index, word);
                         TokenType type = TokenType::IntegerLiteral;
-                        if (index < int(word.length()) && word[index] == '.')
+                        if (index < word.length() && word[index] == '.')
                         { // if real
                             int oldIndex = index;
                             index++;
@@ -226,7 +226,7 @@ namespace lexer
                     else if (std::isalpha(c))
                     { // if var name
                         std::string name = toStr(c);
-                        while (index < int(word.length()) && (std::isalpha(word[index]) || std::isdigit(word[index]) || word[index] == '_'))
+                        while (index < word.length() && (std::isalpha(word[index]) || std::isdigit(word[index]) || word[index] == '_'))
                         {
                             name.push_back(word[index++]);
                         }
