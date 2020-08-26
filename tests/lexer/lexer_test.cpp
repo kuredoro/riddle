@@ -54,7 +54,7 @@ SCENARIO("Trie initialization")
     }
     GIVEN("A command to initialize the trie")
     {
-        common::Trie<TokenType> trie = initTrie();
+        common::Trie<TokenType> trie = getTrie();
 
         THEN("All the keywords are in the trie")
         {
