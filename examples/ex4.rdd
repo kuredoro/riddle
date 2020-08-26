@@ -15,7 +15,7 @@ routine main(a : integer) : integer is
     node.is_first := 1;
     // append new node
     var node1 : Node;
-    node1.value := 0.7;
+    node1.value := 10.73;
     node1.is_last := true;
     node1.is_first := 0;
 
@@ -27,7 +27,7 @@ routine main(a : integer) : integer is
     // insert a node at the middle
 
     var node2 : Node;
-    node2.value := 5.8;
+    node2.value := 5.891;
     node2.is_last := false;
     node2.is_first := 0;
 
@@ -40,7 +40,7 @@ routine main(a : integer) : integer is
     // create some fantom nodes
     var some : Node;
     some.value := 7;
-    some.previous.value := 6;
+    some.previous.value := 6442;
     some.previous := node2;
 
     return node.next.next.previous.previous.value + true;
