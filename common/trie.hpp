@@ -11,41 +11,12 @@ namespace common {
 
 
 template <typename T>
+class Trie;
+
+template <typename T>
 struct TriePayload {
     std::string key;
     T value;
-};
-
-template <typename T>
-class TrieConstIterator;
-
-template <typename T>
-class Trie {
-public:
-    using const_iterator = TrieConstIterator<T>;
-
-    Trie() = default;
-    Trie(std::initializer_list<TriePayload<T>> initList);
-
-    void Add(const std::string_view key, T value);
-    std::optional<T> Find(const std::string_view key) const;
-
-    const_iterator Head() const {
-        return {&m_tree, 0};
-    }
-
-    std::vector<std::string> PrintContents() const;
-
-private:
-
-    friend struct TrieConstIterator<T>;
-
-    struct Node {
-        std::optional<T> value;
-        std::map<char, size_t> next;
-    };
-
-    std::vector<Node> m_tree;
 };
 
 
@@ -95,6 +66,36 @@ public:
 private:
     const std::vector<Node>* const m_tree_ref;
     int m_id = -1;
+};
+
+
+template <typename T>
+class Trie {
+public:
+    using const_iterator = TrieConstIterator<T>;
+
+    Trie() = default;
+    Trie(std::initializer_list<TriePayload<T>> initList);
+
+    void Add(const std::string_view key, T value);
+    std::optional<T> Find(const std::string_view key) const;
+
+    const_iterator Head() const {
+        return {&m_tree, 0};
+    }
+
+    std::vector<std::string> PrintContents() const;
+
+private:
+
+    friend struct TrieConstIterator<T>;
+
+    struct Node {
+        std::optional<T> value;
+        std::map<char, size_t> next;
+    };
+
+    std::vector<Node> m_tree;
 };
 
 
