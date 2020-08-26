@@ -45,6 +45,7 @@ SCENARIO("Lexer is fed source code") {
         "if 0.0 /= 42.424 then\n    g_od := true\nend\n",
         "for i in reverse 1..42 loop\n",
         "type MyRecord record\nvar x : integer\nvar ok : boolean;\nend\n",
+        "type // is boolean\nwaffles",
     };
 
     std::vector<std::vector<lexer::Token>> result{
@@ -102,6 +103,10 @@ SCENARIO("Lexer is fed source code") {
             {TokenType::BooleanType, 3, 9, "boolean"}, {TokenType::Semicolon, 3, 16, ";"},
             {TokenType::NewLine, 3, 17, "\n"}, {TokenType::End, 4, 0, "end"},
             {TokenType::NewLine, 4, 3, "\n"},
+        },
+        {
+            {TokenType::TypeDecl, 1, 0, "type"}, {TokenType::NewLine, 1, 18, "\n"},
+            {TokenType::Identifier, 2, 0, "waffles"},
         },
     };
 
