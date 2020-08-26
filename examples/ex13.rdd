@@ -1,0 +1,9 @@
+routine foo(number: i nteger) : integer
+is
+   return i*3/5+7*8+6.7
+end
+
+routine main(num : integer) : integer is
+    var a = foo(num);
+    return a-74%3;
+end
