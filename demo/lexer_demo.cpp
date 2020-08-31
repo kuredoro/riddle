@@ -9,6 +9,7 @@
 std::vector<std::string> g_TokTypeStr{
     "Eof",
     "Error",
+    "OneLineComment",
     "VarDecl",
     "TypeDecl",
     "RoutineDecl",
