@@ -13,5 +13,6 @@ if get_option('build-tests')
 endif
 
 if get_option('build-demos')
-  subdir('demo')
+  executable('lexer_demo', [ 'demo/lexer_demo.cpp' ],
+            dependencies : [ fmt_dep, lexer_dep, common_dep ])
 endif
