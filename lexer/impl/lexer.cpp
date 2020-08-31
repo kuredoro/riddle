@@ -67,10 +67,18 @@ common::Trie<TokenType> g_operatorTrie{
 };
 
 
+size_t Lexer::skipWhile(size_t bufPos, std::function<bool(char)> pred, size_t len) {
+    while (bufPos + len < m_buf.size() && pred(m_buf[bufPos + len]))
+        len++;
+
+    return len;
+}
+
+
 Token Lexer::Next() {
 
     // Ignore spaces
-    for (; m_pos < m_buf.size() && Lexer::isspace(m_buf[m_pos]); m_pos++) {}
+    m_pos += skipWhile(m_pos, Lexer::isspace);
 
     if (m_pos == m_buf.size()) {
         return { .type = TokenType::Eof };
@@ -84,8 +92,8 @@ Token Lexer::Next() {
 
     // If alpha -> either a keyword or identifier -> read until space
     if (Lexer::isidstart(m_buf[m_pos])) {
-        size_t len = 1;
-        for (; m_pos + len < m_buf.size() && Lexer::isidsuf(m_buf[m_pos + len]); len++) {}
+
+        auto len = skipWhile(m_pos, Lexer::isidsuf, 1);
 
         tok.image = m_buf.substr(m_pos, len);
         tok.type = g_keywordTrie.Find(tok.image).value_or(TokenType::Identifier);
@@ -96,13 +104,12 @@ Token Lexer::Next() {
     }
 
     if (std::isdigit(m_buf[m_pos])) {
-        size_t truncLen = 1;
-        for(; m_pos + truncLen < m_buf.size() && std::isdigit(m_buf[m_pos + truncLen]); truncLen++) {}
+
+        auto truncLen = skipWhile(m_pos, Lexer::isdigit, 1);
 
         size_t fracLen = 0;
         if (m_pos + truncLen < m_buf.size() && m_buf[m_pos + truncLen] == '.') {
-            size_t offset = m_pos + truncLen + 1;
-            for (; offset + fracLen < m_buf.size() && std::isdigit(m_buf[offset + fracLen]); fracLen++) {}
+            fracLen = skipWhile(m_pos + truncLen + 1, Lexer::isdigit);
         }
 
         if (fracLen != 0) {
@@ -155,7 +162,7 @@ Token Lexer::Next() {
     // If we got it, then we'll just skip to the next newline and start over
     // as if nothing happened.
     if (tok.type == TokenType::OneLineComment) {
-        for (; m_pos < m_buf.size() && m_buf[m_pos] != '\n'; m_pos++) {}
+        m_pos += skipWhile(m_pos, [](char c){ return c != '\n'; });
 
         return Next();
     }

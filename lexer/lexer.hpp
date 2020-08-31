@@ -1,11 +1,9 @@
-#include "trie.hpp"
-#include "token.hpp"
-#include "trie.hpp"
 #pragma once
 
+#include <functional>
+#include <cctype>
 #include "trie.hpp"
 #include "token.hpp"
-#include <cctype>
 
 namespace lexer {
 
@@ -24,17 +22,23 @@ private:
     size_t m_pos = 0, m_lastAfterNewLine = 0;
     size_t m_lineNum = 1;
 
-    bool isspace(char ch) {
+    static bool isspace(char ch) {
         return ch != '\n' && std::isspace(ch);
     }
 
-    bool isidstart(char ch) {
+    static bool isdigit(char ch) {
+        return std::isdigit(ch);
+    }
+
+    static bool isidstart(char ch) {
         return ch == '_' || std::isalpha(ch);
     }
 
-    bool isidsuf(char ch) {
+    static bool isidsuf(char ch) {
         return ch == '_' || std::isalnum(ch);
     }
+
+    size_t skipWhile(size_t bufPos, std::function<bool(char)> pred, size_t len = 0);
 };
 
 
