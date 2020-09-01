@@ -16,14 +16,14 @@ void AssertTrieContains(const common::Trie<T>& trie, const common::TriePayload<T
 
     if (result) {
         CHECK_MESSAGE(*result == payload.value,
-            "got payload {}, want {}", *result, payload.value);
+            "for key '{}' got payload {}, want {}", payload.key, *result, payload.value);
     }
 
     auto resultBracket = trie[payload.key];
     if (*result != *resultBracket) {
         CHECK_MESSAGE(*result == *resultBracket,
-            "expected Find() and operator[] to return the same value, but got {} and {} respectively", 
-            *result, *resultBracket);
+            "expected Find() and operator[] to return the same value, but for key '{}' got {} and {} respectively", 
+            payload.key, *result, *resultBracket);
     }
 }
 
@@ -40,10 +40,6 @@ void AssertTrieDoesNotContain(const common::Trie<T>& trie, const std::string& ke
 
 SCENARIO("Basic word lookup via trie") {
 
-    // TODO: ask on catch2 discord server where the hell is HAS_FAILED() macro
-    // And then add printing of the source dictionary and the trie structure
-    // if test fails.
-    
     std::vector<std::string> foreignWords{
         "zzzz", "世界", "لوحة", "this is not in trie at all"
     };
@@ -61,6 +57,9 @@ SCENARIO("Basic word lookup via trie") {
             trie.Add(i.key, i.value);
         }
 
+
+        CAPTURE(words);
+        CAPTURE(trie);
 
         THEN("All words that belong to it are reported as found") {
             for (auto& i : words) {
