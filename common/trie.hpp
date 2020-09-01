@@ -21,74 +21,89 @@ struct TriePayload {
 
 
 template <typename T>
-class TrieConstIterator {
+class TrieCursor {
 public:
 
     using Node = typename Trie<T>::Node;
 
-    TrieConstIterator(const std::vector<Node>* const ref, size_t id)
+    TrieCursor(const std::vector<Node>* const ref, size_t id)
         : m_tree_ref(ref), m_id(id)
     {}
 
-    void Next(char ch) {
-        if (m_id == -1) {
-            return;
-        }
+    void Next(char ch);
 
-        if (m_tree_ref->at(m_id).next.count(ch) == 0) {
-            m_id = -1;
-            return;
-        }
-
-        m_id = m_tree_ref->at(m_id).next.at(ch);
-    }
-
-    bool Valid() const {
-        return m_id != -1;
-    }
-
-    bool Terminal() const {
-        if (!Valid()) {
-            return false;
-        }       
-
-        return (bool)m_tree_ref->at(m_id).value;
-    }
-
-    std::optional<T> Value() const {
-        if (m_id == -1) {
-            return std::nullopt;
-        }
-
-        return m_tree_ref->at(m_id).value;
-    }
+    bool Valid() const;
+    bool Terminal() const;
+    std::optional<T> Value() const;
 
 private:
     const std::vector<Node>* const m_tree_ref;
     int m_id = -1;
 };
 
+template <typename T>
+void TrieCursor<T>::Next(char ch) {
+    if (m_id == -1) {
+        return;
+    }
 
+    if (m_tree_ref->at(m_id).next.count(ch) == 0) {
+        m_id = -1;
+        return;
+    }
+
+    m_id = m_tree_ref->at(m_id).next.at(ch);
+}
+
+template <typename T>
+bool TrieCursor<T>::Valid() const {
+    return m_id != -1;
+}
+
+template <typename T>
+bool TrieCursor<T>::Terminal() const {
+    if (!Valid()) {
+        return false;
+    }       
+
+    return (bool)m_tree_ref->at(m_id).value;
+}
+
+template <typename T>
+std::optional<T> TrieCursor<T>::Value() const {
+    if (m_id == -1) {
+        return std::nullopt;
+    }
+
+    return m_tree_ref->at(m_id).value;
+}
+
+
+/**
+ * Trie class is a string dictionary implemented via trie data structure.
+ * This enables for O(n) lookup times for the entries and also allows
+ * to incrementally traverse the prefix tree via a cursor.
+ */
 template <typename T>
 class Trie {
 public:
-    using const_iterator = TrieConstIterator<T>;
-
     Trie() = default;
     Trie(std::initializer_list<TriePayload<T>> initList);
 
     void Add(const std::string_view key, T value);
-    std::optional<T> Find(const std::string_view key) const;
 
-    const_iterator Head() const {
-        return {&m_tree, 0};
+    std::optional<T> Find(const std::string_view key) const;
+    std::optional<T> operator[](const std::string_view key) const {
+        return Find(key);
     }
+
+    TrieCursor<T> Head() const;
 
     std::vector<std::string> PrintContents() const;
 
 private:
 
-    friend struct TrieConstIterator<T>;
+    friend struct TrieCursor<T>;
 
     struct Node {
         std::optional<T> value;
@@ -153,6 +168,11 @@ std::optional<T> Trie<T>::Find(const std::string_view key) const {
     }
 
     return m_tree[head].value;
+}
+
+template <typename T>
+TrieCursor<T> Trie<T>::Head() const {
+    return {&m_tree, 0};
 }
 
 template <typename T>
