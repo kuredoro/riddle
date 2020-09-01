@@ -33,6 +33,8 @@
 
 # Directories
 builddir/
+build-gcc/
+build-clang/
 subprojects/*
 !subprojects/*.wrap
 .vscode/
