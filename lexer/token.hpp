@@ -63,6 +63,17 @@ struct Token {
     size_t line;
     size_t srcPos;
     std::string image;
+
+    friend bool operator==(const Token& a, const Token& b) {
+        return a.type == b.type && 
+               a.line == b.line &&
+               a.srcPos == b.srcPos &&
+               a.image == b.image;
+    }
+
+    friend bool operator!=(const Token& a, const Token& b) {
+        return !(a == b);
+    }
 };
 
 
