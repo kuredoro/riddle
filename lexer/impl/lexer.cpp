@@ -96,7 +96,7 @@ Token Lexer::Next() {
         auto len = skipWhile(m_pos, Lexer::isidsuf, 1);
 
         tok.image = m_buf.substr(m_pos, len);
-        tok.type = g_keywordTrie.Find(tok.image).value_or(TokenType::Identifier);
+        tok.type = g_keywordTrie[tok.image].value_or(TokenType::Identifier);
 
         m_pos += len;
 

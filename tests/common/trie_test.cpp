@@ -18,6 +18,13 @@ void AssertTrieContains(const common::Trie<T>& trie, const common::TriePayload<T
         CHECK_MESSAGE(*result == payload.value,
             "got payload {}, want {}", *result, payload.value);
     }
+
+    auto resultBracket = trie[payload.key];
+    if (*result != *resultBracket) {
+        CHECK_MESSAGE(*result == *resultBracket,
+            "expected Find() and operator[] to return the same value, but got {} and {} respectively", 
+            *result, *resultBracket);
+    }
 }
 
 template <typename T>
