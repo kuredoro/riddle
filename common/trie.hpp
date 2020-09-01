@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <iostream>
 #include "fmt/format.h"
 
 namespace common {
@@ -18,6 +19,12 @@ struct TriePayload {
     std::string key;
     T value;
 };
+
+template <typename T>
+std::ostream& operator<<(std::ostream& out, const TriePayload<T>& payload) {
+    out << "{'" << payload.key << "', " << payload.value << "}";
+    return out;
+}
 
 
 template <typename T>
@@ -101,9 +108,12 @@ public:
 
     std::vector<std::string> PrintContents() const;
 
-private:
-
     friend struct TrieCursor<T>;
+
+    template <typename U>
+    friend std::ostream& operator<<(std::ostream& out, const Trie<U>& trie);
+
+private:
 
     struct Node {
         std::optional<T> value;
@@ -176,29 +186,29 @@ TrieCursor<T> Trie<T>::Head() const {
 }
 
 template <typename T>
-std::vector<std::string> Trie<T>::PrintContents() const {
-    std::vector<std::string> out;
-    for (size_t head = 0; head < m_tree.size(); head++) {
-        auto& node = m_tree[head];
-        std::string nodeInfo = fmt::format("[{:2}] ", head);
+std::ostream& operator<<(std::ostream& out, const Trie<T>& trie) {
+
+    out << "{";
+    for (size_t head = 0; head < trie.m_tree.size(); head++) {
+        auto& node = trie.m_tree[head];
+        out << "\n  [" << head << "] ";
 
         if (node.value) {
-            nodeInfo += fmt::format("Value : {}\n", *node.value);
+            out << "Value : " << *node.value << "\n";
         } else {
-            nodeInfo += "Value : nil\n";
+            out << "Value : nil\n";
         }
 
         if (node.next.empty()) {
-            nodeInfo += "    empty\n";
+            out << "    empty\n";
         }
 
         for (auto& [k, v] : node.next) {
-            nodeInfo += fmt::format("    {} : {}\n", k, v);
+            out << "    " << k << " -> " << v << "\n";
         }
-
-        nodeInfo += "\n";
-        out.push_back(nodeInfo);
     }
+
+    out << "}\n";
 
     return out;
 }
