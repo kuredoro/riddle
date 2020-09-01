@@ -4,13 +4,30 @@ on:
   pull_request
 
 jobs:
-  test:
+  gcc:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v1
-    - uses: BSFishy/meson-build@v1.0.1
-      with:
-        action: test
-        meson-version: 0.55.1
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v1
+      - uses: BSFishy/meson-build@v1.0.1
+        env:
+          CC: gcc
+          CXX: g++
+        with:
+          action: test
+          meson-version: 0.55.1
+
+  clang:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v1
+      - uses: BSFishy/meson-build@v1.0.1
+        env:
+          CC: clang
+          CXX: clang++
+        with:
+          action: test
+          meson-version: 0.55.1
