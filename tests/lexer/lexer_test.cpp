@@ -23,13 +23,6 @@ void PrintTokenStream(const std::vector<lexer::Token>& toks) {
 
 } // namespace testing
 
-bool operator!=(const lexer::Token& a, const lexer::Token& b) {
-    return a.type != b.type || a.line != b.line || a.srcPos != b.srcPos || a.image != b.image;
-}
-
-bool operator==(const lexer::Token& a, const lexer::Token& b) {
-    return !(a != b);
-}
 
 SCENARIO("Lexer is fed source code") {
 
@@ -137,7 +130,7 @@ SCENARIO("Lexer is fed source code") {
             REQUIRE(tokStream.size() == result[i].size());
 
             for (size_t ti = 0; ti < result[i].size(); ti++) {
-                if (tokStream[ti] != result[i][ti]) {
+                if (tokStream[ti] == result[i][ti]) {
                     FMT_UINFO("got {}", testing::TokenToString(tokStream[ti]));
                     FMT_UINFO("want {}", testing::TokenToString(result[i][ti]));
                 }

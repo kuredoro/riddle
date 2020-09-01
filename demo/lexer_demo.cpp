@@ -88,7 +88,7 @@ std::vector<lexer::Token> extractTokens(lexer::Lexer& lx) {
     return tokens;
 }
 
-int main(int argc, char* argv[]) {
+int main() {
     for (;;) {
         fmt::print("riddle> ");
         std::string line;
