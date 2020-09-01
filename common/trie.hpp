@@ -45,7 +45,7 @@ public:
 
 private:
     const std::vector<Node>* const m_tree_ref;
-    int m_id = -1;
+    int64_t m_id = -1;
 };
 
 template <typename T>
@@ -108,7 +108,7 @@ public:
 
     std::vector<std::string> PrintContents() const;
 
-    friend struct TrieCursor<T>;
+    friend class TrieCursor<T>;
 
     template <typename U>
     friend std::ostream& operator<<(std::ostream& out, const Trie<U>& trie);

@@ -57,7 +57,6 @@ SCENARIO("Basic word lookup via trie") {
             trie.Add(i.key, i.value);
         }
 
-
         CAPTURE(words);
         CAPTURE(trie);
 
