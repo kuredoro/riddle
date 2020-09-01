@@ -1,6 +1,7 @@
 incdir = include_directories('.')
 liblexer = static_library('lexer', 
                          sources : ['impl/lexer.cpp'], 
+                         cpp_args : riddle_cpp_args,
                          dependencies : [ fmt_dep, common_dep ],
                          install : true)
 
