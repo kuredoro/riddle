@@ -2,7 +2,7 @@
 
 var INFINITY is 999999; var x is 5
 
-routine dijkstra(graph: array array integer, src: integer):
+routine dijkstra(graph: array array integer, src: integer): // We accept such declaration of 2D array
                 array [3] integer is
     
     var dist: array [3] integer; // The output array. dist[i] will hold the shortest distance from src to i

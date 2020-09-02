@@ -1,3 +1,4 @@
+// This test has an error
 routine main(a : integer) : integer is
     type Node is record
         var value       :   real
