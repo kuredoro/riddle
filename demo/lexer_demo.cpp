@@ -75,8 +75,9 @@ void printTokens(const std::vector<lexer::Token>& toks) {
 }
 
 void outputLineDiagnostics(std::string line, size_t begin, size_t end) {
+    begin--;
     fmt::print("\t{}", line.substr(0, begin));
-    fmt::print(fg(fmt::color::crimson), "{}", line.substr(begin, end - begin));
+    fmt::print(fg(fmt::color::indian_red), "{}", line.substr(begin, end - begin));
     fmt::print("{}\n", line.substr(end));
     fmt::print("\t{}{}\n", std::string(begin, ' '), '^');
 }
@@ -111,7 +112,7 @@ int main(int argc, char* argv[]) {
         auto tokens = extractTokens(lx);
 
         if (auto tok = lx.Next(); tok.type == lexer::TokenType::Illegal) {
-            fmt::print(fg(fmt::color::crimson) | fmt::emphasis::bold, "Illegal: ");
+            fmt::print(fg(fmt::color::indian_red) | fmt::emphasis::bold, "error: ");
             fmt::print("could not tokenize further.\n");
             outputLineDiagnostics(line, tok.column, line.size());
             continue;
