@@ -1,8 +1,8 @@
-type BigArray is array [100000]
+type BigArray is array [100000] integer
 
 var nums: BigArray  // initialized with zeros
 
-routine collatz (n: integer)
+routine collatz (n: integer) is
     var i is 1;
     while nums[i] /= 1 loop
         if nums[i] % 2 = 0 then
@@ -12,5 +12,6 @@ routine collatz (n: integer)
         end
         i := i + 1
     end
+    // dont forget to define it
     print(i)
 end

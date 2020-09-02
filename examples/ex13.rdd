@@ -4,6 +4,6 @@ is
 end
 
 routine main(num : integer) : integer is
-    var a = foo(num);
+    var a is foo(num);
     return a-74%3;
 end

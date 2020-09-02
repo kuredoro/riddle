@@ -1,4 +1,4 @@
-routine factorial(number: i nteger) : integer
+routine factorial(num: integer) : integer
 is
     if num /= 1 then
         return num * factorial(num - 1);
