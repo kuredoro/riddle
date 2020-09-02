@@ -1,4 +1,4 @@
-type BigArray is array [100000]
+type BigArray is array [100000] integer
 
 type Human is record
     var id                  :   integer     

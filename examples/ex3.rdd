@@ -19,6 +19,8 @@ routine main(input: integer) : integer is
         end
     end
     if counter then
-        return counter
+        return counter;
+    else
+	return 0;
     end
 end
