@@ -74,11 +74,19 @@ size_t Lexer::skipWhile(size_t bufPos, std::function<bool(char)> pred, size_t le
     return len;
 }
 
+char Lexer::peek(size_t offset) {
+    if (m_pos + offset >= m_buf.size()) {
+        return 0;
+    }
+
+    return m_buf[m_pos + offset];
+}
+
 
 Token Lexer::Next() {
 
     // Ignore spaces
-    m_pos += skipWhile(m_pos, Lexer::isspace);
+    m_pos += skipWhile(m_pos, isSpace);
 
     if (m_pos == m_buf.size()) {
         return { .type = TokenType::Eof };
@@ -90,10 +98,10 @@ Token Lexer::Next() {
         .column = m_pos - m_lastAfterNewLine,
     };
 
-    // If alpha -> either a keyword or identifier -> read until space
-    if (Lexer::isidstart(m_buf[m_pos])) {
+    // If alpha -> either a keyword or identifier -> read until not
+    if (isIdentStart(m_buf[m_pos])) {
 
-        auto len = skipWhile(m_pos, Lexer::isidsuf, 1);
+        auto len = skipWhile(m_pos, isIdentSuf, 1);
 
         tok.lit = m_buf.substr(m_pos, len);
         tok.type = g_keywordTrie[tok.lit].value_or(TokenType::Ident);
@@ -103,16 +111,21 @@ Token Lexer::Next() {
         return tok;
     }
 
-    if (std::isdigit(m_buf[m_pos])) {
+    if (isDigit(m_buf[m_pos]) || (m_buf[m_pos] == '.' && isDigit(peek()))) {
 
-        auto truncLen = skipWhile(m_pos, Lexer::isdigit, 1);
+        auto truncLen = skipWhile(m_pos, isDigit);
 
-        size_t fracLen = 0;
-        if (m_pos + truncLen < m_buf.size() && m_buf[m_pos + truncLen] == '.') {
-            fracLen = skipWhile(m_pos + truncLen + 1, Lexer::isdigit);
+        int64_t fracLen = -1;
+        if (peek(truncLen) == '.') {
+            fracLen = skipWhile(m_pos + truncLen + 1, isDigit);
+
+            // Two dots case
+            if (fracLen == 0 && peek(truncLen + 1) == '.') {
+                fracLen = -1;
+            }
         }
 
-        if (fracLen != 0) {
+        if (fracLen != -1) {
             truncLen += 1 + fracLen;
             tok.type = TokenType::Real;
         } else {
@@ -142,7 +155,7 @@ Token Lexer::Next() {
     size_t lastTerminalLength = 0;
 
     auto head = g_operatorTrie.Head();
-    while (m_pos + len < m_buf.size() && head.Valid()) {
+    while (peek(len) && head.Valid()) {
         head.Next(m_buf[m_pos + len]);
         len++;
 

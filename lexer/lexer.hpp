@@ -22,23 +22,25 @@ private:
     size_t m_pos = 0, m_lastAfterNewLine = 0;
     size_t m_lineNum = 1;
 
-    static bool isspace(char ch) {
+    static bool isSpace(char ch) {
         return ch != '\n' && std::isspace(ch);
     }
 
-    static bool isdigit(char ch) {
+    static bool isDigit(char ch) {
         return std::isdigit(ch);
     }
 
-    static bool isidstart(char ch) {
+    static bool isIdentStart(char ch) {
         return ch == '_' || std::isalpha(ch);
     }
 
-    static bool isidsuf(char ch) {
+    static bool isIdentSuf(char ch) {
         return ch == '_' || std::isalnum(ch);
     }
 
     size_t skipWhile(size_t bufPos, std::function<bool(char)> pred, size_t len = 0);
+
+    char peek(size_t offset = 1);
 };
 
 

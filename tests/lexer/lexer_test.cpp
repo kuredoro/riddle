@@ -23,7 +23,6 @@ void PrintTokenStream(const std::vector<lexer::Token>& toks) {
 
 } // namespace testing
 
-
 SCENARIO("Lexer is fed source code") {
 
     using lexer::TokenType;
@@ -39,74 +38,84 @@ SCENARIO("Lexer is fed source code") {
         "for i in reverse 1..42 loop\n",
         "type MyRecord record\nvar x : integer\nvar ok : boolean;\nend\n",
         "type // is boolean\nwaffles",
+        "var x is 4.\nvar y is .4\n",
     };
 
     std::vector<std::vector<lexer::Token>> result{
         {
-            {       TokenType::If, 1,  0,   "if"}, {TokenType::Ident, 1,  3, "sausage"}, 
-            {TokenType::Loop, 1, 11, "loop"}, {       TokenType::End, 1, 16,     "end"},
-            {       TokenType::Is, 1, 20,   "is"}, {TokenType::Ident, 1, 23,    "near"},
+
+            {       TokenType::If, 1,  0,   "if"}, {     TokenType::Ident, 1,  3, "sausage"}, 
+            {     TokenType::Loop, 1, 11, "loop"}, {       TokenType::End, 1, 16,     "end"},
+            {       TokenType::Is, 1, 20,   "is"}, {     TokenType::Ident, 1, 23,    "near"},
         },
         {
-            {       TokenType::If, 1,  0,   "if"}, {TokenType::Ident, 1,  3, "sausage"}, 
-            {TokenType::Loop, 1, 11, "loop"}, {   TokenType::NewLine, 1, 15,      "\n"},
-            {  TokenType::Var, 2,  4,  "var"}, {       TokenType::End, 2,  8,     "end"},
-            {       TokenType::Is, 2, 12,   "is"}, {TokenType::Ident, 2, 15,    "near"},
+
+            {       TokenType::If, 1,  0,   "if"}, {     TokenType::Ident, 1,  3, "sausage"}, 
+            {     TokenType::Loop, 1, 11, "loop"}, {   TokenType::NewLine, 1, 15,      "\n"},
+            {      TokenType::Var, 2,  4,  "var"}, {       TokenType::End, 2,  8,     "end"},
+            {       TokenType::Is, 2, 12,   "is"}, {     TokenType::Ident, 2, 15,    "near"},
             {  TokenType::NewLine, 2, 19,   "\n"}, {       TokenType::End, 3,  0,     "end"},
             {  TokenType::NewLine, 3,  3,   "\n"},
         },
         { 
-            {TokenType::Var, 1,  0, "var"}, { TokenType::Ident, 1,  4,  "an_int"},
+            {    TokenType::Var, 1,  0, "var"}, {      TokenType::Ident, 1,  4,  "an_int"},
             {  TokenType::Colon, 1, 10,   ":"}, {TokenType::IntegerType, 1, 12, "integer"}, 
             {TokenType::NewLine, 1, 19,  "\n"},
         },
         {
-            {        TokenType::If, 1,  0,   "if"}, { TokenType::OParen, 1,  3,  "("}, 
-            {TokenType::Ident, 1,  4,    "x"}, {     TokenType::Add, 1,  5,  "+"},
-            {TokenType::Ident, 1,  6,    "y"}, {TokenType::CParen, 1,  7,  ")"},
-            {   TokenType::Leq, 1,  8,   "<="}, {TokenType::Ident, 1, 10,  "z"},
+            {        TokenType::If, 1,  0,   "if"}, {    TokenType::OParen, 1,  3,  "("}, 
+            {     TokenType::Ident, 1,  4,    "x"}, {       TokenType::Add, 1,  5,  "+"},
+            {     TokenType::Ident, 1,  6,    "y"}, {    TokenType::CParen, 1,  7,  ")"},
+            {       TokenType::Leq, 1,  8,   "<="}, {     TokenType::Ident, 1, 10,  "z"},
             {      TokenType::Then, 1, 12, "then"}, {   TokenType::NewLine, 1, 16, "\n"},
         },
         {
-            {TokenType::Ident, 1,  0, "TokenType"}, {     TokenType::Colon, 1,  9,     ":"},
-            {     TokenType::Colon, 1, 10,         ":"}, {TokenType::Ident, 1, 11, "Colon"},
+            {     TokenType::Ident, 1,  0, "TokenType"}, {     TokenType::Colon, 1,  9,     ":"},
+            {     TokenType::Colon, 1, 10,         ":"}, {     TokenType::Ident, 1, 11, "Colon"},
             { TokenType::Semicolon, 1, 16,         ";"},
         },
         { 
-            {TokenType::Var, 1,  0, "var"}, {    TokenType::Ident, 1,  4,     "ans"},
+            {    TokenType::Var, 1,  0, "var"}, {         TokenType::Ident, 1,  4,     "ans"},
             {  TokenType::Colon, 1,  7,   ":"}, {   TokenType::IntegerType, 1, 10, "integer"}, 
-            {     TokenType::Is, 1, 18,  "is"}, {TokenType::Int, 1, 21,      "42"},
+            {     TokenType::Is, 1, 18,  "is"}, {           TokenType::Int, 1, 21,      "42"},
             {TokenType::NewLine, 1, 23,  "\n"},
         },
         {
-            {        TokenType::If, 1,  0,   "if"}, { TokenType::Real, 1,  3,    "0.0"}, 
-            {   TokenType::Neq, 1,  7,   "/="}, { TokenType::Real, 1, 10, "42.424"},
+            {        TokenType::If, 1,  0,   "if"}, {        TokenType::Real, 1,  3,    "0.0"}, 
+            {       TokenType::Neq, 1,  7,   "/="}, {        TokenType::Real, 1, 10, "42.424"},
             {      TokenType::Then, 1, 17, "then"}, {     TokenType::NewLine, 1, 21,     "\n"},
-            {TokenType::Ident, 2,  4, "g_od"}, {TokenType::Assign, 2,  9,     ":="},
+            {     TokenType::Ident, 2,  4, "g_od"}, {      TokenType::Assign, 2,  9,     ":="},
             {      TokenType::True, 2, 12, "true"}, {     TokenType::NewLine, 2, 16,     "\n"},
             {       TokenType::End, 3,  0,  "end"}, {     TokenType::NewLine, 3,  3,     "\n"},
         },
         {
-            {       TokenType::For, 1,  0, "for"}, {  TokenType::Ident, 1,  4,       "i"},
-            {       TokenType::In, 1,  6,  "in"}, {TokenType::Reverse, 1,  9, "reverse"},
-            {TokenType::Int, 1, 17,   "1"}, {     TokenType::TwoDots, 1, 18,      ".."},
-            {TokenType::Int, 1, 20,  "42"}, {   TokenType::Loop, 1, 23,    "loop"},
+            {           TokenType::For, 1,  0, "for"}, {       TokenType::Ident, 1,  4,       "i"},
+            {            TokenType::In, 1,  6,  "in"}, {     TokenType::Reverse, 1,  9, "reverse"},
+            {           TokenType::Int, 1, 17,   "1"}, {     TokenType::TwoDots, 1, 18,      ".."},
+            {           TokenType::Int, 1, 20,  "42"}, {        TokenType::Loop, 1, 23,    "loop"},
             {       TokenType::NewLine, 1, 27,  "\n"},
         },
         {
-            {   TokenType::Type, 1,  0,    "type"}, { TokenType::Ident, 1,  5, "MyRecord"},
-            { TokenType::Record, 1, 14,  "record"}, {    TokenType::NewLine, 1, 20,       "\n"},
-            {    TokenType::Var, 2,  0,     "var"}, { TokenType::Ident, 2,  4,        "x"},
+            {       TokenType::Type, 1,  0,    "type"}, {      TokenType::Ident, 1,  5, "MyRecord"},
+            {     TokenType::Record, 1, 14,  "record"}, {    TokenType::NewLine, 1, 20,       "\n"},
+            {        TokenType::Var, 2,  0,     "var"}, {      TokenType::Ident, 2,  4,        "x"},
             {      TokenType::Colon, 2,  6,       ":"}, {TokenType::IntegerType, 2,  8,  "integer"},
-            {    TokenType::NewLine, 2, 15,      "\n"}, {    TokenType::Var, 3,  0,      "var"},
-            { TokenType::Ident, 3,  4,      "ok"}, {      TokenType::Colon, 3,  7,        ":"},
-            {TokenType::Boolean, 3,  9, "boolean"}, {  TokenType::Semicolon, 3, 16,        ";"},
+            {    TokenType::NewLine, 2, 15,      "\n"}, {        TokenType::Var, 3,  0,      "var"},
+            {      TokenType::Ident, 3,  4,      "ok"}, {      TokenType::Colon, 3,  7,        ":"},
+            {    TokenType::Boolean, 3,  9, "boolean"}, {  TokenType::Semicolon, 3, 16,        ";"},
             {    TokenType::NewLine, 3, 17,      "\n"}, {        TokenType::End, 4,  0,      "end"},
             {    TokenType::NewLine, 4,  3,      "\n"},
         },
         {
-            {  TokenType::Type, 1, 0,    "type"}, {TokenType::NewLine, 1, 18, "\n"},
+            { TokenType::Type, 1, 0,    "type"}, {TokenType::NewLine, 1, 18, "\n"},
             {TokenType::Ident, 2, 0, "waffles"},
+        },
+        {
+            {    TokenType::Var, 1,  0, "var"}, {  TokenType::Ident, 1,  4,   "x"},
+            {     TokenType::Is, 1,  6,  "is"}, {   TokenType::Real, 1,  9,  "4."},
+            {TokenType::NewLine, 1, 11,  "\n"}, {    TokenType::Var, 2,  0, "var"},
+            {  TokenType::Ident, 2,  4,   "y"}, {     TokenType::Is, 2,  6,  "is"},
+            {   TokenType::Real, 2,  9,  ".4"}, {TokenType::NewLine, 2, 11,  "\n"},
         },
     };
 
@@ -130,7 +139,7 @@ SCENARIO("Lexer is fed source code") {
             REQUIRE(tokStream.size() == result[i].size());
 
             for (size_t ti = 0; ti < result[i].size(); ti++) {
-                if (tokStream[ti] == result[i][ti]) {
+                if (tokStream[ti] != result[i][ti]) {
                     FMT_UINFO("got {}", testing::TokenToString(tokStream[ti]));
                     FMT_UINFO("want {}", testing::TokenToString(result[i][ti]));
                 }
