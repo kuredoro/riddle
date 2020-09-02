@@ -1,4 +1,6 @@
+#include <fstream>
 #include <iostream>
+#include <iterator>
 #include "fmt/core.h"
 #include "fmt/color.h"
 #include "strings.hpp"
@@ -7,57 +9,57 @@
 #include "strings.hpp"
 
 std::vector<std::string> g_TokTypeStr{
+    "Illegal",
     "Eof",
-    "Error",
-    "OneLineComment",
-    "VarDecl",
-    "TypeDecl",
-    "RoutineDecl",
+    "Comment",
+    "Ident",
+    "Int",
+    "Real",
+    "Less",
+    "Greater",
+    "Eq",
+    "Leq",
+    "Geq",
+    "Neq",
+    "Assign",
+    "Add",
+    "Sub",
+    "Mul",
+    "Div",
+    "Mod",
+    "OParen",
+    "OBrack",
+    "Comma",
+    "Dot",
+    "TwoDots",
+    "CParen",
+    "CBrack",
+    "Semicolon",
+    "Colon",
+    "NewLine",
+    "Var",
+    "Type",
+    "Routine",
     "Is",
     "IntegerType",
     "RealType",
-    "BooleanType",
-    "RecordType",
-    "ArrayType",
+    "Boolean",
+    "Record",
+    "Array",
     "True",
     "False",
-    "WhileLoop",
-    "ForLoop",
-    "LoopBegin",
+    "While",
+    "For",
+    "Loop",
     "End",
-    "ReverseRange",
-    "InRange",
+    "Reverse,",
+    "In,",
     "If",
-    "Then",
+    "Then,",
     "Else",
-    "AndLogic",
-    "OrLogic",
-    "XorLogic",
-    "LessComp",
-    "LeqComp",
-    "GreaterComp",
-    "GeqComp",
-    "EqComp",
-    "NeqComp",
-    "AssignmentOp",
-    "MultOp",
-    "DivOp",
-    "ModOp",
-    "AddOp",
-    "SubOp",
-    "IntegerLiteral",
-    "RealLiteral",
-    "Identifier",
-    "Dot",
-    "TwoDots",
-    "Comma",
-    "ParenOpen",
-    "ParenClose",
-    "BracketOpen",
-    "BracketClose",
-    "Colon",
-    "Semicolon",
-    "NewLine",
+    "And",
+    "Or",
+    "Xor",
 };
 
 std::string to_string(lexer::TokenType type) {
@@ -66,7 +68,7 @@ std::string to_string(lexer::TokenType type) {
 
 void printTokens(const std::vector<lexer::Token>& toks) {
     for (auto& tok : toks) {
-        auto str = common::replaceAll(tok.image, "\n", "\\n");
+        auto str = common::replaceAll(tok.lit, "\n", "\\n");
         fmt::print("{} ({}) ", str, to_string(tok.type));
     }
     fmt::print("\n\n");
@@ -81,14 +83,25 @@ void outputLineDiagnostics(std::string line, size_t begin, size_t end) {
 
 std::vector<lexer::Token> extractTokens(lexer::Lexer& lx) {
     std::vector<lexer::Token> tokens;
-    for (auto tok = lx.Next(); tok.type != lexer::TokenType::Eof && tok.type != lexer::TokenType::Error; tok = lx.Next()) {
+    for (auto tok = lx.Next(); tok.type != lexer::TokenType::Eof && tok.type != lexer::TokenType::Illegal; tok = lx.Next()) {
         tokens.push_back(tok);
     }
 
     return tokens;
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+    if (argc == 2) {
+        std::ifstream f(argv[1]);
+        std::string code((std::istreambuf_iterator<char>(f)),
+                         (std::istreambuf_iterator<char>() ));
+        fmt::print("Code:\n{}\n\n", code);
+        lexer::Lexer lx{code};
+        auto tokens = extractTokens(lx);
+        printTokens(tokens);
+        return 0;
+    }
+
     for (;;) {
         fmt::print("riddle> ");
         std::string line;
@@ -97,10 +110,10 @@ int main() {
         lexer::Lexer lx{line};
         auto tokens = extractTokens(lx);
 
-        if (auto tok = lx.Next(); tok.type == lexer::TokenType::Error) {
-            fmt::print(fg(fmt::color::crimson) | fmt::emphasis::bold, "error: ");
+        if (auto tok = lx.Next(); tok.type == lexer::TokenType::Illegal) {
+            fmt::print(fg(fmt::color::crimson) | fmt::emphasis::bold, "Illegal: ");
             fmt::print("could not tokenize further.\n");
-            outputLineDiagnostics(line, tok.srcPos, line.size());
+            outputLineDiagnostics(line, tok.column, line.size());
             continue;
         }
 

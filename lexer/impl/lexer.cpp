@@ -16,54 +16,54 @@ namespace lexer {
 
 
 common::Trie<TokenType> g_keywordTrie{
-    {"var", TokenType::VarDecl},
-    {"type", TokenType::TypeDecl},
-    {"routine", TokenType::RoutineDecl},
+    {"var", TokenType::Var},
+    {"type", TokenType::Type},
+    {"routine", TokenType::Routine},
     {"is", TokenType::Is},
     {"integer", TokenType::IntegerType},
     {"real", TokenType::RealType},
-    {"boolean", TokenType::BooleanType},
-    {"record", TokenType::RecordType},
-    {"array", TokenType::ArrayType},
+    {"boolean", TokenType::Boolean},
+    {"record", TokenType::Record},
+    {"array", TokenType::Array},
     {"true", TokenType::True},
     {"false", TokenType::False},
-    {"while", TokenType::WhileLoop},
-    {"for", TokenType::ForLoop},
-    {"loop", TokenType::LoopBegin},
+    {"while", TokenType::While},
+    {"for", TokenType::For},
+    {"loop", TokenType::Loop},
     {"end", TokenType::End},
-    {"reverse", TokenType::ReverseRange},
-    {"in", TokenType::InRange},
+    {"reverse", TokenType::Reverse},
+    {"in", TokenType::In},
     {"if", TokenType::If},
     {"then", TokenType::Then},
     {"else", TokenType::Else},
-    {"and", TokenType::AndLogic},
-    {"or", TokenType::OrLogic},
-    {"xor", TokenType::XorLogic},
+    {"and", TokenType::And},
+    {"or", TokenType::Or},
+    {"xor", TokenType::Xor},
 };
 
 common::Trie<TokenType> g_operatorTrie{
-    {"//", TokenType::OneLineComment},
-    {"<", TokenType::LessComp},
-    {"<=", TokenType::LeqComp},
-    {">", TokenType::GreaterComp},
-    {">=", TokenType::GeqComp},
-    {"=", TokenType::EqComp},
-    {"/=", TokenType::NeqComp},
-    {":=", TokenType::AssignmentOp},
-    {"*", TokenType::MultOp},
-    {"/", TokenType::DivOp},
-    {"%", TokenType::ModOp},
-    {"+", TokenType::AddOp},
-    {"-", TokenType::SubOp},
-    {".", TokenType::Dot},
+    {"//", TokenType::Comment},
+    {"<",  TokenType::Less},
+    {">",  TokenType::Greater},
+    {"=",  TokenType::Eq},
+    {"<=", TokenType::Leq},
+    {">=", TokenType::Geq},
+    {"/=", TokenType::Neq},
+    {":=", TokenType::Assign},
+    {"+",  TokenType::Add},
+    {"-",  TokenType::Sub},
+    {"*",  TokenType::Mul},
+    {"/",  TokenType::Div},
+    {"%",  TokenType::Mod},
+    {"(",  TokenType::OParen},
+    {"[",  TokenType::OBrack},
+    {",",  TokenType::Comma},
+    {".",  TokenType::Dot},
     {"..", TokenType::TwoDots},
-    {",", TokenType::Comma},
-    {"(", TokenType::ParenOpen},
-    {")", TokenType::ParenClose},
-    {"[", TokenType::BracketOpen},
-    {"]", TokenType::BracketClose},
-    {":", TokenType::Colon},
-    {";", TokenType::Semicolon},
+    {")",  TokenType::CParen},
+    {"]",  TokenType::CBrack},
+    {";",  TokenType::Semicolon},
+    {":",  TokenType::Colon},
 };
 
 
@@ -85,9 +85,9 @@ Token Lexer::Next() {
     }
 
     Token tok{
-        .type = TokenType::Error,
+        .type = TokenType::Illegal,
         .line = m_lineNum,
-        .srcPos = m_pos - m_lastAfterNewLine,
+        .column = m_pos - m_lastAfterNewLine,
     };
 
     // If alpha -> either a keyword or identifier -> read until space
@@ -95,8 +95,8 @@ Token Lexer::Next() {
 
         auto len = skipWhile(m_pos, Lexer::isidsuf, 1);
 
-        tok.image = m_buf.substr(m_pos, len);
-        tok.type = g_keywordTrie[tok.image].value_or(TokenType::Identifier);
+        tok.lit = m_buf.substr(m_pos, len);
+        tok.type = g_keywordTrie[tok.lit].value_or(TokenType::Ident);
 
         m_pos += len;
 
@@ -114,12 +114,12 @@ Token Lexer::Next() {
 
         if (fracLen != 0) {
             truncLen += 1 + fracLen;
-            tok.type = TokenType::RealLiteral;
+            tok.type = TokenType::Real;
         } else {
-            tok.type = TokenType::IntegerLiteral;
+            tok.type = TokenType::Int;
         }
 
-        tok.image = m_buf.substr(m_pos, truncLen);
+        tok.lit = m_buf.substr(m_pos, truncLen);
 
         m_pos += truncLen;
 
@@ -128,7 +128,7 @@ Token Lexer::Next() {
 
     if (m_buf[m_pos] == '\n') {
         tok.type = TokenType::NewLine;
-        tok.image = "\n";
+        tok.lit = "\n";
 
         m_pos++;
         m_lastAfterNewLine = m_pos;
@@ -154,14 +154,14 @@ Token Lexer::Next() {
         }
     }
 
-    tok.image = m_buf.substr(m_pos, lastTerminalLength);
+    tok.lit = m_buf.substr(m_pos, lastTerminalLength);
 
     m_pos += lastTerminalLength;
 
     // I'll use the fact that // can be considered an operator
     // If we got it, then we'll just skip to the next newline and start over
     // as if nothing happened.
-    if (tok.type == TokenType::OneLineComment) {
+    if (tok.type == TokenType::Comment) {
         m_pos += skipWhile(m_pos, [](char c){ return c != '\n'; });
 
         return Next();

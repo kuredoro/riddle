@@ -5,70 +5,78 @@
 namespace lexer {
 
 enum class TokenType{
+    Illegal,
     Eof,
-    Error,
-    OneLineComment, // //
-    VarDecl, // var
-    TypeDecl, // type
-    RoutineDecl, // routine
-    Is, // is
-    IntegerType, // integer
-    RealType, // real
-    BooleanType, // boolean
-    RecordType, // record
-    ArrayType, // array
-    True, // true
-    False, // false
-    WhileLoop, // while
-    ForLoop, // for
-    LoopBegin, // loop
-    End, // end
-    ReverseRange, // reverse
-    InRange, // in
-    If, // if
-    Then, // then
-    Else, // else
-    AndLogic, // and
-    OrLogic, // or
-    XorLogic, // xor
-    LessComp, // <
-    LeqComp, // <=
-    GreaterComp, // >
-    GeqComp, // >=
-    EqComp, // =
-    NeqComp, // /=
-    AssignmentOp, // :=
-    MultOp, // *
-    DivOp, // /
-    ModOp, // %
-    AddOp, // +
-    SubOp, // -
-    IntegerLiteral, // int const
-    RealLiteral, // real const
-    Identifier, // name
-    Dot, // .
+    Comment,
+
+    Ident, // my_var
+    Int,   // 12345
+    Real,  // 123.45
+
+    Less,    // <
+    Greater, // >
+    Eq,      // =
+
+    Leq,    // <=
+    Geq,    // >=
+    Neq,    // /=
+    Assign, // :=
+
+    Add, // +
+    Sub, // -
+    Mul, // *
+    Div, // /
+    Mod, // %
+
+    OParen,  // (
+    OBrack,  // [
+    Comma,   // ,
+    Dot,     // .
     TwoDots, // ..
-    Comma, // ,
-    ParenOpen, // (
-    ParenClose, // )
-    BracketOpen, // [
-    BracketClose, // ]
-    Colon, // :
+
+    CParen,    // )
+    CBrack,    // ]
     Semicolon, // ;
-    NewLine,
+    Colon,     // :
+    NewLine,   // \n
+
+    // Keywords
+    Var,
+    Type,
+    Routine,
+    Is,
+    IntegerType,
+    RealType,
+    Boolean,
+    Record,
+    Array,
+    True,
+    False,
+    While,
+    For,
+    Loop,
+    End,
+    Reverse, 
+    In, 
+    If,
+    Then, 
+    Else,
+    And,
+    Or,
+    Xor,
 };
 
 struct Token {
     TokenType type;
-    size_t line;
-    size_t srcPos;
-    std::string image;
+    size_t line;       // starting at 1
+    size_t column;     // starting at 1, in bytes
+    std::string lit;
 
     friend bool operator==(const Token& a, const Token& b) {
         return a.type == b.type && 
                a.line == b.line &&
-               a.srcPos == b.srcPos &&
-               a.image == b.image;
+               a.column == b.column &&
+               a.lit == b.lit;
     }
 
     friend bool operator!=(const Token& a, const Token& b) {
