@@ -19,7 +19,8 @@ public:
 
 private:
     std::string m_buf;
-    size_t m_pos = 0, m_lastAfterNewLine = 0;
+    size_t m_pos = 0;
+    int64_t m_lastNewLine = -1;
     size_t m_lineNum = 1;
 
     static bool isSpace(char ch) {

@@ -95,7 +95,7 @@ Token Lexer::Next() {
     Token tok{
         .type = TokenType::Illegal,
         .line = m_lineNum,
-        .column = m_pos - m_lastAfterNewLine,
+        .column = m_pos - m_lastNewLine,
     };
 
     // If alpha -> either a keyword or identifier -> read until not
@@ -143,8 +143,8 @@ Token Lexer::Next() {
         tok.type = TokenType::NewLine;
         tok.lit = "\n";
 
+        m_lastNewLine = m_pos;
         m_pos++;
-        m_lastAfterNewLine = m_pos;
         m_lineNum++;
 
         return tok;

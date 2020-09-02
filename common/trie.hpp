@@ -78,7 +78,7 @@ bool TrieCursor<T>::Terminal() const {
 
 template <typename T>
 std::optional<T> TrieCursor<T>::Value() const {
-    if (m_id == -1) {
+    if (!Valid()) {
         return std::nullopt;
     }
 
@@ -105,8 +105,6 @@ public:
     }
 
     TrieCursor<T> Head() const;
-
-    std::vector<std::string> PrintContents() const;
 
     friend class TrieCursor<T>;
 
