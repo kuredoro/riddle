@@ -1,6 +1,6 @@
 project('riddle',
         'cpp',
-        default_options : ['cpp_std=c++17'])
+        default_options : ['cpp_std=gnu++17'])
 
 riddle_cpp_args = [
   '-Wall',

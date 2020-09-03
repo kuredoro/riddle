@@ -45,17 +45,17 @@ public:
 
 private:
     const std::vector<Node>* const m_tree_ref;
-    int64_t m_id = -1;
+    size_t m_id = (size_t)-1;
 };
 
 template <typename T>
 void TrieCursor<T>::Next(char ch) {
-    if (m_id == -1) {
+    if (!Valid()) {
         return;
     }
 
     if (m_tree_ref->at(m_id).next.count(ch) == 0) {
-        m_id = -1;
+        m_id = (size_t)-1;
         return;
     }
 
@@ -64,7 +64,7 @@ void TrieCursor<T>::Next(char ch) {
 
 template <typename T>
 bool TrieCursor<T>::Valid() const {
-    return m_id != -1;
+    return m_id != (size_t)-1;
 }
 
 template <typename T>
