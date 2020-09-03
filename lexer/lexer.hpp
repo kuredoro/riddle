@@ -39,7 +39,7 @@ private:
         return ch == '_' || std::isalnum(ch);
     }
 
-    size_t skipWhile(size_t bufPos, std::function<bool(char)> pred, size_t len = 0);
+    size_t skipWhile(size_t bufPos, std::function<bool(char)> pred);
 
     char peek(size_t offset = 1);
 };
