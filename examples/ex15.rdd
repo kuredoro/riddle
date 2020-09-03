@@ -9,8 +9,8 @@ routine collatz (n: integer) :integer is
             nums[i+1] := nums[i] / 2
             if nums[i] % 6 = 0 then
                 return i
-	    else
-		return 0
+            else
+                return 0
             end
         else
             nums[i+1] := nums[i] * 3 + 1
@@ -18,4 +18,5 @@ routine collatz (n: integer) :integer is
         i := i + 1
     end
     print(i)
+    return i
 end
