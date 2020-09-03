@@ -68,7 +68,8 @@ common::Trie<TokenType> g_operatorTrie{
 };
 
 
-size_t Lexer::skipWhile(size_t bufPos, std::function<bool(char)> pred, size_t len) {
+size_t Lexer::skipWhile(size_t bufPos, std::function<bool(char)> pred) {
+    size_t len = 0;
     while (bufPos + len < m_buf.size() && pred(m_buf[bufPos + len]))
         len++;
 
@@ -102,7 +103,7 @@ Token Lexer::Next() {
     // If alpha -> either a keyword or identifier -> read until not
     if (isIdentStart(m_buf[m_pos])) {
 
-        auto len = skipWhile(m_pos, isIdentSuf, 1);
+        auto len = 1 + skipWhile(m_pos + 1, isIdentSuf);
 
         tok.lit = m_buf.substr(m_pos, len);
         tok.type = g_keywordTrie[tok.lit].value_or(TokenType::Identifier);
