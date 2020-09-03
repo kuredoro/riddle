@@ -115,17 +115,17 @@ Token Lexer::Next() {
 
         auto truncLen = skipWhile(m_pos, isDigit);
 
-        int64_t fracLen = -1;
+        size_t fracLen = (size_t)-1;
         if (peek(truncLen) == '.') {
             fracLen = skipWhile(m_pos + truncLen + 1, isDigit);
 
             // Two dots case
             if (fracLen == 0 && peek(truncLen + 1) == '.') {
-                fracLen = -1;
+                fracLen = (size_t)-1;
             }
         }
 
-        if (fracLen != -1) {
+        if (fracLen != (size_t)-1) {
             truncLen += 1 + fracLen;
             tok.type = TokenType::Real;
         } else {
