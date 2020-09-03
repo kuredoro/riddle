@@ -9,9 +9,9 @@ enum class TokenType{
     Eof,
     Comment,
 
-    Ident, // my_var
-    Int,   // 12345
-    Real,  // 123.45
+    Identifier, // my_var
+    Int,        // 12345
+    Real,       // 123.45
 
     Less,    // <
     Greater, // >
@@ -28,14 +28,14 @@ enum class TokenType{
     Div, // /
     Mod, // %
 
-    OParen,  // (
-    OBrack,  // [
+    OpenParen,  // (
+    OpenBrack,  // [
     Comma,   // ,
     Dot,     // .
     TwoDots, // ..
 
-    CParen,    // )
-    CBrack,    // ]
+    CloseParen,    // )
+    CloseBrack,    // ]
     Semicolon, // ;
     Colon,     // :
     NewLine,   // \n
@@ -61,6 +61,7 @@ enum class TokenType{
     If,
     Then, 
     Else,
+    Not,
     And,
     Or,
     Xor,

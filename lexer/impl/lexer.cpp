@@ -36,6 +36,7 @@ common::Trie<TokenType> g_keywordTrie{
     {"if", TokenType::If},
     {"then", TokenType::Then},
     {"else", TokenType::Else},
+    {"not", TokenType::Not},
     {"and", TokenType::And},
     {"or", TokenType::Or},
     {"xor", TokenType::Xor},
@@ -55,13 +56,13 @@ common::Trie<TokenType> g_operatorTrie{
     {"*",  TokenType::Mul},
     {"/",  TokenType::Div},
     {"%",  TokenType::Mod},
-    {"(",  TokenType::OParen},
-    {"[",  TokenType::OBrack},
+    {"(",  TokenType::OpenParen},
+    {"[",  TokenType::OpenBrack},
     {",",  TokenType::Comma},
     {".",  TokenType::Dot},
     {"..", TokenType::TwoDots},
-    {")",  TokenType::CParen},
-    {"]",  TokenType::CBrack},
+    {")",  TokenType::CloseParen},
+    {"]",  TokenType::CloseBrack},
     {";",  TokenType::Semicolon},
     {":",  TokenType::Colon},
 };
@@ -104,7 +105,7 @@ Token Lexer::Next() {
         auto len = skipWhile(m_pos, isIdentSuf, 1);
 
         tok.lit = m_buf.substr(m_pos, len);
-        tok.type = g_keywordTrie[tok.lit].value_or(TokenType::Ident);
+        tok.type = g_keywordTrie[tok.lit].value_or(TokenType::Identifier);
 
         m_pos += len;
 
