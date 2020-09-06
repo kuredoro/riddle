@@ -7,10 +7,10 @@ type Human is record
     var test                :   BigArray
 end
 
-routine collatz (n: integer)
+routine main (n: integer) is
     var i : Human;
     i.height := 167.8;
     i.id := 12345;
-    i.test[5] = 345;
+    i.test[5] := 345;
     print(i)
 end
