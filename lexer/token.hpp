@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include "structures.hpp"
 
 namespace lexer {
 
@@ -69,14 +70,12 @@ enum class TokenType{
 
 struct Token {
     TokenType type;
-    size_t line;       // starting at 1
-    size_t column;     // starting at 1, in bytes
+    position_t position;
     std::string lit;
 
     friend bool operator==(const Token& a, const Token& b) {
         return a.type == b.type && 
-               a.line == b.line &&
-               a.column == b.column &&
+               a.position == b.position &&
                a.lit == b.lit;
     }
 
