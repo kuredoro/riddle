@@ -9,7 +9,7 @@ namespace testing {
 
 std::string TokenToString(const lexer::Token& tok) {
     auto str = common::replaceAll(tok.lit, "\n", "\\n");
-    return fmt::format("{{{}:{} {} ({})}} ", tok.line, tok.column, str, tok.type);
+    return fmt::format("{{{}:{} {} ({})}} ", tok.position.line, tok.position.column, str, tok.type);
 }
 
 void PrintTokenStream(const std::vector<lexer::Token>& toks) {

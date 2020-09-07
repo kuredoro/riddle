@@ -96,8 +96,10 @@ Token Lexer::Next() {
 
     Token tok{
         .type = TokenType::Illegal,
-        .line = m_lineNum,
-        .column = m_pos - m_lineStartPos + 1,
+        .position = {
+            .line = m_lineNum,
+            .column = m_pos - m_lineStartPos + 1,
+        }
     };
 
     // If alpha -> either a keyword or identifier -> read until not

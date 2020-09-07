@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {
         if (auto tok = lx.Next(); tok.type == lexer::TokenType::Illegal) {
             fmt::print(fg(fmt::color::indian_red) | fmt::emphasis::bold, "error: ");
             fmt::print("could not tokenize further.\n");
-            outputLineDiagnostics(line, tok.column, line.size());
+            outputLineDiagnostics(line, tok.position.column, line.size());
             continue;
         }
 
