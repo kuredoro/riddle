@@ -1,9 +1,9 @@
 incdir = include_directories('.')
-libparser = library('parser', 
-                    include_directories : incdir,
-                    cpp_args : riddle_cpp_args,
-                    sources : ['impl/parser.cpp'], 
-                    install : true)
+libparser = static_library('parser', 
+                           sources : ['impl/parser.cpp'],
+                           cpp_args : riddle_cpp_args,
+                           dependencies : [ lexer_dep, common_dep ],
+                           install : true)
 
 
 parser_dep = declare_dependency(include_directories : '.',
