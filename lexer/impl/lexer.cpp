@@ -84,14 +84,26 @@ char Lexer::peek(size_t offset) {
     return m_buf[m_pos + offset];
 }
 
+Token Lexer::Peek () {
+    if (currentToken == nullptr) {
+        scanNext();
+    }
+    return *currentToken;
+}
 
-Token Lexer::Next() {
+Token Lexer::Next () {
+    Token ret = Peek();
+    scanNext();
+    return ret;
+}
 
+void Lexer::scanNext() {
     // Ignore spaces
     m_pos += skipWhile(m_pos, isSpace);
 
     if (m_pos == m_buf.size()) {
-        return { .type = TokenType::Eof };
+        currentToken = std::make_shared<Token>(Token { .type = TokenType::Eof });
+        return;
     }
 
     Token tok{
@@ -112,7 +124,8 @@ Token Lexer::Next() {
 
         m_pos += len;
 
-        return tok;
+        currentToken = std::make_shared<Token>(tok);
+        return;
     }
 
     if (isDigit(m_buf[m_pos]) || (m_buf[m_pos] == '.' && isDigit(peek()))) {
@@ -140,7 +153,8 @@ Token Lexer::Next() {
 
         m_pos += truncLen;
 
-        return tok;
+        currentToken = std::make_shared<Token>(tok);
+        return;
     }
 
     if (m_buf[m_pos] == '\n') {
@@ -152,7 +166,8 @@ Token Lexer::Next() {
         m_pos++;
         m_lineNum++;
 
-        return tok;
+        currentToken = std::make_shared<Token>(tok);
+        return;
     }
 
     // If not -> some operator, do maximal munch
@@ -182,10 +197,11 @@ Token Lexer::Next() {
     if (tok.type == TokenType::Comment) {
         m_pos += skipWhile(m_pos, [](char c){ return c != '\n'; });
 
-        return Next();
+        scanNext();
+        return;
     }
 
-    return tok;
+    currentToken = std::make_shared<Token>(tok);
 }
 
 } // namespace lexer

@@ -17,11 +17,14 @@ public:
 
     Token Next();
 
+    Token Peek();
+
 private:
     std::string m_buf;
     size_t m_pos = 0;
     size_t m_lineStartPos = 0;
     size_t m_lineNum = 1;
+    std::shared_ptr<Token> currentToken = nullptr;
 
     static bool isSpace(char ch) {
         return ch != '\n' && std::isspace(ch);
@@ -40,6 +43,8 @@ private:
     }
 
     size_t skipWhile(size_t bufPos, std::function<bool(char)> pred);
+
+    void scanNext();
 
     char peek(size_t offset = 1);
 };
