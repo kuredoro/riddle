@@ -81,7 +81,7 @@ SCENARIO("Parser builds a tree from tokens") {
 
             THEN("Order of operations is preserved") {
                 AST::Parser parser(lx);
-                auto tree = parser.parseProgram();
+                auto tree = parser.parseExpression();
                 // TODO: compare the tree to the expected one
             }
         }
