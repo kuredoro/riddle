@@ -40,3 +40,4 @@ subprojects/*
 !subprojects/*.wrap
 .vscode/
 .clangd/
+compile_commands.json

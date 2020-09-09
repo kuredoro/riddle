@@ -1,47 +1,20 @@
 #pragma once
 
-#include "structures.hpp"
+#include "token.hpp"
 #include "lexer.hpp"
+#include "ast.hpp"
 
 
-namespace AST
+namespace parser
 {
 
+template <typename T>
+using sPtr = std::shared_ptr<T>;
 
-struct Node {
-    position_t begin, end;
-    virtual bool operator==(const Node& other) const;
-    virtual ~Node() = default;
-};
-
-// TODO: fill the following structs with relevant data
-
-struct ProgramNode : Node {
-    std::vector<struct RoutineNode> routine_table;
-    bool operator==(const ProgramNode& other) const;
-};
-
-struct RoutineNode : Node {};
-struct ParameterNode : Node {};
-struct TypeNode : Node {};
-struct PrimitiveTypeNode : TypeNode {};
-struct ArrayTypeNode : TypeNode {};
-struct RecordTypeNode : TypeNode {};
-struct VariableNode : Node {};
-struct BodyNode : Node {};
-struct StatementNode : Node {};
-struct AssignmentNode : StatementNode {};
-struct RoutineCallNode : StatementNode {};
-struct WhileLoopNode : StatementNode {};
-struct ForLoopNode : StatementNode {};
-struct IfStatementNode : StatementNode {};
-struct ExpressionNode : Node {};
-struct UnaryExpressionNode : ExpressionNode {};
-struct BinaryExpressionNode : ExpressionNode {};
 
 // TODO: define function to use this struct, that also advances
 struct Error {
-    position_t position;
+    lexer::Token::Position pos;
     std::string message;
 };
 
@@ -49,25 +22,26 @@ struct Error {
 
 class Parser {
 public:
+
     Parser(lexer::Lexer lexer) : m_lexer(lexer) {}
-    ProgramNode parseProgram ();
-    RoutineNode parseRoutine ();
-    ParameterNode parseParameter ();
-    TypeNode parseType ();
-    PrimitiveTypeNode parsePrimitiveType ();
-    ArrayTypeNode parseArrayType ();
-    RecordTypeNode parseRecordType ();
-    VariableNode parseVariable ();
-    BodyNode parseBody ();
-    StatementNode parseStatement ();
-    AssignmentNode parseAssignment ();
-    RoutineCallNode parseRoutineCall ();
-    WhileLoopNode parseWhileLoop ();
-    ForLoopNode parseForLoop ();
-    IfStatementNode parseIfStatement ();
-    ExpressionNode parseExpression ();
-    UnaryExpressionNode parseUnaryExpression ();
-    BinaryExpressionNode parseBinaryExpression ();
+    sPtr<ast::Program> parseProgram ();
+    sPtr<ast::Routine> parseRoutine ();
+    sPtr<ast::Parameter> parseParameter ();
+    sPtr<ast::Type> parseType ();
+    sPtr<ast::PrimitiveType> parsePrimitiveType ();
+    sPtr<ast::ArrayType> parseArrayType ();
+    sPtr<ast::RecordType> parseRecordType ();
+    sPtr<ast::Variable> parseVariable ();
+    sPtr<ast::BodyNode> parseBody ();
+    sPtr<ast::Statement> parseStatement ();
+    sPtr<ast::Assignment> parseAssignment ();
+    sPtr<ast::RoutineCall> parseRoutineCall ();
+    sPtr<ast::WhileLoop> parseWhileLoop ();
+    sPtr<ast::ForLoop> parseForLoop ();
+    sPtr<ast::IfStatement> parseIfStatement ();
+    sPtr<ast::Expression> parseExpression ();
+    sPtr<ast::UnaryExpression> parseUnaryExpression ();
+    sPtr<ast::BinaryExpression> parseBinaryExpression ();
 
 private:
     lexer::Lexer m_lexer;
@@ -75,4 +49,4 @@ private:
 };
 
 
-} // namespace AST
+} // namespace parser
