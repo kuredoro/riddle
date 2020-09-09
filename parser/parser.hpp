@@ -50,12 +50,7 @@ struct Error {
 class Parser {
 public:
     Parser(lexer::Lexer lexer) : m_lexer(lexer) {}
-    ProgramNode parseProgram();
-
-private:
-    lexer::Lexer m_lexer;
-    std::vector<Error> m_errors;
-
+    ProgramNode parseProgram ();
     RoutineNode parseRoutine ();
     ParameterNode parseParameter ();
     TypeNode parseType ();
@@ -73,6 +68,10 @@ private:
     ExpressionNode parseExpression ();
     UnaryExpressionNode parseUnaryExpression ();
     BinaryExpressionNode parseBinaryExpression ();
+
+private:
+    lexer::Lexer m_lexer;
+    std::vector<Error> m_errors;
 };
 
 
