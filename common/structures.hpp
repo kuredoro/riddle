@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 
 // For common data structures
 
@@ -10,7 +11,7 @@ struct position_t
 {
 	size_t line;       // starting at 1
     size_t column;     // starting at 1, in bytes
-	auto operator==(const position_t& other) const {
+	bool operator==(const position_t& other) const {
 		return line == other.line && column == other.column;
 	}
 };

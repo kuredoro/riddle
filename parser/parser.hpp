@@ -10,10 +10,17 @@ namespace AST
 
 struct Node {
 	position_t begin, end;
+	virtual bool operator==(const Node& other) const;
+	virtual ~Node() = default;
 };
 
 // TODO: fill the following structs with relevant data
-struct ProgramNode : Node {};
+
+struct ProgramNode : Node {
+	std::vector<struct RoutineNode> routine_table;
+	bool operator==(const ProgramNode& other) const;
+};
+
 struct RoutineNode : Node {};
 struct ParameterNode : Node {};
 struct TypeNode : Node {};
@@ -43,7 +50,7 @@ struct Error {
 class Parser {
 public:
 	Parser(lexer::Lexer lexer) : m_lexer(lexer) {}
-	Node parseProgram();
+	ProgramNode parseProgram();
 
 private:
 	lexer::Lexer m_lexer;
