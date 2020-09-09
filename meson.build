@@ -17,6 +17,7 @@ fmt_dep = dependency('fmt', fallback : ['fmt', 'fmt_dep'])
 
 subdir('common')
 subdir('lexer')
+subdir('ast')
 subdir('parser')
 
 if get_option('build-tests')

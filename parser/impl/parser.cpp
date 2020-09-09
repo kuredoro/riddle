@@ -1,38 +1,31 @@
 #include "parser.hpp"
 #include "token.hpp"
 
-namespace AST
+namespace parser
 {
 
 
     // ---- @kureduro
 
-    bool Node::operator==(const Node& other) const {
-        return begin == other.begin && end == other.end;
-    }
 
-    bool ProgramNode::operator==(const ProgramNode& other) const {
-        return Node::operator==(other) && routine_table == other.routine_table;
-    }
-
-    ProgramNode Parser::parseProgram() {
-        return ProgramNode();
+    sPtr<ast::Program> Parser::parseProgram() {
+        return std::make_shared<ast::Program>();
     }
 
     // ---- @CrazyDream1
 
-    VariableNode Parser::parseVariable() {
+    sPtr<ast::Variable> Parser::parseVariable() {
         auto token = m_lexer.Next();
         if (token.type != lexer::TokenType::Var) {
             m_errors.push_back({
-                .position = token.position,
+                .pos = token.pos,
                 .message = "Expected \"var\" keyword but didn't find it.",
             });
         }
         token = m_lexer.Next();
         if (token.type != lexer::TokenType::Identifier) {
             m_errors.push_back({
-                .position = token.position,
+                .pos = token.pos,
                 .message = "Expected an identifier after \"var\" keyword.",
             });
         }
@@ -41,11 +34,11 @@ namespace AST
 
     // ---- @MefAldemisov
 
-    WhileLoopNode Parser::parseWhileLoop() {
+    sPtr<ast::WhileLoop> Parser::parseWhileLoop() {
         auto token = m_lexer.Next();
         if (token.type != lexer::TokenType::While) {
             m_errors.push_back({
-                .position = token.position,
+                .pos = token.pos,
                 .message = "Expected \"while\" keyword but didn't find it.",
             });
         }
@@ -54,11 +47,11 @@ namespace AST
 
     // ---- @aabounegm
 
-    ExpressionNode Parser::parseExpression() {
+    sPtr<ast::Expression> Parser::parseExpression() {
         // TODO: Concrete implementation
     }
 
     // ---- End separation
 
 
-} // namespace AST
+} // namespace parser

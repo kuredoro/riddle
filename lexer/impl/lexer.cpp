@@ -96,7 +96,7 @@ Token Lexer::Next() {
 
     Token tok{
         .type = TokenType::Illegal,
-        .position = {
+        .pos = {
             .line = m_lineNum,
             .column = m_pos - m_lineStartPos + 1,
         }

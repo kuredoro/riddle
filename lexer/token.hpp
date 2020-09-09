@@ -69,20 +69,32 @@ enum class TokenType{
 };
 
 struct Token {
+
+    struct Position
+    {
+        size_t line;       // starting at 1
+        size_t column;     // starting at 1, in bytes
+        bool operator==(const Position& other) const {
+            return line == other.line && column == other.column;
+        }
+    };
+
     TokenType type;
-    position_t position;
+    Position pos;
     std::string lit;
 
     friend bool operator==(const Token& a, const Token& b) {
         return a.type == b.type && 
-               a.position == b.position &&
+               a.pos == b.pos &&
                a.lit == b.lit;
     }
 
     friend bool operator!=(const Token& a, const Token& b) {
         return !(a == b);
     }
+
 };
+
 
 
 }

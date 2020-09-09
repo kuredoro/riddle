@@ -2,7 +2,7 @@ incdir = include_directories('.')
 libparser = static_library('parser', 
                            sources : ['impl/parser.cpp'],
                            cpp_args : riddle_cpp_args,
-                           dependencies : [ fmt_dep, lexer_dep, common_dep ],
+                           dependencies : [ fmt_dep, lexer_dep, common_dep, ast_dep ],
                            install : true)
 
 

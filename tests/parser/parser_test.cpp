@@ -39,7 +39,7 @@ SCENARIO("Parser builds a tree from tokens") {
             DummyLexer lx{
                 lexer::Token{
                     .type = lexer::TokenType::Int,
-                    .position = {
+                    .pos = {
                         .line = 1,
                         .column = 1,
                     },
@@ -47,7 +47,7 @@ SCENARIO("Parser builds a tree from tokens") {
                 },
                 lexer::Token{
                     .type = lexer::TokenType::Add,
-                    .position = {
+                    .pos = {
                         .line = 1,
                         .column = 2,
                     },
@@ -55,7 +55,7 @@ SCENARIO("Parser builds a tree from tokens") {
                 },
                 lexer::Token{
                     .type = lexer::TokenType::Int,
-                    .position = {
+                    .pos = {
                         .line = 1,
                         .column = 3,
                     },
@@ -63,7 +63,7 @@ SCENARIO("Parser builds a tree from tokens") {
                 },
                 lexer::Token{
                     .type = lexer::TokenType::Div,
-                    .position = {
+                    .pos = {
                         .line = 1,
                         .column = 4,
                     },
@@ -71,7 +71,7 @@ SCENARIO("Parser builds a tree from tokens") {
                 },
                 lexer::Token{
                     .type = lexer::TokenType::Int,
-                    .position = {
+                    .pos = {
                         .line = 1,
                         .column = 5,
                     },
@@ -80,7 +80,7 @@ SCENARIO("Parser builds a tree from tokens") {
             };
 
             THEN("Order of operations is preserved") {
-                AST::Parser parser(lx);
+                parser::Parser parser(lx);
                 auto tree = parser.parseExpression();
                 // TODO: compare the tree to the expected one
             }
