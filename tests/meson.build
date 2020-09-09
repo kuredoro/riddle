@@ -16,7 +16,7 @@ parser_test = executable('parserTest', ['test_main.cpp', 'parser/parser_test.cpp
                         include_directories : '.',
                         cpp_args : riddle_cpp_args,
                         dependencies :
-                        [ fmt_dep, catch2_dep, parser_dep ])
+                        [ fmt_dep, catch2_dep, common_dep, lexer_dep, parser_dep ])
 
 test('common', common_test)
 test('lexer', lexer_test)

@@ -7,12 +7,21 @@ namespace AST
 
     // ---- @kureduro
 
+    bool Node::operator==(const Node& other) const {
+		return begin == other.begin && end == other.end;
+	}
 
+    bool ProgramNode::operator==(const ProgramNode& other) const {
+		return Node::operator==(other) && routine_table == other.routine_table;
+	}
+
+    ProgramNode Parser::parseProgram() {
+        return ProgramNode();
+    }
 
     // ---- @CrazyDream1
 
     VariableNode Parser::parseVariable() {
-        // TODO: change to  .Peek() wherever checking for error ("expecting")
         auto token = m_lexer.Next();
         if (token.type != lexer::TokenType::Var) {
             m_errors.push_back({
@@ -33,7 +42,6 @@ namespace AST
     // ---- @MefAldemisov
 
     WhileLoopNode Parser::parseWhileLoop() {
-        // TODO: change to  .Peek() wherever checking for error ("expecting")
         auto token = m_lexer.Next();
         if (token.type != lexer::TokenType::While) {
             m_errors.push_back({
