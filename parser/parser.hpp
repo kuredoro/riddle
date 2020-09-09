@@ -32,7 +32,7 @@ public:
     sPtr<ast::ArrayType> parseArrayType ();
     sPtr<ast::RecordType> parseRecordType ();
     sPtr<ast::Variable> parseVariable ();
-    sPtr<ast::BodyNode> parseBody ();
+    sPtr<ast::Body> parseBody ();
     sPtr<ast::Statement> parseStatement ();
     sPtr<ast::Assignment> parseAssignment ();
     sPtr<ast::RoutineCall> parseRoutineCall ();
