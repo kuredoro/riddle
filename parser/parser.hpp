@@ -9,16 +9,16 @@ namespace AST
 
 
 struct Node {
-	position_t begin, end;
-	virtual bool operator==(const Node& other) const;
-	virtual ~Node() = default;
+    position_t begin, end;
+    virtual bool operator==(const Node& other) const;
+    virtual ~Node() = default;
 };
 
 // TODO: fill the following structs with relevant data
 
 struct ProgramNode : Node {
-	std::vector<struct RoutineNode> routine_table;
-	bool operator==(const ProgramNode& other) const;
+    std::vector<struct RoutineNode> routine_table;
+    bool operator==(const ProgramNode& other) const;
 };
 
 struct RoutineNode : Node {};
@@ -41,38 +41,38 @@ struct BinaryExpressionNode : ExpressionNode {};
 
 // TODO: define function to use this struct, that also advances
 struct Error {
-	position_t position;
-	std::string message;
+    position_t position;
+    std::string message;
 };
 
 // TODO: define a type for the "context"
 
 class Parser {
 public:
-	Parser(lexer::Lexer lexer) : m_lexer(lexer) {}
-	ProgramNode parseProgram();
+    Parser(lexer::Lexer lexer) : m_lexer(lexer) {}
+    ProgramNode parseProgram();
 
 private:
-	lexer::Lexer m_lexer;
-	std::vector<Error> m_errors;
+    lexer::Lexer m_lexer;
+    std::vector<Error> m_errors;
 
-	RoutineNode parseRoutine ();
-	ParameterNode parseParameter ();
-	TypeNode parseType ();
-	PrimitiveTypeNode parsePrimitiveType ();
-	ArrayTypeNode parseArrayType ();
-	RecordTypeNode parseRecordType ();
-	VariableNode parseVariable ();
-	BodyNode parseBody ();
-	StatementNode parseStatement ();
-	AssignmentNode parseAssignment ();
-	RoutineCallNode parseRoutineCall ();
-	WhileLoopNode parseWhileLoop ();
-	ForLoopNode parseForLoop ();
-	IfStatementNode parseIfStatement ();
-	ExpressionNode parseExpression ();
-	UnaryExpressionNode parseUnaryExpression ();
-	BinaryExpressionNode parseBinaryExpression ();
+    RoutineNode parseRoutine ();
+    ParameterNode parseParameter ();
+    TypeNode parseType ();
+    PrimitiveTypeNode parsePrimitiveType ();
+    ArrayTypeNode parseArrayType ();
+    RecordTypeNode parseRecordType ();
+    VariableNode parseVariable ();
+    BodyNode parseBody ();
+    StatementNode parseStatement ();
+    AssignmentNode parseAssignment ();
+    RoutineCallNode parseRoutineCall ();
+    WhileLoopNode parseWhileLoop ();
+    ForLoopNode parseForLoop ();
+    IfStatementNode parseIfStatement ();
+    ExpressionNode parseExpression ();
+    UnaryExpressionNode parseUnaryExpression ();
+    BinaryExpressionNode parseBinaryExpression ();
 };
 
 

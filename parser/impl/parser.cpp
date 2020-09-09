@@ -8,12 +8,12 @@ namespace AST
     // ---- @kureduro
 
     bool Node::operator==(const Node& other) const {
-		return begin == other.begin && end == other.end;
-	}
+        return begin == other.begin && end == other.end;
+    }
 
     bool ProgramNode::operator==(const ProgramNode& other) const {
-		return Node::operator==(other) && routine_table == other.routine_table;
-	}
+        return Node::operator==(other) && routine_table == other.routine_table;
+    }
 
     ProgramNode Parser::parseProgram() {
         return ProgramNode();
