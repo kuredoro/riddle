@@ -93,7 +93,7 @@ Token Lexer::Peek () {
 
 Token Lexer::Next () {
     Token ret = Peek();
-    scanNext();
+    currentToken = nullptr;
     return ret;
 }
 
