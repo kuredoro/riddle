@@ -117,6 +117,37 @@ namespace parser
         return std::make_shared<ast::Routine>(routineNode);
     }
 
+    sPtr<ast::Parameter> Parser::parseParameter() {
+        ast::Parameter parameterNode;
+        lexer::Token currentToken = m_lexer.Next();
+        if (currentToken.type != lexer::TokenType::Identifier) {
+            m_errors.push_back(Error{
+                .pos = currentToken.pos,
+                .message = "Expected to find an identifier",
+            });
+            // skip till ')' or ','
+            while(m_lexer.Peek().type != lexer::TokenType::Comma && m_lexer.Peek().type != lexer::TokenType::CloseParen) {
+                m_lexer.Next();
+            }
+            return nullptr;
+        }
+        parameterNode.name = currentToken;
+        currentToken = skipWhile(isNewLine);
+        if (currentToken.type != lexer::TokenType::Colon) {
+            m_errors.push_back(Error{
+                .pos = currentToken.pos,
+                .message = "Expected to find a ':'",
+            });
+            // skip till ')' or ','
+            while(m_lexer.Peek().type != lexer::TokenType::Comma && m_lexer.Peek().type != lexer::TokenType::CloseParen) {
+                m_lexer.Next();
+            }
+            return nullptr;
+        }
+        parameterNode.type = parseType();
+        return std::make_shared<ast::Parameter>(parameterNode);
+    }
+
     // ---- @CrazyDream1
 
     sPtr<ast::Variable> Parser::parseVariable() {
