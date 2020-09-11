@@ -80,9 +80,42 @@ SCENARIO("Parser builds a tree from tokens") {
             };
 
             THEN("Order of operations is preserved") {
-                parser::Parser parser(lx);
-                auto tree = parser.parseExpression();
+                // parser::Parser parser(lx);
+                // auto tree = parser.parseExpression();
                 // TODO: compare the tree to the expected one
+            }
+        }
+
+        WHEN("Tokens represent a routine") {
+            DummyLexer lx{
+                lexer::Token{
+                    .type = lexer::TokenType::Routine,
+                    .pos = {
+                        .line = 1,
+                        .column = 1,
+                    },
+                    .lit = "routine",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::Identifier,
+                    .pos = {
+                        .line = 1,
+                        .column = 9,
+                    },
+                    .lit = "main",
+                },
+                // TODO
+            };
+
+            THEN("It is parsed correctly") {
+                
+            }
+        }
+
+        WHEN("The routine is not named") {
+            // TODO
+            THEN("An error is reported") {
+
             }
         }
     }
