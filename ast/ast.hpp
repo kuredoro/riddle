@@ -93,6 +93,13 @@ struct Routine : Node {
     }
 };
 struct Parameter : Node {
+    lexer::Token name;
+    sPtr<Type> type;
+    bool operator==(const Parameter& other) const {
+        return Node::operator==(other)
+                && name == other.name
+                && type == other.type;
+    }
     void accept(Visitor& v) {
         v.visit(this);
     }
