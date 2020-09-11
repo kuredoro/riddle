@@ -46,6 +46,8 @@ public:
 private:
     lexer::Lexer m_lexer;
     std::vector<Error> m_errors;
+    lexer::Token skipWhile(std::function<bool(lexer::Token)>);
+    static bool isNewLine(lexer::Token);
 };
 
 

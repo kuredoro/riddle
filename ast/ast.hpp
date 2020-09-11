@@ -63,15 +63,31 @@ struct Node {
     virtual ~Node() = default;
 };
 struct Program : Node {
-    std::vector<sPtr<Routine>> routineTable;
+    std::vector<sPtr<Routine>> routines;
+    std::vector<sPtr<Variable>> variables;
+    std::vector<sPtr<Type>> types;
     bool operator==(const Program& other) const {
-        return Node::operator==(other) && routineTable == other.routineTable;
+        return Node::operator==(other)
+                && routines == other.routines
+                && variables == other.variables
+                && types == other.types;
     }
     void accept(Visitor& v) {
         v.visit(this);
     }
 };
 struct Routine : Node {
+    lexer::Token name;
+    std::vector<sPtr<Parameter>> parameters;
+    sPtr<Type> returnType;
+    sPtr<Body> body;
+    bool operator==(const Routine& other) const {
+        return Node::operator==(other)
+                && name == other.name
+                && returnType == other.returnType
+                && body == other.body
+                && parameters == other.parameters;
+    }
     void accept(Visitor& v) {
         v.visit(this);
     }
