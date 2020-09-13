@@ -7,6 +7,10 @@ namespace parser
 
     // ---- @kureduro
 
+    static lexer::TokenType primitives[] = {
+        lexer::TokenType::IntegerType,
+        lexer::TokenType::RealType,
+    }; 
 
     sPtr<ast::Program> Parser::parseProgram() {
         ast::Program programNode;
@@ -148,19 +152,92 @@ namespace parser
         return std::make_shared<ast::Parameter>(parameterNode);
     }
 
+    sPtr<ast::Type> Parser::parseType() {
+        lexer::Token currentToken = m_lexer.Peek();
+        if (lexer::TokenType *type = std::find(std::begin(primitives), std::end(primitives), currentToken.type);
+            type != std::end(primitives)) {
+            ast::PrimitiveType typeNode;
+            typeNode.type = currentToken.type;
+            m_lexer.Next();
+            return std::make_shared<ast::PrimitiveType>(typeNode);
+        } else if (currentToken.type == lexer::TokenType::Array) {
+            return parseArrayType();
+        } else if (currentToken.type == lexer::TokenType::Record) {
+            return parseRecordType();
+        } else if (currentToken.type == lexer::TokenType::Identifier) {
+            ast::AliasedType typeNode;
+            typeNode.name = currentToken;
+            m_lexer.Next();
+            return std::make_shared<ast::AliasedType>(typeNode);
+        } else {
+            m_errors.push_back(Error{
+                .pos = currentToken.pos,
+                .message = "Unknown type",
+            });
+            m_lexer.Next();
+            return nullptr;
+        }
+    }
+
+    sPtr<ast::ArrayType> Parser::parseArrayType() {
+        lexer::Token currentToken = m_lexer.Next();
+        if (currentToken.type != lexer::TokenType::Array) {
+            m_errors.push_back(Error{
+                .pos = currentToken.pos,
+                .message = "Expected 'array' keyword but did not find it"
+            });
+            return nullptr;
+        }
+        ast::ArrayType arrayNode;
+        if (m_lexer.Peek().type == lexer::TokenType::OpenBrack) {
+            m_lexer.Next();
+            arrayNode.length = parseExpression();
+            currentToken = m_lexer.Next();
+            if (currentToken.type != lexer::TokenType::CloseBrack) {
+                m_errors.push_back(Error{
+                    .pos = currentToken.pos,
+                    .message = "Unexpected token"
+                });
+                while(m_lexer.Next().type != lexer::TokenType::CloseBrack);
+                return nullptr;
+            }
+        }
+        arrayNode.elementType = parseType();
+        return std::make_shared<ast::ArrayType>(arrayNode);
+    }
+
+    sPtr<ast::RecordType> Parser::parseRecordType() {
+        lexer::Token currentToken = m_lexer.Next();
+        if (currentToken.type != lexer::TokenType::Record) {
+            m_errors.push_back(Error{
+                .pos = currentToken.pos,
+                .message = "Expected 'record' keyword but did not find it"
+            });
+            return nullptr;
+        }
+        ast::RecordType recordNode;
+        while (m_lexer.Peek().type == lexer::TokenType::NewLine) m_lexer.Next();
+        while (m_lexer.Peek().type != lexer::TokenType::End) {
+            recordNode.fields.push_back(parseVariable());
+            while (m_lexer.Peek().type == lexer::TokenType::NewLine) m_lexer.Next();
+        }
+        m_lexer.Next();
+        return std::make_shared<ast::RecordType>(recordNode);
+    }
+
     // ---- @CrazyDream1
 
     sPtr<ast::Variable> Parser::parseVariable() {
         auto token = m_lexer.Next();
         if (token.type != lexer::TokenType::Var) {
-            m_errors.push_back({
+            m_errors.push_back(Error{
                 .pos = token.pos,
                 .message = "Expected \"var\" keyword but didn't find it.",
             });
         }
         token = m_lexer.Next();
         if (token.type != lexer::TokenType::Identifier) {
-            m_errors.push_back({
+            m_errors.push_back(Error{
                 .pos = token.pos,
                 .message = "Expected an identifier after \"var\" keyword.",
             });
@@ -173,7 +250,7 @@ namespace parser
     sPtr<ast::WhileLoop> Parser::parseWhileLoop() {
         auto token = m_lexer.Next();
         if (token.type != lexer::TokenType::While) {
-            m_errors.push_back({
+            m_errors.push_back(Error{
                 .pos = token.pos,
                 .message = "Expected \"while\" keyword but didn't find it.",
             });
