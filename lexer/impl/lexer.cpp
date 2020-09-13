@@ -87,13 +87,17 @@ char Lexer::peek(size_t offset) {
 Token Lexer::Peek () {
     if (currentToken == nullptr) {
         scanNext();
+    } else if (currentToken->type == TokenType::Eof) {
+        throw "End-of-file already reached";
     }
     return *currentToken;
 }
 
 Token Lexer::Next () {
     Token ret = Peek();
-    currentToken = nullptr;
+    if (ret.type != TokenType::Eof) {
+        currentToken = nullptr;
+    }
     return ret;
 }
 
