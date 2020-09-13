@@ -175,6 +175,76 @@ SCENARIO("Parser builds a tree from tokens") {
             }
         }
 
+        WHEN("Tokens represent an array type \"array [ 5+3 ] real\"") {
+            DummyLexer lx{
+                lexer::Token{
+                    .type = lexer::TokenType::Array,
+                    .pos = {
+                        .line = 1,
+                        .column = 1,
+                    },
+                    .lit = "array",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::OpenBrack,
+                    .pos = {
+                        .line = 1,
+                        .column = 7,
+                    },
+                    .lit = "[",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::Int,
+                    .pos = {
+                        .line = 1,
+                        .column = 9,
+                    },
+                    .lit = "5",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::Add,
+                    .pos = {
+                        .line = 1,
+                        .column = 10,
+                    },
+                    .lit = "+",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::Int,
+                    .pos = {
+                        .line = 1,
+                        .column = 11,
+                    },
+                    .lit = "3",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::CloseBrack,
+                    .pos = {
+                        .line = 1,
+                        .column = 13,
+                    },
+                    .lit = "]",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::RealType,
+                    .pos = {
+                        .line = 1,
+                        .column = 15,
+                    },
+                    .lit = "real",
+                },
+            };
+
+            ast::ArrayType expected;
+
+            THEN("It is parsed correctly") {
+                // parser::Parser parser(lx);
+                // auto tree = parser.parseParameter();
+                // CHECK((bool)tree);
+                // CHECK(*tree == expected);
+            }
+        }
+
 
     }
 }

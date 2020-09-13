@@ -14,6 +14,7 @@ struct Program;
 struct Routine;
 struct Parameter;
 struct Type;
+struct AliasedType;
 struct PrimitiveType;
 struct ArrayType;
 struct RecordType;
@@ -109,17 +110,47 @@ struct Type : Node {
         v.visit(this);
     }
 };
+/**
+ * To handle the "Identifier" kind of type
+ */
+struct AliasedType : Type {
+    lexer::Token name;
+    bool operator==(const AliasedType& other) const {
+        return Node::operator==(other)
+                && name == other.name;
+    }
+    void accept(Visitor& v) {
+        v.visit(this);
+    }
+};
 struct PrimitiveType : Type {
+    lexer::TokenType type;
+    bool operator==(const PrimitiveType& other) const {
+        return Node::operator==(other)
+                && type == other.type;
+    }
     void accept(Visitor& v) {
         v.visit(this);
     }
 };
 struct ArrayType : Type {
+    sPtr<Expression> length; // TODO: how to differentiate between 0-length and optional length?
+    sPtr<Type> elementType;
+    bool operator==(const ArrayType& other) const {
+        return Node::operator==(other)
+                && length == other.length
+                && elementType == other.elementType;
+    }
     void accept(Visitor& v) {
         v.visit(this);
     }
 };
 struct RecordType : Type {
+    std::vector<sPtr<Variable>> fields;
+    bool operator==(const RecordType& other) const {
+        return Node::operator==(other)
+                && fields == other.fields;
+    }
     void accept(Visitor& v) {
         v.visit(this);
     }
