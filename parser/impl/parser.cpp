@@ -157,7 +157,7 @@ namespace parser
         if (lexer::TokenType *type = std::find(std::begin(primitives), std::end(primitives), currentToken.type);
             type != std::end(primitives)) {
             ast::PrimitiveType typeNode;
-            typeNode.type = currentToken.type;
+            typeNode.type = currentToken;
             m_lexer.Next();
             return std::make_shared<ast::PrimitiveType>(typeNode);
         } else if (currentToken.type == lexer::TokenType::Array) {
