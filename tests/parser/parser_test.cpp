@@ -28,6 +28,10 @@ public:
         return t;
     }
 
+    lexer::Token operator[](size_t idx) {
+        return m_tokens.at(idx);
+    }
+
 private:
     std::vector<lexer::Token> m_tokens;
     std::vector<lexer::Token>::iterator it;
@@ -118,5 +122,59 @@ SCENARIO("Parser builds a tree from tokens") {
 
             }
         }
+
+        WHEN("Tokens represent a parameter \"x: array integer\"") {
+            DummyLexer lx{
+                lexer::Token{
+                    .type = lexer::TokenType::Identifier,
+                    .pos = {
+                        .line = 1,
+                        .column = 1,
+                    },
+                    .lit = "x",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::Colon,
+                    .pos = {
+                        .line = 1,
+                        .column = 2,
+                    },
+                    .lit = ":",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::Array,
+                    .pos = {
+                        .line = 1,
+                        .column = 4,
+                    },
+                    .lit = "array",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::IntegerType,
+                    .pos = {
+                        .line = 1,
+                        .column = 10,
+                    },
+                    .lit = "integer",
+                },
+            };
+
+            ast::Parameter expected;
+            expected.name = lx[0];
+            ast::ArrayType expectedType;
+            ast::PrimitiveType integer;
+            integer.type = lx[3].type;
+            expectedType.elementType = std::make_shared<ast::PrimitiveType>(integer);
+            expected.type = std::make_shared<ast::ArrayType>(expectedType);
+
+            THEN("It is parsed correctly") {
+                // parser::Parser parser(lx);
+                // auto tree = parser.parseParameter();
+                // CHECK((bool)tree);
+                // CHECK(*tree == expected);
+            }
+        }
+
+
     }
 }
