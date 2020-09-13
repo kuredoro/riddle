@@ -42,6 +42,7 @@ public:
     sPtr<ast::Expression> parseExpression ();
     sPtr<ast::UnaryExpression> parseUnaryExpression ();
     sPtr<ast::BinaryExpression> parseBinaryExpression ();
+    std::vector<Error> getErrors();
 
 private:
     lexer::Lexer m_lexer;
