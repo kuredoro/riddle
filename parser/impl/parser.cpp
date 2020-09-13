@@ -243,6 +243,7 @@ namespace parser
             });
         }
         // ...
+        return nullptr;
     }
 
     // ---- @MefAldemisov
@@ -256,12 +257,18 @@ namespace parser
             });
         }
         // ...
+        return nullptr;
     }
 
     // ---- @aabounegm
 
     sPtr<ast::Expression> Parser::parseExpression() {
         // TODO: Concrete implementation
+        return nullptr;
+    }
+
+    sPtr<ast::Body> Parser::parseBody() {
+        return nullptr;
     }
 
     // ---- End separation
