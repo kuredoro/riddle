@@ -287,5 +287,9 @@ namespace parser
         return m_lexer.Next();
     }
 
+    std::vector<parser::Error> Parser::getErrors() {
+        return m_errors;
+    }
+
 
 } // namespace parser
