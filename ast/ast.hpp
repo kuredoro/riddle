@@ -124,7 +124,7 @@ struct AliasedType : Type {
     }
 };
 struct PrimitiveType : Type {
-    lexer::TokenType type;
+    lexer::Token type;
     bool operator==(const PrimitiveType& other) const {
         return Node::operator==(other)
                 && type == other.type;
