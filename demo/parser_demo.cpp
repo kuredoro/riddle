@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include "fmt/core.h"
+#include "fmt/color.h"
 #include "lexer.hpp"
 #include "parser.hpp"
 
@@ -132,9 +133,9 @@ int main (int argc, char *argv[]) {
             PrintVisitor v;
             ast->accept(v);
         } else {
-            fmt::print("Errors:\n");
+            fmt::print(fg(fmt::color::indian_red) | fmt::emphasis::bold, "Errors:\n");
             for (auto error : errors) {
-                fmt::print("\t[character: {}]: {}\n", error.pos.column, error.message);
+                fmt::print(fg(fmt::color::indian_red), "\t[character: {}]: {}\n", error.pos.column, error.message);
             }
         }
     }
