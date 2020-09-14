@@ -134,7 +134,7 @@ struct PrimitiveType : Type {
     }
 };
 struct ArrayType : Type {
-    sPtr<Expression> length; // TODO: how to differentiate between 0-length and optional length?
+    sPtr<Expression> length;
     sPtr<Type> elementType;
     bool operator==(const ArrayType& other) const {
         return Node::operator==(other)
