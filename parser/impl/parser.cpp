@@ -42,7 +42,7 @@ namespace parser
 
     sPtr<ast::Routine> Parser::parseRoutine() {
         ast::Routine routineNode;
-        lexer::Token currentToken = m_lexer.Next();
+        lexer::Token currentToken = skipWhile(isNewLine);
         if (currentToken.type != lexer::TokenType::Routine) {
             m_errors.push_back(Error{
                 .pos = currentToken.pos,
@@ -77,9 +77,12 @@ namespace parser
 
         while(currentToken.type != lexer::TokenType::CloseParen) {
             routineNode.parameters.push_back(parseParameter());
-            currentToken = m_lexer.Next();
-            if (currentToken.type == lexer::TokenType::Comma) {
-                currentToken = m_lexer.Next();
+            currentToken = skipWhile(isNewLine);
+            if (currentToken.type != lexer::TokenType::Comma && currentToken.type != lexer::TokenType::CloseParen) {
+                m_errors.push_back(Error{
+                    .pos = currentToken.pos,
+                    .message = "Unexpected token",
+                });
             }
         }
         currentToken = skipWhile(isNewLine);
@@ -123,7 +126,7 @@ namespace parser
 
     sPtr<ast::Parameter> Parser::parseParameter() {
         ast::Parameter parameterNode;
-        lexer::Token currentToken = m_lexer.Next();
+        lexer::Token currentToken = skipWhile(isNewLine);
         if (currentToken.type != lexer::TokenType::Identifier) {
             m_errors.push_back(Error{
                 .pos = currentToken.pos,
