@@ -106,7 +106,7 @@ struct Parameter : Node {
     }
 };
 struct Type : Node {
-    void accept(Visitor& v) {
+    virtual void accept(Visitor& v) {
         v.visit(this);
     }
 };
@@ -119,7 +119,7 @@ struct AliasedType : Type {
         return Node::operator==(other)
                 && name == other.name;
     }
-    void accept(Visitor& v) {
+    void accept(Visitor& v) override {
         v.visit(this);
     }
 };
@@ -129,7 +129,7 @@ struct PrimitiveType : Type {
         return Node::operator==(other)
                 && type == other.type;
     }
-    void accept(Visitor& v) {
+    void accept(Visitor& v) override {
         v.visit(this);
     }
 };
@@ -141,7 +141,7 @@ struct ArrayType : Type {
                 && length == other.length
                 && elementType == other.elementType;
     }
-    void accept(Visitor& v) {
+    void accept(Visitor& v) override {
         v.visit(this);
     }
 };
@@ -151,7 +151,7 @@ struct RecordType : Type {
         return Node::operator==(other)
                 && fields == other.fields;
     }
-    void accept(Visitor& v) {
+    void accept(Visitor& v) override {
         v.visit(this);
     }
 };
