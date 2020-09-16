@@ -28,4 +28,7 @@ if get_option('build-demos')
   executable('lexer_demo', [ 'demo/lexer_demo.cpp' ],
             cpp_args : riddle_cpp_args,
             dependencies : [ fmt_dep, lexer_dep, common_dep ])
+  executable('parser_demo', [ 'demo/parser_demo.cpp' ],
+            cpp_args : riddle_cpp_args,
+            dependencies : [ parser_dep, ast_dep, fmt_dep, lexer_dep, common_dep ])
 endif

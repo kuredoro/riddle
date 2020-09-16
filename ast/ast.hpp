@@ -14,6 +14,7 @@ struct Program;
 struct Routine;
 struct Parameter;
 struct Type;
+struct AliasedType;
 struct PrimitiveType;
 struct ArrayType;
 struct RecordType;
@@ -63,41 +64,94 @@ struct Node {
     virtual ~Node() = default;
 };
 struct Program : Node {
-    std::vector<sPtr<Routine>> routineTable;
+    std::vector<sPtr<Routine>> routines;
+    std::vector<sPtr<Variable>> variables;
+    std::vector<sPtr<Type>> types;
     bool operator==(const Program& other) const {
-        return Node::operator==(other) && routineTable == other.routineTable;
+        return Node::operator==(other)
+                && routines == other.routines
+                && variables == other.variables
+                && types == other.types;
     }
     void accept(Visitor& v) {
         v.visit(this);
     }
 };
 struct Routine : Node {
+    lexer::Token name;
+    std::vector<sPtr<Parameter>> parameters;
+    sPtr<Type> returnType;
+    sPtr<Body> body;
+    bool operator==(const Routine& other) const {
+        return Node::operator==(other)
+                && name == other.name
+                && returnType == other.returnType
+                && body == other.body
+                && parameters == other.parameters;
+    }
     void accept(Visitor& v) {
         v.visit(this);
     }
 };
 struct Parameter : Node {
+    lexer::Token name;
+    sPtr<Type> type;
+    bool operator==(const Parameter& other) const {
+        return Node::operator==(other)
+                && name == other.name
+                && type == other.type;
+    }
     void accept(Visitor& v) {
         v.visit(this);
     }
 };
 struct Type : Node {
-    void accept(Visitor& v) {
+    virtual void accept(Visitor& v) {
+        v.visit(this);
+    }
+};
+/**
+ * To handle the "Identifier" kind of type
+ */
+struct AliasedType : Type {
+    lexer::Token name;
+    bool operator==(const AliasedType& other) const {
+        return Node::operator==(other)
+                && name == other.name;
+    }
+    void accept(Visitor& v) override {
         v.visit(this);
     }
 };
 struct PrimitiveType : Type {
-    void accept(Visitor& v) {
+    lexer::Token type;
+    bool operator==(const PrimitiveType& other) const {
+        return Node::operator==(other)
+                && type == other.type;
+    }
+    void accept(Visitor& v) override {
         v.visit(this);
     }
 };
 struct ArrayType : Type {
-    void accept(Visitor& v) {
+    sPtr<Expression> length;
+    sPtr<Type> elementType;
+    bool operator==(const ArrayType& other) const {
+        return Node::operator==(other)
+                && length == other.length
+                && elementType == other.elementType;
+    }
+    void accept(Visitor& v) override {
         v.visit(this);
     }
 };
 struct RecordType : Type {
-    void accept(Visitor& v) {
+    std::vector<sPtr<Variable>> fields;
+    bool operator==(const RecordType& other) const {
+        return Node::operator==(other)
+                && fields == other.fields;
+    }
+    void accept(Visitor& v) override {
         v.visit(this);
     }
 };
