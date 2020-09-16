@@ -4,29 +4,31 @@
 namespace parser
 {
 
+    using lexer::TokenType;
+    using lexer::Token;
 
     // ---- @kureduro
 
-    static std::array<lexer::TokenType, 2> primitives{
-        lexer::TokenType::IntegerType,
-        lexer::TokenType::RealType,
+    static std::array<TokenType, 2> primitives{
+        TokenType::IntegerType,
+        TokenType::RealType,
     };
 
     sPtr<ast::Program> Parser::parseProgram() {
         ast::Program programNode;
-        lexer::Token currentToken;
-        while ((currentToken = m_lexer.Peek()).type != lexer::TokenType::Eof) {
+        Token currentToken;
+        while ((currentToken = m_lexer.Peek()).type != TokenType::Eof) {
             switch(currentToken.type) {
-            case lexer::TokenType::Routine:
+            case TokenType::Routine:
                 programNode.routines.push_back(parseRoutine());
                 continue;
-            case lexer::TokenType::Var:
+            case TokenType::Var:
                 programNode.variables.push_back(parseVariable());
                 continue;
-            case lexer::TokenType::Type:
+            case TokenType::Type:
                 programNode.types.push_back(parseType());
                 continue;
-            case lexer::TokenType::NewLine:
+            case TokenType::NewLine:
                 m_lexer.Next();
                 continue;
             default:
@@ -34,7 +36,7 @@ namespace parser
                     .pos = currentToken.pos,
                     .message = "Unexpected token",
                 });
-                while(m_lexer.Peek().type != lexer::TokenType::NewLine) m_lexer.Next();
+                while(m_lexer.Peek().type != TokenType::NewLine) m_lexer.Next();
             }
         }
         return std::make_shared<ast::Program>(programNode);
@@ -42,8 +44,8 @@ namespace parser
 
     sPtr<ast::Routine> Parser::parseRoutine() {
         ast::Routine routineNode;
-        lexer::Token currentToken = skipWhile(isNewLine);
-        if (currentToken.type != lexer::TokenType::Routine) {
+        Token currentToken = skipWhile(isNewLine);
+        if (currentToken.type != TokenType::Routine) {
             m_errors.push_back(Error{
                 .pos = currentToken.pos,
                 .message = "Expected 'routine' keyword but did not find one",
@@ -52,33 +54,33 @@ namespace parser
         }
         currentToken = skipWhile(isNewLine);
 
-        if (currentToken.type != lexer::TokenType::Identifier) {
+        if (currentToken.type != TokenType::Identifier) {
             m_errors.push_back(Error{
                 .pos = currentToken.pos,
                 .message = "Expected an identifier but did not find one",
             });
             // skip till "end" keyword
-            while(m_lexer.Next().type != lexer::TokenType::End);
+            while(m_lexer.Next().type != TokenType::End);
             return nullptr;
         }
         routineNode.name = currentToken;
 
         currentToken = skipWhile(isNewLine);
 
-        if (currentToken.type != lexer::TokenType::OpenParen) {
+        if (currentToken.type != TokenType::OpenParen) {
             m_errors.push_back(Error{
                 .pos = currentToken.pos,
                 .message = "Expected to find '('",
             });
             // skip till "end" keyword
-            while(m_lexer.Next().type != lexer::TokenType::End);
+            while(m_lexer.Next().type != TokenType::End);
             return nullptr;
         }
 
-        while(currentToken.type != lexer::TokenType::CloseParen) {
+        while(currentToken.type != TokenType::CloseParen) {
             routineNode.parameters.push_back(parseParameter());
             currentToken = skipWhile(isNewLine);
-            if (currentToken.type != lexer::TokenType::Comma && currentToken.type != lexer::TokenType::CloseParen) {
+            if (currentToken.type != TokenType::Comma && currentToken.type != TokenType::CloseParen) {
                 m_errors.push_back(Error{
                     .pos = currentToken.pos,
                     .message = "Unexpected token",
@@ -86,39 +88,39 @@ namespace parser
             }
         }
         currentToken = skipWhile(isNewLine);
-        if (currentToken.type != lexer::TokenType::Colon && currentToken.type != lexer::TokenType::Is) {
+        if (currentToken.type != TokenType::Colon && currentToken.type != TokenType::Is) {
             m_errors.push_back(Error{
                 .pos = currentToken.pos,
                 .message = "Unexpected token",
             });
             // skip till "end" keyword
-            while(m_lexer.Next().type != lexer::TokenType::End);
+            while(m_lexer.Next().type != TokenType::End);
             return nullptr;
         }
-        if (currentToken.type == lexer::TokenType::Colon) {
+        if (currentToken.type == TokenType::Colon) {
             currentToken = skipWhile(isNewLine);
             routineNode.returnType = parseType();
         }
         currentToken = skipWhile(isNewLine);
 
-        if (currentToken.type != lexer::TokenType::Is) {
+        if (currentToken.type != TokenType::Is) {
             m_errors.push_back(Error{
                 .pos = currentToken.pos,
                 .message = "Expected to find keyword 'is'",
             });
             // skip till "end" keyword
-            while(m_lexer.Next().type != lexer::TokenType::End);
+            while(m_lexer.Next().type != TokenType::End);
             return nullptr;
         }
         currentToken = skipWhile(isNewLine);
         routineNode.body = parseBody();
-        if (currentToken.type != lexer::TokenType::End) {
+        if (currentToken.type != TokenType::End) {
             m_errors.push_back(Error{
                 .pos = currentToken.pos,
                 .message = "Expected to find keyword 'end'",
             });
             // skip till "end" keyword
-            while(m_lexer.Next().type != lexer::TokenType::End);
+            while(m_lexer.Next().type != TokenType::End);
             return nullptr;
         }
         return std::make_shared<ast::Routine>(routineNode);
@@ -126,27 +128,27 @@ namespace parser
 
     sPtr<ast::Parameter> Parser::parseParameter() {
         ast::Parameter parameterNode;
-        lexer::Token currentToken = skipWhile(isNewLine);
-        if (currentToken.type != lexer::TokenType::Identifier) {
+        Token currentToken = skipWhile(isNewLine);
+        if (currentToken.type != TokenType::Identifier) {
             m_errors.push_back(Error{
                 .pos = currentToken.pos,
                 .message = "Expected to find an identifier",
             });
             // skip till ')' or ','
-            while(m_lexer.Peek().type != lexer::TokenType::Comma && m_lexer.Peek().type != lexer::TokenType::CloseParen) {
+            while(m_lexer.Peek().type != TokenType::Comma && m_lexer.Peek().type != TokenType::CloseParen) {
                 m_lexer.Next();
             }
             return nullptr;
         }
         parameterNode.name = currentToken;
         currentToken = skipWhile(isNewLine);
-        if (currentToken.type != lexer::TokenType::Colon) {
+        if (currentToken.type != TokenType::Colon) {
             m_errors.push_back(Error{
                 .pos = currentToken.pos,
                 .message = "Expected to find a ':'",
             });
             // skip till ')' or ','
-            while(m_lexer.Peek().type != lexer::TokenType::Comma && m_lexer.Peek().type != lexer::TokenType::CloseParen) {
+            while(m_lexer.Peek().type != TokenType::Comma && m_lexer.Peek().type != TokenType::CloseParen) {
                 m_lexer.Next();
             }
             return nullptr;
@@ -156,18 +158,18 @@ namespace parser
     }
 
     sPtr<ast::Type> Parser::parseType() {
-        lexer::Token currentToken = m_lexer.Peek();
-        if (lexer::TokenType *type = std::find(std::begin(primitives), std::end(primitives), currentToken.type);
+        Token currentToken = m_lexer.Peek();
+        if (TokenType *type = std::find(std::begin(primitives), std::end(primitives), currentToken.type);
             type != std::end(primitives)) {
             ast::PrimitiveType typeNode;
             typeNode.type = currentToken;
             m_lexer.Next();
             return std::make_shared<ast::PrimitiveType>(typeNode);
-        } else if (currentToken.type == lexer::TokenType::Array) {
+        } else if (currentToken.type == TokenType::Array) {
             return parseArrayType();
-        } else if (currentToken.type == lexer::TokenType::Record) {
+        } else if (currentToken.type == TokenType::Record) {
             return parseRecordType();
-        } else if (currentToken.type == lexer::TokenType::Identifier) {
+        } else if (currentToken.type == TokenType::Identifier) {
             ast::AliasedType typeNode;
             typeNode.name = currentToken;
             m_lexer.Next();
@@ -183,8 +185,8 @@ namespace parser
     }
 
     sPtr<ast::ArrayType> Parser::parseArrayType() {
-        lexer::Token currentToken = m_lexer.Next();
-        if (currentToken.type != lexer::TokenType::Array) {
+        Token currentToken = m_lexer.Next();
+        if (currentToken.type != TokenType::Array) {
             m_errors.push_back(Error{
                 .pos = currentToken.pos,
                 .message = "Expected 'array' keyword but did not find it"
@@ -192,16 +194,16 @@ namespace parser
             return nullptr;
         }
         ast::ArrayType arrayNode;
-        if (m_lexer.Peek().type == lexer::TokenType::OpenBrack) {
+        if (m_lexer.Peek().type == TokenType::OpenBrack) {
             m_lexer.Next();
             arrayNode.length = parseExpression();
             currentToken = m_lexer.Next();
-            if (currentToken.type != lexer::TokenType::CloseBrack) {
+            if (currentToken.type != TokenType::CloseBrack) {
                 m_errors.push_back(Error{
                     .pos = currentToken.pos,
                     .message = "Unexpected token"
                 });
-                while(m_lexer.Next().type != lexer::TokenType::CloseBrack);
+                while(m_lexer.Next().type != TokenType::CloseBrack);
                 return nullptr;
             }
         }
@@ -210,8 +212,8 @@ namespace parser
     }
 
     sPtr<ast::RecordType> Parser::parseRecordType() {
-        lexer::Token currentToken = m_lexer.Next();
-        if (currentToken.type != lexer::TokenType::Record) {
+        Token currentToken = m_lexer.Next();
+        if (currentToken.type != TokenType::Record) {
             m_errors.push_back(Error{
                 .pos = currentToken.pos,
                 .message = "Expected 'record' keyword but did not find it"
@@ -219,10 +221,10 @@ namespace parser
             return nullptr;
         }
         ast::RecordType recordNode;
-        while (m_lexer.Peek().type == lexer::TokenType::NewLine) m_lexer.Next();
-        while (m_lexer.Peek().type != lexer::TokenType::End) {
+        while (m_lexer.Peek().type == TokenType::NewLine) m_lexer.Next();
+        while (m_lexer.Peek().type != TokenType::End) {
             recordNode.fields.push_back(parseVariable());
-            while (m_lexer.Peek().type == lexer::TokenType::NewLine) m_lexer.Next();
+            while (m_lexer.Peek().type == TokenType::NewLine) m_lexer.Next();
         }
         m_lexer.Next();
         return std::make_shared<ast::RecordType>(recordNode);
@@ -232,14 +234,14 @@ namespace parser
 
     sPtr<ast::Variable> Parser::parseVariable() {
         auto token = m_lexer.Next();
-        if (token.type != lexer::TokenType::Var) {
+        if (token.type != TokenType::Var) {
             m_errors.push_back(Error{
                 .pos = token.pos,
                 .message = "Expected \"var\" keyword but didn't find it.",
             });
         }
         token = m_lexer.Next();
-        if (token.type != lexer::TokenType::Identifier) {
+        if (token.type != TokenType::Identifier) {
             m_errors.push_back(Error{
                 .pos = token.pos,
                 .message = "Expected an identifier after \"var\" keyword.",
@@ -249,11 +251,15 @@ namespace parser
         return nullptr;
     }
 
+    sPtr<ast::Body> Parser::parseBody() {
+        return nullptr;
+    }
+
     // ---- @MefAldemisov
 
     sPtr<ast::WhileLoop> Parser::parseWhileLoop() {
         auto token = m_lexer.Next();
-        if (token.type != lexer::TokenType::While) {
+        if (token.type != TokenType::While) {
             m_errors.push_back(Error{
                 .pos = token.pos,
                 .message = "Expected \"while\" keyword but didn't find it.",
@@ -270,20 +276,16 @@ namespace parser
         return nullptr;
     }
 
-    sPtr<ast::Body> Parser::parseBody() {
-        return nullptr;
-    }
-
     // ---- End separation
 
-    bool Parser::isNewLine(lexer::Token tok) {
-        return tok.type == lexer::TokenType::NewLine;
+    bool Parser::isNewLine(Token tok) {
+        return tok.type == TokenType::NewLine;
     }
 
     /**
      * Skips all tokens that match the given predicate, returning the first token that doesn't
      */
-    lexer::Token Parser::skipWhile(std::function<bool(lexer::Token)> pred) {
+    Token Parser::skipWhile(std::function<bool(Token)> pred) {
         while(pred(m_lexer.Peek())) {
             m_lexer.Next();
         }
