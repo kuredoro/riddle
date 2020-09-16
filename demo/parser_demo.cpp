@@ -20,17 +20,17 @@ public:
         } else {
             fmt::print("{:|>{}}- [Parameter]> {}\n", "", depth, node->name.lit);
             depth++;
-            visit(node->type.get());
+            node->type->accept(*this);
             depth--;
         }
     };
     void visit(ast::Type *node) override {
         if (ast::PrimitiveType *specific = dynamic_cast<ast::PrimitiveType*>(node); specific != nullptr) {
-            visit(specific);
+            specific->accept(*this);
         } else if (ast::ArrayType *specific = dynamic_cast<ast::ArrayType*>(node); specific != nullptr) {
-            visit(specific);
+            specific->accept(*this);
         } else if (ast::RecordType *specific = dynamic_cast<ast::RecordType*>(node); specific != nullptr) {
-            visit(specific);
+            specific->accept(*this);
         } else if (ast::AliasedType *specific = dynamic_cast<ast::AliasedType*>(node); specific != nullptr) {
             fmt::print("{:|>{}}- [Type Identifier]> {}\n", "", depth, specific->name.lit);
         } else {
@@ -50,8 +50,8 @@ public:
         } else {
             fmt::print("{:|>{}}- [ArrayType]>\n", "", depth);
             depth++;
-            visit(node->length.get());
-            visit(node->elementType.get());
+            node->length->accept(*this);
+            node->elementType->accept(*this);
             depth--;
         }
     };
@@ -62,7 +62,7 @@ public:
             fmt::print("{:|>{}}- [RecordType]>\n", "", depth);
             depth++;
             for (auto field : node->fields) {
-                visit(field.get());
+                field->accept(*this);
             }
             depth--;
         }
