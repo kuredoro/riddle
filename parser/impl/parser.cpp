@@ -7,10 +7,10 @@ namespace parser
 
     // ---- @kureduro
 
-    static lexer::TokenType primitives[] = {
+    static std::array<lexer::TokenType, 2> primitives{
         lexer::TokenType::IntegerType,
         lexer::TokenType::RealType,
-    }; 
+    };
 
     sPtr<ast::Program> Parser::parseProgram() {
         ast::Program programNode;
