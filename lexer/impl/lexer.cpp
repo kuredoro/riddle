@@ -100,7 +100,7 @@ char Lexer::peek(size_t offset) {
  */
 Token Lexer::Peek () {
     if (currentToken == nullptr) {
-        scanNext();
+        currentToken = std::make_shared<Token>(scanNext());
     } else if (currentToken->type == TokenType::Eof) {
         throw "End-of-file already reached";
     }
@@ -118,13 +118,12 @@ Token Lexer::Next () {
     return ret;
 }
 
-void Lexer::scanNext() {
+Token Lexer::scanNext() {
     // Ignore spaces
     m_pos += skipWhile(m_pos, isSpace);
 
     if (m_pos == m_buf.size()) {
-        currentToken = std::make_shared<Token>(Token { .type = TokenType::Eof });
-        return;
+        return Token { .type = TokenType::Eof };
     }
 
     Token tok{
@@ -132,7 +131,8 @@ void Lexer::scanNext() {
         .pos = {
             .line = m_lineNum,
             .column = m_pos - m_lineStartPos + 1,
-        }
+        },
+        .lit = "",
     };
 
     // If alpha -> either a keyword or identifier -> read until not
@@ -145,8 +145,7 @@ void Lexer::scanNext() {
 
         m_pos += len;
 
-        currentToken = std::make_shared<Token>(tok);
-        return;
+        return tok;
     }
 
     if (isDigit(m_buf[m_pos]) || (m_buf[m_pos] == '.' && isDigit(peek()))) {
@@ -174,8 +173,7 @@ void Lexer::scanNext() {
 
         m_pos += truncLen;
 
-        currentToken = std::make_shared<Token>(tok);
-        return;
+        return tok;
     }
 
     if (m_buf[m_pos] == '\n') {
@@ -187,8 +185,7 @@ void Lexer::scanNext() {
         m_pos++;
         m_lineNum++;
 
-        currentToken = std::make_shared<Token>(tok);
-        return;
+        return tok;
     }
 
     // If not -> some operator, do maximal munch
@@ -218,11 +215,10 @@ void Lexer::scanNext() {
     if (tok.type == TokenType::Comment) {
         m_pos += skipWhile(m_pos, [](char c){ return c != '\n'; });
 
-        scanNext();
-        return;
+        return scanNext();
     }
 
-    currentToken = std::make_shared<Token>(tok);
+    return tok;
 }
 
 } // namespace lexer
