@@ -391,7 +391,7 @@ namespace parser
         {
             m_errors.push_back(Error{
                 .pos = currentToken.pos,
-                .message = "Expected \"is\" keyword but didn't find it.",
+                .message = "Expected \"in\" keyword but didn't find it.",
             });
             return nullptr;
         }
@@ -470,9 +470,11 @@ namespace parser
             });
             return nullptr;
         }
+
         currentToken = skipWhile(isNewLine);
         // read condition
         ifNode.condition = parseExpression();
+
         // check then kwd
         currentToken = skipWhile(isNewLine);
         if (currentToken.type != TokenType::Then)
@@ -490,7 +492,7 @@ namespace parser
         ifNode.ifBody = parseBody();
         // check if ther is an 'else' kwd
         currentToken = skipWhile(isNewLine);
-        if (currentToken.type != TokenType::Else)
+        if (currentToken.type == TokenType::Else)
         {
             // read else body
             ifNode.elseBody = parseBody();
