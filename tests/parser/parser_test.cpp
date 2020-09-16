@@ -28,6 +28,10 @@ public:
         return t;
     }
 
+    lexer::Token operator[](size_t idx) {
+        return m_tokens.at(idx);
+    }
+
 private:
     std::vector<lexer::Token> m_tokens;
     std::vector<lexer::Token>::iterator it;
@@ -80,10 +84,167 @@ SCENARIO("Parser builds a tree from tokens") {
             };
 
             THEN("Order of operations is preserved") {
-                parser::Parser parser(lx);
-                auto tree = parser.parseExpression();
+                // parser::Parser parser(lx);
+                // auto tree = parser.parseExpression();
                 // TODO: compare the tree to the expected one
             }
         }
+
+        WHEN("Tokens represent a routine") {
+            DummyLexer lx{
+                lexer::Token{
+                    .type = lexer::TokenType::Routine,
+                    .pos = {
+                        .line = 1,
+                        .column = 1,
+                    },
+                    .lit = "routine",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::Identifier,
+                    .pos = {
+                        .line = 1,
+                        .column = 9,
+                    },
+                    .lit = "main",
+                },
+                // TODO
+            };
+
+            THEN("It is parsed correctly") {
+                
+            }
+        }
+
+        WHEN("The routine is not named") {
+            // TODO
+            THEN("An error is reported") {
+
+            }
+        }
+
+        WHEN("Tokens represent a parameter \"x: array integer\"") {
+            DummyLexer lx{
+                lexer::Token{
+                    .type = lexer::TokenType::Identifier,
+                    .pos = {
+                        .line = 1,
+                        .column = 1,
+                    },
+                    .lit = "x",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::Colon,
+                    .pos = {
+                        .line = 1,
+                        .column = 2,
+                    },
+                    .lit = ":",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::Array,
+                    .pos = {
+                        .line = 1,
+                        .column = 4,
+                    },
+                    .lit = "array",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::IntegerType,
+                    .pos = {
+                        .line = 1,
+                        .column = 10,
+                    },
+                    .lit = "integer",
+                },
+            };
+
+            ast::Parameter expected;
+            expected.name = lx[0];
+            ast::ArrayType expectedType;
+            ast::PrimitiveType integer;
+            integer.type = lx[3];
+            expectedType.elementType = std::make_shared<ast::PrimitiveType>(integer);
+            expected.type = std::make_shared<ast::ArrayType>(expectedType);
+
+            THEN("It is parsed correctly") {
+                // parser::Parser parser(lx);
+                // auto tree = parser.parseParameter();
+                // CHECK((bool)tree);
+                // CHECK(*tree == expected);
+            }
+        }
+
+        WHEN("Tokens represent an array type \"array [ 5+3 ] real\"") {
+            DummyLexer lx{
+                lexer::Token{
+                    .type = lexer::TokenType::Array,
+                    .pos = {
+                        .line = 1,
+                        .column = 1,
+                    },
+                    .lit = "array",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::OpenBrack,
+                    .pos = {
+                        .line = 1,
+                        .column = 7,
+                    },
+                    .lit = "[",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::Int,
+                    .pos = {
+                        .line = 1,
+                        .column = 9,
+                    },
+                    .lit = "5",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::Add,
+                    .pos = {
+                        .line = 1,
+                        .column = 10,
+                    },
+                    .lit = "+",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::Int,
+                    .pos = {
+                        .line = 1,
+                        .column = 11,
+                    },
+                    .lit = "3",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::CloseBrack,
+                    .pos = {
+                        .line = 1,
+                        .column = 13,
+                    },
+                    .lit = "]",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::RealType,
+                    .pos = {
+                        .line = 1,
+                        .column = 15,
+                    },
+                    .lit = "real",
+                },
+            };
+
+            ast::ArrayType expected;
+
+            THEN("It is parsed correctly") {
+                // parser::Parser parser(lx);
+                // auto tree = parser.parseParameter();
+                // CHECK((bool)tree);
+                // CHECK(*tree == expected);
+            }
+        }
+
+
     }
 }

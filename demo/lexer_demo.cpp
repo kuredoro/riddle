@@ -85,9 +85,11 @@ void outputLineDiagnostics(std::string line, size_t begin, size_t end) {
 
 std::vector<lexer::Token> extractTokens(lexer::Lexer& lx) {
     std::vector<lexer::Token> tokens;
-    for (auto tok = lx.Next(); tok.type != lexer::TokenType::Eof && tok.type != lexer::TokenType::Illegal; tok = lx.Next()) {
+    auto tok = lx.Next();
+    for (; tok.type != lexer::TokenType::Eof && tok.type != lexer::TokenType::Illegal; tok = lx.Next()) {
         tokens.push_back(tok);
     }
+    tokens.push_back(tok);  // to keep the Eof|Illegal token
 
     return tokens;
 }
@@ -112,7 +114,7 @@ int main(int argc, char* argv[]) {
         lexer::Lexer lx{line};
         auto tokens = extractTokens(lx);
 
-        if (auto tok = lx.Next(); tok.type == lexer::TokenType::Illegal) {
+        if (auto tok = tokens.back(); tok.type == lexer::TokenType::Illegal) {
             fmt::print(fg(fmt::color::indian_red) | fmt::emphasis::bold, "error: ");
             fmt::print("could not tokenize further.\n");
             outputLineDiagnostics(line, tok.pos.column, line.size());
