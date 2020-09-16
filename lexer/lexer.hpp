@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <cctype>
+#include <string_view>
 #include "trie.hpp"
 #include "token.hpp"
 
@@ -13,14 +14,14 @@ extern common::Trie<TokenType> g_operatorTrie;
 
 class Lexer {
 public:
-    Lexer(std::string src) : m_buf(src) {}
+    Lexer(std::string_view src) : m_buf(src) {}
 
     Token Next();
 
     Token Peek();
 
 private:
-    std::string m_buf;
+    std::string_view m_buf;
     size_t m_pos = 0;
     size_t m_lineStartPos = 0;
     size_t m_lineNum = 1;
