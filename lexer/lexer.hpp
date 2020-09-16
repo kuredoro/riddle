@@ -44,7 +44,7 @@ private:
 
     size_t skipWhile(size_t bufPos, std::function<bool(char)> pred);
 
-    void scanNext();
+    Token scanNext();
 
     char peek(size_t offset = 1);
 };
