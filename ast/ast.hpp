@@ -61,6 +61,7 @@ struct Node {
     bool operator==(const Node& other) const {
         return begin == other.begin && end == other.end;
     }
+    virtual void accept(Visitor& v) = 0;
     virtual ~Node() = default;
 };
 struct Program : Node {
@@ -73,7 +74,7 @@ struct Program : Node {
                 && variables == other.variables
                 && types == other.types;
     }
-    void accept(Visitor& v) {
+    void accept(Visitor& v) override {
         v.visit(this);
     }
 };
@@ -89,7 +90,7 @@ struct Routine : Node {
                 && body == other.body
                 && parameters == other.parameters;
     }
-    void accept(Visitor& v) {
+    void accept(Visitor& v) override {
         v.visit(this);
     }
 };
@@ -101,12 +102,12 @@ struct Parameter : Node {
                 && name == other.name
                 && type == other.type;
     }
-    void accept(Visitor& v) {
+    void accept(Visitor& v) override {
         v.visit(this);
     }
 };
 struct Type : Node {
-    virtual void accept(Visitor& v) {
+    virtual void accept(Visitor& v) override {
         v.visit(this);
     }
 };
@@ -156,57 +157,57 @@ struct RecordType : Type {
     }
 };
 struct Variable : Node {
-    void accept(Visitor& v) {
+    void accept(Visitor& v) override {
         v.visit(this);
     }
 };
 struct Body : Node {
-    void accept(Visitor& v) {
+    void accept(Visitor& v) override {
         v.visit(this);
     }
 };
 struct Statement : Node {
-    void accept(Visitor& v) {
+    void accept(Visitor& v) override {
         v.visit(this);
     }
 };
 struct Assignment : Statement {
-    void accept(Visitor& v) {
+    void accept(Visitor& v) override {
         v.visit(this);
     }
 };
 struct RoutineCall : Statement {
-    void accept(Visitor& v) {
+    void accept(Visitor& v) override {
         v.visit(this);
     }
 };
 struct WhileLoop : Statement {
-    void accept(Visitor& v) {
+    void accept(Visitor& v) override {
         v.visit(this);
     }
 };
 struct ForLoop : Statement {
-    void accept(Visitor& v) {
+    void accept(Visitor& v) override {
         v.visit(this);
     }
 };
 struct IfStatement : Statement {
-    void accept(Visitor& v) {
+    void accept(Visitor& v) override {
         v.visit(this);
     }
 };
 struct Expression : Node {
-    void accept(Visitor& v) {
+    void accept(Visitor& v) override {
         v.visit(this);
     }
 };
 struct UnaryExpression : Expression {
-    void accept(Visitor& v) {
+    void accept(Visitor& v) override {
         v.visit(this);
     }
 };
 struct BinaryExpression : Expression {
-    void accept(Visitor& v) {
+    void accept(Visitor& v) override {
         v.visit(this);
     }
 };
