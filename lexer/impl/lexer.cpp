@@ -68,6 +68,13 @@ common::Trie<TokenType> g_operatorTrie{
 };
 
 
+/**
+ * skipWhile will return the offset from the given position within the buffer
+ * at which the predicate function returns false. 
+ *
+ * Zero will be returned if at specified position predicate is already false,
+ * or if it is beyond the buffer.
+ */
 size_t Lexer::skipWhile(size_t bufPos, std::function<bool(char)> pred) {
     size_t len = 0;
     while (bufPos + len < m_buf.size() && pred(m_buf[bufPos + len]))
@@ -76,6 +83,10 @@ size_t Lexer::skipWhile(size_t bufPos, std::function<bool(char)> pred) {
     return len;
 }
 
+/**
+ * Returns the character in the buffer located at the given offset
+ * or zero if the its position is outside the buffer.
+ */
 char Lexer::peek(size_t offset) {
     if (m_pos + offset >= m_buf.size()) {
         return 0;
@@ -84,6 +95,9 @@ char Lexer::peek(size_t offset) {
     return m_buf[m_pos + offset];
 }
 
+/**
+ * Returns the next token without consuming it.
+ */
 Token Lexer::Peek () {
     if (currentToken == nullptr) {
         scanNext();
@@ -93,6 +107,9 @@ Token Lexer::Peek () {
     return *currentToken;
 }
 
+/**
+ * Consumes the next token
+ */
 Token Lexer::Next () {
     Token ret = Peek();
     if (ret.type != TokenType::Eof) {
