@@ -155,7 +155,10 @@ public:
             depth++;
             node->condition->accept(*this);
             node->ifBody->accept(*this);
-            node->elseBody->accept(*this);
+            if (node->elseBody)
+            {
+                node->elseBody->accept(*this);
+            }
             depth--;
         }
     };
