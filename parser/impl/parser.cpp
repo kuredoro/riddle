@@ -233,6 +233,7 @@ namespace parser
     // ---- @CrazyDream1
 
     sPtr<ast::Variable> Parser::parseVariable() {
+	    ast::Variable variable;
         auto token = m_lexer.Next();
         if (token.type != TokenType::Var) {
             m_errors.push_back(Error{
@@ -247,11 +248,85 @@ namespace parser
                 .message = "Expected an identifier after \"var\" keyword.",
             });
         }
-        // ...
-        return nullptr;
+	    variable.name = token;
+        token = m_lexer.Next();
+        if (token.type != TokenType::Is && token.type != TokenType::Colon) {
+            m_errors.push_back(Error{
+                .pos = token.pos,
+                .message = "Expected an \"is\" keyword or : after the identifier.",
+            });
+        }
+        switch (token.type)
+        {
+	    case TokenType::Colon:
+                variable.type = parseType();
+                if ((token = m_lexer.Peek()).type != TokenType::Is) break;
+		else m_lexer.Next();
+            case TokenType::Is:
+                variable.expression = parseExpression();
+                break;
+            default:
+                m_errors.push_back(Error{
+                    .pos = currentToken.pos,
+                    .message = "Expected an \"is\" keyword or : after the identifier.",
+                });
+        }
+        return std::make_shared<ast::Variable>(variable);
     }
 
     sPtr<ast::Body> Parser::parseBody() {
+	ast::Body body;
+        auto currentToken;
+        while ((currentToken = m_lexer.Peek()).type != TokenType::End)
+        {
+            switch (currentToken.type)
+            {
+            case TokenType::Var:
+                body.variables.push_back(parseVariable());
+                continue;
+            case TokenType::Type:
+                body.types.push_back(parseType());
+                continue;
+            case TokenType::NewLine:
+                m_lexer.Next();
+                continue;
+            default:
+                body.statements.push_back(parseStatement());
+                //while (m_lexer.Peek().type != TokenType::NewLine)
+                //    m_lexer.Next();
+            }
+        }
+        return std::make_shared<ast::Body>(body);
+    }
+
+    sPtr<ast::Statement> Parser::parseStatement() {
+        auto currentToken = m_lexer.Peek();
+        switch (currentToken.type)
+        {
+        case TokenType::Identifier:
+            m_lexer.next();
+	    if ((currentToken = m_lexer.Peek().type) == TokenType::OpenParen || currentToken == TokenType::Semicolon)
+	        return parseRoutineCall();
+            else return parseAssignment();
+        case TokenType::While:
+            return parseWhileLoop();
+        case TokenType::For:
+            return parseForLoop();
+	case TokenType::If:
+            return parseIfStatement();
+        default:
+            m_errors.push_back(Error{
+                    .pos = currentToken.pos,
+                    .message = "Unexpected token",
+                });
+	    return nullptr;
+            //while (m_lexer.Peek().type != TokenType::NewLine)
+            //   m_lexer.Next();
+        }
+        ;
+    }
+
+    sPtr<ast::RoutineCall> parseRoutineCall() {
         return nullptr;
     }
 
