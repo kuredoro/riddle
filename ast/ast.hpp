@@ -157,11 +157,25 @@ struct RecordType : Type {
     }
 };
 struct Variable : Node {
+    lexer::Token name;
+    sPtr<Type> type;
+    sPtr<Expression> Expression;
+    bool operator==(const Variable& other) const {
+        return Node::operator==(other)
+                && name == other.name && type == other.type;
+    }
     void accept(Visitor& v) override {
         v.visit(this);
     }
 };
 struct Body : Node {
+    std::vector<sPtr<Statement>> statements;
+    std::vector<sPtr<Variable>> variables;
+    std::vector<sPtr<Type>> types;
+    bool operator==(const Body& other) const {
+        return Node::operator==(other)
+                && name == other.name && type == other.type;
+    }
     void accept(Visitor& v) override {
         v.visit(this);
     }
@@ -172,11 +186,15 @@ struct Statement : Node {
     }
 };
 struct Assignment : Statement {
+    sPtr<Expression> LeftExpression;
+    sPtr<Expression> RightExpression;
     void accept(Visitor& v) override {
         v.visit(this);
     }
 };
 struct RoutineCall : Statement {
+    std::vector<sPtr<Expression>> parameters;
+    lexer::Token name;
     void accept(Visitor& v) override {
         v.visit(this);
     }
