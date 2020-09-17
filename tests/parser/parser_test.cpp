@@ -497,7 +497,7 @@ SCENARIO("Parser builds a tree from tokens")
                         .line = 1,
                         .column = 1,
                     },
-                    .lit = "routine",
+                    .lit = "if",
                 },
                 lexer::Token{
                     .type = lexer::TokenType::Boolean,
