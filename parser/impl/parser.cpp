@@ -401,14 +401,16 @@ namespace parser
             return nullptr;
         }
         // check optional 'reverse' kwd
-        currentToken = skipWhile(isNewLine);
-        forNode.reverse = (currentToken.type == TokenType::Reverse);
+        while (m_lexer.Peek().type == TokenType::NewLine)
+            m_lexer.Next();
+        forNode.reverse = (m_lexer.Peek().type == TokenType::Reverse);
         if (forNode.reverse)
         {
             currentToken = m_lexer.Next();
         }
         // check Expression
         forNode.rangeFrom = parseExpression();
+        currentToken = m_lexer.Next();
 
         // check two dots
         if (currentToken.type != TokenType::TwoDots)
