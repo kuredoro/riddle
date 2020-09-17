@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
         lexer::Lexer lx{line};
         parser::Parser parser(lx);
 
-        auto ast = parser.parseIfStatement();
+        auto ast = parser.parseForLoop();
         auto errors = parser.getErrors();
         if (errors.empty())
         {

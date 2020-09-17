@@ -318,7 +318,6 @@ namespace parser
             return nullptr;
         }
         // read expression
-        currentToken = skipWhile(isNewLine);
         whileNode.condition = parseExpression();
         // check loop kwd
         currentToken = skipWhile(isNewLine);
@@ -328,11 +327,15 @@ namespace parser
                 .pos = currentToken.pos,
                 .message = "Expected \"loop\" keyword but didn't find it.",
             });
+            while (m_lexer.Next().type != TokenType::End)
+                ;
             return nullptr;
         }
         // read body
-        currentToken = skipWhile(isNewLine);
+
         whileNode.body = parseBody();
+        currentToken = skipWhile(isNewLine);
+
         // check end kwd
         if (currentToken.type != TokenType::End)
         {
@@ -393,17 +396,16 @@ namespace parser
                 .pos = currentToken.pos,
                 .message = "Expected \"in\" keyword but didn't find it.",
             });
+            while (m_lexer.Next().type != TokenType::End)
+                ;
             return nullptr;
         }
         // check optional 'reverse' kwd
         currentToken = skipWhile(isNewLine);
-        if (currentToken.type == TokenType::Reverse)
+        forNode.reverse = (currentToken.type == TokenType::Reverse);
+        if (forNode.reverse)
         {
-            forNode.reverse = true;
-        }
-        else
-        {
-            forNode.reverse = false;
+            currentToken = m_lexer.Next();
         }
         // check Expression
         forNode.rangeFrom = parseExpression();
@@ -415,6 +417,8 @@ namespace parser
                 .pos = currentToken.pos,
                 .message = "Expected \"..\" token but didn't find it.",
             });
+            while (m_lexer.Next().type != TokenType::End)
+                ;
             return nullptr;
         }
         // check Expression
@@ -434,8 +438,8 @@ namespace parser
             return nullptr;
         }
         // read body
-        currentToken = skipWhile(isNewLine);
         forNode.body = parseBody();
+        currentToken = skipWhile(isNewLine);
 
         // check end kwd
         if (currentToken.type != TokenType::End)
@@ -462,6 +466,7 @@ namespace parser
         // check if token
         ast::IfStatement ifNode;
         Token currentToken = skipWhile(isNewLine);
+
         if (currentToken.type != TokenType::If)
         {
             m_errors.push_back(Error{
@@ -470,13 +475,12 @@ namespace parser
             });
             return nullptr;
         }
-
-        currentToken = skipWhile(isNewLine);
         // read condition
         ifNode.condition = parseExpression();
 
         // check then kwd
         currentToken = skipWhile(isNewLine);
+
         if (currentToken.type != TokenType::Then)
         {
             m_errors.push_back(Error{
@@ -492,15 +496,14 @@ namespace parser
         ifNode.ifBody = parseBody();
         // check if ther is an 'else' kwd
         currentToken = skipWhile(isNewLine);
+
         if (currentToken.type == TokenType::Else)
         {
             // read else body
             ifNode.elseBody = parseBody();
+            currentToken = skipWhile(isNewLine);
         }
-        else
-        {
-            ifNode.elseBody = nullptr;
-        }
+
         // check end kwd
         if (currentToken.type != TokenType::End)
         {
