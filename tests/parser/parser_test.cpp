@@ -277,7 +277,7 @@ SCENARIO("Parser builds a tree from tokens")
                         .line = 1,
                         .column = 5,
                     },
-                    .lit = "i",
+                    .lit = "\n",
                 },
                 lexer::Token{
                     .type = lexer::TokenType::Identifier,
@@ -349,7 +349,7 @@ SCENARIO("Parser builds a tree from tokens")
                         .line = 5,
                         .column = 1,
                     },
-                    .lit = "10",
+                    .lit = "loop",
                 },
                 lexer::Token{
                     .type = lexer::TokenType::NewLine,
@@ -374,26 +374,57 @@ SCENARIO("Parser builds a tree from tokens")
             }
         }
 
-        WHEN("Tokens represent a while loop with reverse")
+        WHEN("Tokens represent a while loop")
         {
             DummyLexer lx{
                 lexer::Token{
-                    .type = lexer::TokenType::Routine,
+                    .type = lexer::TokenType::While,
                     .pos = {
                         .line = 1,
                         .column = 1,
                     },
-                    .lit = "routine",
+                    .lit = "while",
                 },
                 lexer::Token{
-                    .type = lexer::TokenType::Identifier,
+                    .type = lexer::TokenType::NewLine,
                     .pos = {
                         .line = 1,
-                        .column = 9,
+                        .column = 7,
                     },
-                    .lit = "main",
+                    .lit = "\n",
                 },
-                // TODO
+                lexer::Token{
+                    .type = lexer::TokenType::Boolean,
+                    .pos = {
+                        .line = 2,
+                        .column = 1,
+                    },
+                    .lit = "true",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::Loop,
+                    .pos = {
+                        .line = 2,
+                        .column = 6,
+                    },
+                    .lit = "loop",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::NewLine,
+                    .pos = {
+                        .line = 2,
+                        .column = 11,
+                    },
+                    .lit = "\n",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::End,
+                    .pos = {
+                        .line = 3,
+                        .column = 1,
+                    },
+                    .lit = "end",
+                },
             };
 
             THEN("It is parsed correctly")
@@ -404,7 +435,7 @@ SCENARIO("Parser builds a tree from tokens")
         {
             DummyLexer lx{
                 lexer::Token{
-                    .type = lexer::TokenType::Routine,
+                    .type = lexer::TokenType::If,
                     .pos = {
                         .line = 1,
                         .column = 1,
@@ -412,14 +443,45 @@ SCENARIO("Parser builds a tree from tokens")
                     .lit = "routine",
                 },
                 lexer::Token{
-                    .type = lexer::TokenType::Identifier,
+                    .type = lexer::TokenType::Boolean,
                     .pos = {
                         .line = 1,
-                        .column = 9,
+                        .column = 3,
                     },
-                    .lit = "main",
+                    .lit = "true",
                 },
-                // TODO
+                lexer::Token{
+                    .type = lexer::TokenType::Then,
+                    .pos = {
+                        .line = 1,
+                        .column = 8,
+                    },
+                    .lit = "then",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::NewLine,
+                    .pos = {
+                        .line = 1,
+                        .column = 13,
+                    },
+                    .lit = "\n",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::Else,
+                    .pos = {
+                        .line = 2,
+                        .column = 1,
+                    },
+                    .lit = "else",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::End,
+                    .pos = {
+                        .line = 2,
+                        .column = 6,
+                    },
+                    .lit = "end",
+                },
             };
 
             THEN("It is parsed correctly")
@@ -430,7 +492,7 @@ SCENARIO("Parser builds a tree from tokens")
         {
             DummyLexer lx{
                 lexer::Token{
-                    .type = lexer::TokenType::Routine,
+                    .type = lexer::TokenType::If,
                     .pos = {
                         .line = 1,
                         .column = 1,
@@ -438,14 +500,45 @@ SCENARIO("Parser builds a tree from tokens")
                     .lit = "routine",
                 },
                 lexer::Token{
-                    .type = lexer::TokenType::Identifier,
+                    .type = lexer::TokenType::Boolean,
                     .pos = {
                         .line = 1,
-                        .column = 9,
+                        .column = 3,
                     },
-                    .lit = "main",
+                    .lit = "true",
                 },
-                // TODO
+                lexer::Token{
+                    .type = lexer::TokenType::Then,
+                    .pos = {
+                        .line = 1,
+                        .column = 8,
+                    },
+                    .lit = "then",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::NewLine,
+                    .pos = {
+                        .line = 1,
+                        .column = 13,
+                    },
+                    .lit = "\n",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::NewLine,
+                    .pos = {
+                        .line = 2,
+                        .column = 1,
+                    },
+                    .lit = "\n",
+                },
+                lexer::Token{
+                    .type = lexer::TokenType::End,
+                    .pos = {
+                        .line = 3,
+                        .column = 1,
+                    },
+                    .lit = "end",
+                },
             };
 
             THEN("It is parsed correctly")
