@@ -293,7 +293,7 @@ SCENARIO("Parser builds a tree from tokens")
                         .line = 2,
                         .column = 4,
                     },
-                    .lit = "i",
+                    .lit = "\n",
                 },
                 lexer::Token{
                     .type = lexer::TokenType::In,
