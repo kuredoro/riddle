@@ -1,76 +1,61 @@
-#include <fstream>
-#include <iostream>
-#include "fmt/core.h"
 #include "fmt/color.h"
+#include "fmt/core.h"
 #include "lexer.hpp"
 #include "parser.hpp"
+#include <fstream>
+#include <iostream>
 
-class PrintVisitor : public ast::Visitor
-{
-public:
+class PrintVisitor : public ast::Visitor {
+  public:
     PrintVisitor(size_t depth = 0) : depth(depth) {}
-    void visit(ast::Program *node) override
-    {
-    }
+    void visit(ast::Program *node) override {}
     void visit(ast::Routine *node) override{
 
     };
-    void visit(ast::Parameter *node) override
-    {
-        if (node == nullptr)
-        {
+    void visit(ast::Parameter *node) override {
+        if (node == nullptr) {
             fmt::print("{:|>{}}- [Parameter]> null\n", "", depth);
-        }
-        else
-        {
+        } else {
             fmt::print("{:|>{}}- [Parameter]> {}\n", "", depth, node->name.lit);
             depth++;
             node->type->accept(*this);
             depth--;
         }
     };
-    void visit(ast::Type *node) override
-    {
-        if (ast::PrimitiveType *specific = dynamic_cast<ast::PrimitiveType *>(node); specific != nullptr)
-        {
+    void visit(ast::Type *node) override {
+        if (ast::PrimitiveType *specific =
+                dynamic_cast<ast::PrimitiveType *>(node);
+            specific != nullptr) {
             specific->accept(*this);
-        }
-        else if (ast::ArrayType *specific = dynamic_cast<ast::ArrayType *>(node); specific != nullptr)
-        {
+        } else if (ast::ArrayType *specific =
+                       dynamic_cast<ast::ArrayType *>(node);
+                   specific != nullptr) {
             specific->accept(*this);
-        }
-        else if (ast::RecordType *specific = dynamic_cast<ast::RecordType *>(node); specific != nullptr)
-        {
+        } else if (ast::RecordType *specific =
+                       dynamic_cast<ast::RecordType *>(node);
+                   specific != nullptr) {
             specific->accept(*this);
-        }
-        else if (ast::AliasedType *specific = dynamic_cast<ast::AliasedType *>(node); specific != nullptr)
-        {
-            fmt::print("{:|>{}}- [Type Identifier]> {}\n", "", depth, specific->name.lit);
-        }
-        else
-        {
+        } else if (ast::AliasedType *specific =
+                       dynamic_cast<ast::AliasedType *>(node);
+                   specific != nullptr) {
+            fmt::print("{:|>{}}- [Type Identifier]> {}\n", "", depth,
+                       specific->name.lit);
+        } else {
             fmt::print("{:|>{}}- [Type]> (unknown type)\n", "", depth);
         }
     };
-    void visit(ast::PrimitiveType *node) override
-    {
-        if (node == nullptr)
-        {
+    void visit(ast::PrimitiveType *node) override {
+        if (node == nullptr) {
             fmt::print("{:|>{}}- [PrimitiveType]> null\n", "", depth);
-        }
-        else
-        {
-            fmt::print("{:|>{}}- [PrimitiveType]> {}\n", "", depth, node->type.lit);
+        } else {
+            fmt::print("{:|>{}}- [PrimitiveType]> {}\n", "", depth,
+                       node->type.lit);
         }
     };
-    void visit(ast::ArrayType *node) override
-    {
-        if (node == nullptr)
-        {
+    void visit(ast::ArrayType *node) override {
+        if (node == nullptr) {
             fmt::print("{:|>{}}- [ArrayType]> null\n", "", depth);
-        }
-        else
-        {
+        } else {
             fmt::print("{:|>{}}- [ArrayType]>\n", "", depth);
             depth++;
             node->length->accept(*this);
@@ -78,18 +63,13 @@ public:
             depth--;
         }
     };
-    void visit(ast::RecordType *node) override
-    {
-        if (node == nullptr)
-        {
+    void visit(ast::RecordType *node) override {
+        if (node == nullptr) {
             fmt::print("{:|>{}}- [RecordType]> null\n", "", depth);
-        }
-        else
-        {
+        } else {
             fmt::print("{:|>{}}- [RecordType]>\n", "", depth);
             depth++;
-            for (auto field : node->fields)
-            {
+            for (auto field : node->fields) {
                 field->accept(*this);
             }
             depth--;
@@ -110,14 +90,10 @@ public:
     void visit(ast::RoutineCall *node) override{
 
     };
-    void visit(ast::WhileLoop *node) override
-    {
-        if (node == nullptr)
-        {
+    void visit(ast::WhileLoop *node) override {
+        if (node == nullptr) {
             fmt::print("{:|>{}}- [WhileLoop]> null\n", "", depth);
-        }
-        else
-        {
+        } else {
             fmt::print("{:|>{}}- [WhileLoop]>\n", "", depth);
             depth++;
             node->condition->accept(*this);
@@ -125,14 +101,10 @@ public:
             depth--;
         }
     };
-    void visit(ast::ForLoop *node) override
-    {
-        if (node == nullptr)
-        {
+    void visit(ast::ForLoop *node) override {
+        if (node == nullptr) {
             fmt::print("{:|>{}}- [ForLoop]> null\n", "", depth);
-        }
-        else
-        {
+        } else {
             fmt::print("{:|>{}}- [ForLoop]>\n", "", depth);
             depth++;
             // node->loopVar->accept(*this);
@@ -142,21 +114,16 @@ public:
             depth--;
         }
     };
-    void visit(ast::IfStatement *node) override
-    {
+    void visit(ast::IfStatement *node) override {
 
-        if (node == nullptr)
-        {
+        if (node == nullptr) {
             fmt::print("{:|>{}}- [IfStatement]> null\n", "", depth);
-        }
-        else
-        {
+        } else {
             fmt::print("{:|>{}}- [IfStatement]>\n", "", depth);
             depth++;
             node->condition->accept(*this);
             node->ifBody->accept(*this);
-            if (node->elseBody)
-            {
+            if (node->elseBody) {
                 node->elseBody->accept(*this);
             }
             depth--;
@@ -172,14 +139,12 @@ public:
 
     };
 
-private:
+  private:
     size_t depth;
 };
 
-int main(int argc, char *argv[])
-{
-    if (argc == 2)
-    {
+int main(int argc, char *argv[]) {
+    if (argc == 2) {
         std::ifstream f(argv[1]);
         std::string code((std::istreambuf_iterator<char>(f)),
                          (std::istreambuf_iterator<char>()));
@@ -193,8 +158,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    for (;;)
-    {
+    for (;;) {
         fmt::print("riddle> ");
         std::string line;
         std::getline(std::cin, line);
@@ -204,17 +168,16 @@ int main(int argc, char *argv[])
 
         auto ast = parser.parseForLoop();
         auto errors = parser.getErrors();
-        if (errors.empty())
-        {
+        if (errors.empty()) {
             PrintVisitor v;
             ast->accept(v);
-        }
-        else
-        {
-            fmt::print(fg(fmt::color::indian_red) | fmt::emphasis::bold, "Errors:\n");
-            for (auto error : errors)
-            {
-                fmt::print(fg(fmt::color::indian_red), "\t[character: {}]: {}\n", error.pos.column, error.message);
+        } else {
+            fmt::print(fg(fmt::color::indian_red) | fmt::emphasis::bold,
+                       "Errors:\n");
+            for (auto error : errors) {
+                fmt::print(fg(fmt::color::indian_red),
+                           "\t[character: {}]: {}\n", error.pos.column,
+                           error.message);
             }
         }
     }
