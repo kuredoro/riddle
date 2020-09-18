@@ -192,7 +192,7 @@ struct Assignment : Statement {
         v.visit(this);
     }
 };
-struct RoutineCall : Statement {
+struct RoutineCall : Statement, Expression {
     std::vector<sPtr<Expression>> parameters;
     lexer::Token name;
     void accept(Visitor& v) override {
