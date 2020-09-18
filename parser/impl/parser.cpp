@@ -304,15 +304,16 @@ namespace parser
         switch (currentToken.type)
         {
         case TokenType::Identifier:
-            m_lexer.next();
-	    if ((currentToken = m_lexer.Peek().type) == TokenType::OpenParen || currentToken == TokenType::Semicolon)
-	        return parseRoutineCall();
-            else return parseAssignment();
+	        sPtr<Expression> expression = parseExpression();
+	        if (dynamic_cast<sPtr<ast::RoutineCall>>(expression))
+	            return expression;
+            else 
+                return parseAssignment(expression);
         case TokenType::While:
             return parseWhileLoop();
         case TokenType::For:
             return parseForLoop();
-	case TokenType::If:
+	    case TokenType::If:
             return parseIfStatement();
         default:
             m_errors.push_back(Error{
@@ -321,13 +322,27 @@ namespace parser
                 });
 	    return nullptr;
             //while (m_lexer.Peek().type != TokenType::NewLine)
-            //   m_lexer.Next();
+            //    m_lexer.Next();
         }
         ;
     }
 
     sPtr<ast::RoutineCall> parseRoutineCall() {
         return nullptr;
+    }
+
+    sPtr<ast::Assignment> Parser::parseAssignment(sPtr<ast::Expression> left) {
+        auto currentToken = m_lexer.Next();
+        ast::Assignment assignment;
+	    if (currentToken.type != TokenType::Assign)
+        {
+            m_errors.push_back(Error{
+                .pos = currentToken.pos,
+                .message = "Expected := but didn't find it.",
+            });
+	    assignment.LeftExpression = left;
+	    assignment.RightExpression = parseExpression();
+        return std::make_shared<ast::Assignment>(assignment);
     }
 
     // ---- @MefAldemisov
