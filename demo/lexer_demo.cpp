@@ -1,66 +1,24 @@
+#include "fmt/color.h"
+#include "fmt/core.h"
+#include "lexer.hpp"
+#include "strings.hpp"
+#include "token.hpp"
 #include <fstream>
 #include <iostream>
 #include <iterator>
-#include "fmt/core.h"
-#include "fmt/color.h"
-#include "strings.hpp"
-#include "lexer.hpp"
-#include "token.hpp"
-#include "strings.hpp"
 
 std::vector<std::string> g_TokTypeStr{
-    "Illegal",
-    "Eof",
-    "Comment",
-    "Identifier",
-    "Int",
-    "Real",
-    "Less",
-    "Greater",
-    "Eq",
-    "Leq",
-    "Geq",
-    "Neq",
-    "Assign",
-    "Add",
-    "Sub",
-    "Mul",
-    "Div",
-    "Mod",
-    "OpenParen",
-    "OpenBrack",
-    "Comma",
-    "Dot",
-    "TwoDots",
-    "CloseParen",
-    "CloseBrack",
-    "Semicolon",
-    "Colon",
-    "NewLine",
-    "Var",
-    "Type",
-    "Routine",
-    "Is",
-    "IntegerType",
-    "RealType",
-    "Boolean",
-    "Record",
-    "Array",
-    "True",
-    "False",
-    "While",
-    "For",
-    "Loop",
-    "End",
-    "Reverse,",
-    "In,",
-    "If",
-    "Then",
-    "Else",
-    "Not",
-    "And",
-    "Or",
-    "Xor",
+    "Illegal",   "Eof",   "Comment",     "Identifier", "Int",
+    "Real",      "Less",  "Greater",     "Eq",         "Leq",
+    "Geq",       "Neq",   "Assign",      "Add",        "Sub",
+    "Mul",       "Div",   "Mod",         "OpenParen",  "OpenBrack",
+    "Comma",     "Dot",   "TwoDots",     "CloseParen", "CloseBrack",
+    "Semicolon", "Colon", "NewLine",     "Var",        "Type",
+    "Routine",   "Is",    "IntegerType", "RealType",   "Boolean",
+    "Record",    "Array", "True",        "False",      "While",
+    "For",       "Loop",  "End",         "Reverse,",   "In,",
+    "If",        "Then",  "Else",        "Not",        "And",
+    "Or",        "Xor",
 };
 
 std::string to_string(lexer::TokenType type) {
@@ -78,7 +36,8 @@ void printTokens(const std::vector<lexer::Token>& toks) {
 void outputLineDiagnostics(std::string line, size_t begin, size_t end) {
     begin--;
     fmt::print("\t{}", line.substr(0, begin));
-    fmt::print(fg(fmt::color::indian_red), "{}", line.substr(begin, end - begin));
+    fmt::print(fg(fmt::color::indian_red), "{}",
+               line.substr(begin, end - begin));
     fmt::print("{}\n", line.substr(end));
     fmt::print("\t{}{}\n", std::string(begin, ' '), '^');
 }
@@ -86,10 +45,12 @@ void outputLineDiagnostics(std::string line, size_t begin, size_t end) {
 std::vector<lexer::Token> extractTokens(lexer::Lexer& lx) {
     std::vector<lexer::Token> tokens;
     auto tok = lx.Next();
-    for (; tok.type != lexer::TokenType::Eof && tok.type != lexer::TokenType::Illegal; tok = lx.Next()) {
+    for (; tok.type != lexer::TokenType::Eof &&
+           tok.type != lexer::TokenType::Illegal;
+         tok = lx.Next()) {
         tokens.push_back(tok);
     }
-    tokens.push_back(tok);  // to keep the Eof|Illegal token
+    tokens.push_back(tok); // to keep the Eof|Illegal token
 
     return tokens;
 }
@@ -98,7 +59,7 @@ int main(int argc, char* argv[]) {
     if (argc == 2) {
         std::ifstream f(argv[1]);
         std::string code((std::istreambuf_iterator<char>(f)),
-                         (std::istreambuf_iterator<char>() ));
+                         (std::istreambuf_iterator<char>()));
         fmt::print("Code:\n{}\n\n", code);
         lexer::Lexer lx{code};
         auto tokens = extractTokens(lx);
@@ -115,7 +76,8 @@ int main(int argc, char* argv[]) {
         auto tokens = extractTokens(lx);
 
         if (auto tok = tokens.back(); tok.type == lexer::TokenType::Illegal) {
-            fmt::print(fg(fmt::color::indian_red) | fmt::emphasis::bold, "error: ");
+            fmt::print(fg(fmt::color::indian_red) | fmt::emphasis::bold,
+                       "error: ");
             fmt::print("could not tokenize further.\n");
             outputLineDiagnostics(line, tok.pos.column, line.size());
             continue;
