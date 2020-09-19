@@ -168,7 +168,7 @@ sPtr<ast::Parameter> Parser::parseParameter() {
 
 sPtr<ast::Type> Parser::parseType() {
     Token currentToken = m_lexer.Peek();
-    if (TokenType *type = std::find(std::begin(primitives),
+    if (TokenType* type = std::find(std::begin(primitives),
                                     std::end(primitives), currentToken.type);
         type != std::end(primitives)) {
         ast::PrimitiveType typeNode;
