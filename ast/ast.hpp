@@ -31,7 +31,7 @@ struct UnaryExpression;
 struct BinaryExpression;
 
 class Visitor {
-  public:
+public:
     virtual ~Visitor() = default;
     virtual void visit(Program* node) = 0;
     virtual void visit(Routine* node) = 0;
