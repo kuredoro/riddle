@@ -10,7 +10,7 @@
  */
 class DummyLexer : public lexer::Lexer {
 
-  public:
+public:
     DummyLexer(std::initializer_list<lexer::Token> tokens) : lexer::Lexer("") {
         for (auto it = tokens.begin(); it != tokens.end(); it++) {
             m_tokens.push_back(*it);
@@ -29,7 +29,7 @@ class DummyLexer : public lexer::Lexer {
 
     lexer::Token operator[](size_t idx) { return m_tokens.at(idx); }
 
-  private:
+private:
     std::vector<lexer::Token> m_tokens;
     std::vector<lexer::Token>::iterator it;
 };

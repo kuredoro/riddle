@@ -7,7 +7,7 @@
 #include "parser.hpp"
 
 class PrintVisitor : public ast::Visitor {
-  public:
+public:
     PrintVisitor(size_t depth = 0) : depth(depth) {}
     void visit(ast::Program* node) override {}
     void visit(ast::Routine* node) override{
@@ -139,7 +139,7 @@ class PrintVisitor : public ast::Visitor {
 
     };
 
-  private:
+private:
     size_t depth;
 };
 
