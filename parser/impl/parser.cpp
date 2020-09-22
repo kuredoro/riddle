@@ -118,8 +118,9 @@ sPtr<ast::Routine> Parser::parseRoutine() {
             ;
         return nullptr;
     }
-    currentToken = skipWhile(isNewLine);
+    while (m_lexer.Peek().type != TokenType::NewLine) m_lexer.Next();
     routineNode.body = parseBody();
+    currentToken = skipWhile(isNewLine);
     if (currentToken.type != TokenType::End) {
         m_errors.push_back(Error{
             .pos = currentToken.pos,
