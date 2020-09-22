@@ -1,19 +1,14 @@
-#include "trie.hpp"
-#include "token.hpp"
 #include "lexer.hpp"
 #include "token.hpp"
-#include <vector>
-#include <string>
 #include "trie.hpp"
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <sstream>
 #include <cctype>
-
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
 
 namespace lexer {
-
 
 common::Trie<TokenType> g_keywordTrie{
     {"var", TokenType::Var},
@@ -43,34 +38,22 @@ common::Trie<TokenType> g_keywordTrie{
 };
 
 common::Trie<TokenType> g_operatorTrie{
-    {"//", TokenType::Comment},
-    {"<",  TokenType::Less},
-    {">",  TokenType::Greater},
-    {"=",  TokenType::Eq},
-    {"<=", TokenType::Leq},
-    {">=", TokenType::Geq},
-    {"/=", TokenType::Neq},
-    {":=", TokenType::Assign},
-    {"+",  TokenType::Add},
-    {"-",  TokenType::Sub},
-    {"*",  TokenType::Mul},
-    {"/",  TokenType::Div},
-    {"%",  TokenType::Mod},
-    {"(",  TokenType::OpenParen},
-    {"[",  TokenType::OpenBrack},
-    {",",  TokenType::Comma},
-    {".",  TokenType::Dot},
-    {"..", TokenType::TwoDots},
-    {")",  TokenType::CloseParen},
-    {"]",  TokenType::CloseBrack},
-    {";",  TokenType::Semicolon},
-    {":",  TokenType::Colon},
+    {"//", TokenType::Comment},   {"<", TokenType::Less},
+    {">", TokenType::Greater},    {"=", TokenType::Eq},
+    {"<=", TokenType::Leq},       {">=", TokenType::Geq},
+    {"/=", TokenType::Neq},       {":=", TokenType::Assign},
+    {"+", TokenType::Add},        {"-", TokenType::Sub},
+    {"*", TokenType::Mul},        {"/", TokenType::Div},
+    {"%", TokenType::Mod},        {"(", TokenType::OpenParen},
+    {"[", TokenType::OpenBrack},  {",", TokenType::Comma},
+    {".", TokenType::Dot},        {"..", TokenType::TwoDots},
+    {")", TokenType::CloseParen}, {"]", TokenType::CloseBrack},
+    {";", TokenType::Semicolon},  {":", TokenType::Colon},
 };
-
 
 /**
  * skipWhile will return the offset from the given position within the buffer
- * at which the predicate function returns false. 
+ * at which the predicate function returns false.
  *
  * Zero will be returned if at specified position predicate is already false,
  * or if it is beyond the buffer.
@@ -98,7 +81,7 @@ char Lexer::peek(size_t offset) {
 /**
  * Returns the next token without consuming it.
  */
-Token Lexer::Peek () {
+Token Lexer::Peek() {
     if (currentToken == nullptr) {
         currentToken = std::make_shared<Token>(scanNext());
     } else if (currentToken->type == TokenType::Eof) {
@@ -110,7 +93,7 @@ Token Lexer::Peek () {
 /**
  * Consumes the next token
  */
-Token Lexer::Next () {
+Token Lexer::Next() {
     Token ret = Peek();
     if (ret.type != TokenType::Eof) {
         currentToken = nullptr;
@@ -123,15 +106,16 @@ Token Lexer::scanNext() {
     m_pos += skipWhile(m_pos, isSpace);
 
     if (m_pos == m_buf.size()) {
-        return Token { .type = TokenType::Eof };
+        return Token{.type = TokenType::Eof};
     }
 
     Token tok{
         .type = TokenType::Illegal,
-        .pos = {
-            .line = m_lineNum,
-            .column = m_pos - m_lineStartPos + 1,
-        },
+        .pos =
+            {
+                .line = m_lineNum,
+                .column = m_pos - m_lineStartPos + 1,
+            },
         .lit = "",
     };
 
@@ -213,7 +197,7 @@ Token Lexer::scanNext() {
     // If we got it, then we'll just skip to the next newline and start over
     // as if nothing happened.
     if (tok.type == TokenType::Comment) {
-        m_pos += skipWhile(m_pos, [](char c){ return c != '\n'; });
+        m_pos += skipWhile(m_pos, [](char c) { return c != '\n'; });
 
         return scanNext();
     }

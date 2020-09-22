@@ -1,13 +1,13 @@
 #pragma once
 
-#include <vector>
 #include <memory>
+#include <vector>
+
 #include "lexer.hpp"
 
 namespace ast {
 
-template <typename T>
-using sPtr = std::shared_ptr<T>;
+template <typename T> using sPtr = std::shared_ptr<T>;
 
 struct Node;
 struct Program;
@@ -30,28 +30,27 @@ struct Expression;
 struct UnaryExpression;
 struct BinaryExpression;
 
-class Visitor
-{
-  public:
+class Visitor {
+public:
     virtual ~Visitor() = default;
-    virtual void visit(Program *node) = 0;
-    virtual void visit(Routine *node) = 0;
-    virtual void visit(Parameter *node) = 0;
-    virtual void visit(Type *node) = 0;
-    virtual void visit(PrimitiveType *node) = 0;
-    virtual void visit(ArrayType *node) = 0;
-    virtual void visit(RecordType *node) = 0;
-    virtual void visit(Variable *node) = 0;
-    virtual void visit(Body *node) = 0;
-    virtual void visit(Statement *node) = 0;
-    virtual void visit(Assignment *node) = 0;
-    virtual void visit(RoutineCall *node) = 0;
-    virtual void visit(WhileLoop *node) = 0;
-    virtual void visit(ForLoop *node) = 0;
-    virtual void visit(IfStatement *node) = 0;
-    virtual void visit(Expression *node) = 0;
-    virtual void visit(UnaryExpression *node) = 0;
-    virtual void visit(BinaryExpression *node) = 0;
+    virtual void visit(Program* node) = 0;
+    virtual void visit(Routine* node) = 0;
+    virtual void visit(Parameter* node) = 0;
+    virtual void visit(Type* node) = 0;
+    virtual void visit(PrimitiveType* node) = 0;
+    virtual void visit(ArrayType* node) = 0;
+    virtual void visit(RecordType* node) = 0;
+    virtual void visit(Variable* node) = 0;
+    virtual void visit(Body* node) = 0;
+    virtual void visit(Statement* node) = 0;
+    virtual void visit(Assignment* node) = 0;
+    virtual void visit(RoutineCall* node) = 0;
+    virtual void visit(WhileLoop* node) = 0;
+    virtual void visit(ForLoop* node) = 0;
+    virtual void visit(IfStatement* node) = 0;
+    virtual void visit(Expression* node) = 0;
+    virtual void visit(UnaryExpression* node) = 0;
+    virtual void visit(BinaryExpression* node) = 0;
 };
 
 // TODO: fill the following structs with relevant data
@@ -69,14 +68,10 @@ struct Program : Node {
     std::vector<sPtr<Variable>> variables;
     std::vector<sPtr<Type>> types;
     bool operator==(const Program& other) const {
-        return Node::operator==(other)
-                && routines == other.routines
-                && variables == other.variables
-                && types == other.types;
+        return Node::operator==(other) && routines == other.routines &&
+               variables == other.variables && types == other.types;
     }
-    void accept(Visitor& v) override {
-        v.visit(this);
-    }
+    void accept(Visitor& v) override { v.visit(this); }
 };
 struct Routine : Node {
     lexer::Token name;
@@ -84,32 +79,23 @@ struct Routine : Node {
     sPtr<Type> returnType;
     sPtr<Body> body;
     bool operator==(const Routine& other) const {
-        return Node::operator==(other)
-                && name == other.name
-                && returnType == other.returnType
-                && body == other.body
-                && parameters == other.parameters;
+        return Node::operator==(other) && name == other.name &&
+               returnType == other.returnType && body == other.body &&
+               parameters == other.parameters;
     }
-    void accept(Visitor& v) override {
-        v.visit(this);
-    }
+    void accept(Visitor& v) override { v.visit(this); }
 };
 struct Parameter : Node {
     lexer::Token name;
     sPtr<Type> type;
     bool operator==(const Parameter& other) const {
-        return Node::operator==(other)
-                && name == other.name
-                && type == other.type;
+        return Node::operator==(other) && name == other.name &&
+               type == other.type;
     }
-    void accept(Visitor& v) override {
-        v.visit(this);
-    }
+    void accept(Visitor& v) override { v.visit(this); }
 };
 struct Type : Node {
-    virtual void accept(Visitor& v) override {
-        v.visit(this);
-    }
+    virtual void accept(Visitor& v) override { v.visit(this); }
 };
 /**
  * To handle the "Identifier" kind of type
@@ -117,44 +103,32 @@ struct Type : Node {
 struct AliasedType : Type {
     lexer::Token name;
     bool operator==(const AliasedType& other) const {
-        return Node::operator==(other)
-                && name == other.name;
+        return Node::operator==(other) && name == other.name;
     }
-    void accept(Visitor& v) override {
-        v.visit(this);
-    }
+    void accept(Visitor& v) override { v.visit(this); }
 };
 struct PrimitiveType : Type {
     lexer::Token type;
     bool operator==(const PrimitiveType& other) const {
-        return Node::operator==(other)
-                && type == other.type;
+        return Node::operator==(other) && type == other.type;
     }
-    void accept(Visitor& v) override {
-        v.visit(this);
-    }
+    void accept(Visitor& v) override { v.visit(this); }
 };
 struct ArrayType : Type {
     sPtr<Expression> length;
     sPtr<Type> elementType;
     bool operator==(const ArrayType& other) const {
-        return Node::operator==(other)
-                && length == other.length
-                && elementType == other.elementType;
+        return Node::operator==(other) && length == other.length &&
+               elementType == other.elementType;
     }
-    void accept(Visitor& v) override {
-        v.visit(this);
-    }
+    void accept(Visitor& v) override { v.visit(this); }
 };
 struct RecordType : Type {
     std::vector<sPtr<Variable>> fields;
     bool operator==(const RecordType& other) const {
-        return Node::operator==(other)
-                && fields == other.fields;
+        return Node::operator==(other) && fields == other.fields;
     }
-    void accept(Visitor& v) override {
-        v.visit(this);
-    }
+    void accept(Visitor& v) override { v.visit(this); }
 };
 struct Variable : Node {
     lexer::Token name;
@@ -181,9 +155,7 @@ struct Body : Node {
     }
 };
 struct Statement : Node {
-    void accept(Visitor& v) override {
-        v.visit(this);
-    }
+    void accept(Visitor& v) override { v.visit(this); }
 };
 struct Assignment : Statement {
     sPtr<Expression> LeftExpression;
@@ -200,35 +172,45 @@ struct RoutineCall : Statement, Expression {
     }
 };
 struct WhileLoop : Statement {
-    void accept(Visitor& v) override {
-        v.visit(this);
+    sPtr<Expression> condition;
+    sPtr<Body> body;
+    bool operator==(const WhileLoop& other) const {
+        return Node::operator==(other) && condition == other.condition &&
+               body == other.body;
     }
+    void accept(Visitor& v) override { v.visit(this); }
 };
 struct ForLoop : Statement {
-    void accept(Visitor& v) override {
-        v.visit(this);
+    lexer::Token loopVar;
+    sPtr<Expression> rangeFrom;
+    sPtr<Expression> rangeTo;
+    bool reverse;
+    sPtr<Body> body;
+    bool operator==(const ForLoop& other) const {
+        return Node::operator==(other) && loopVar == other.loopVar &&
+               rangeFrom == other.rangeFrom && rangeTo == other.rangeTo &&
+               reverse == other.reverse && body == other.body;
     }
+    void accept(Visitor& v) override { v.visit(this); }
 };
 struct IfStatement : Statement {
-    void accept(Visitor& v) override {
-        v.visit(this);
+    sPtr<Expression> condition;
+    sPtr<Body> ifBody;
+    sPtr<Body> elseBody;
+    bool operator==(const IfStatement& other) const {
+        return Node::operator==(other) && condition == other.condition &&
+               ifBody == other.elseBody && ifBody == other.elseBody;
     }
+    void accept(Visitor& v) override { v.visit(this); }
 };
 struct Expression : Node {
-    void accept(Visitor& v) override {
-        v.visit(this);
-    }
+    void accept(Visitor& v) override { v.visit(this); }
 };
 struct UnaryExpression : Expression {
-    void accept(Visitor& v) override {
-        v.visit(this);
-    }
+    void accept(Visitor& v) override { v.visit(this); }
 };
 struct BinaryExpression : Expression {
-    void accept(Visitor& v) override {
-        v.visit(this);
-    }
+    void accept(Visitor& v) override { v.visit(this); }
 };
-
 
 } // namespace ast
