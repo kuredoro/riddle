@@ -468,9 +468,98 @@ sPtr<ast::IfStatement> Parser::parseIfStatement() {
 
 // ---- @aabounegm
 
-sPtr<ast::Expression> Parser::parseExpression() {
+ssPtr<ast::Expression> Parser::parseExpression() {
     // TODO: Concrete implementation
-    return nullptr;
+    // Expression : Relation { ( and | or | xor ) Relation }
+    /* Relation : Simple [ ( < | <= | > | >= | = | /= ) Simple ]
+        Simple : Factor { ( + | - ) Factor }
+        Factor : Summand { ( * | / | % ) Summand }
+        Summand : Primary | ( Expression )
+        */
+    // Token currentToken = m_lexer.Next();
+    int p;
+    ast::Expression expression = parseBinaryExpression(-1);
+    while ((p = getPriority(m_lexer.Peek().type)) >=
+           0) { // TODO move to the parse Binary
+        expression.operand1 = expression;
+        expression.operation = m_lexer.Next();
+        expression.operand2 = parseBinaryExpression(p);
+        /* code */
+    }
+
+    // x = parseBinaryExpression();
+    // while Peek next token getPriority() >=0 :
+    //  new bin Expr:= x += parseBinaryExpression();
+    //
+}
+
+sPtr<ast::Expression> Parser::parseBinaryExpression(int priority) {
+    ast::Expression expression;
+    expression.operand1 =
+        parseUnaryExpression(priority); // do I need priority for unary?
+    int p;
+    TokenType opType = m_lexer.Peek().type;
+    if ((p = getPriority(opType)>=0) {
+        if (p < priority) {
+            return expression.operand1;
+        }
+        expression.operator= m_lexer.Next();
+        expression.operand2 = parseBinaryExpression(p);
+    }
+    return expression;
+}
+
+sPtr<ast::Expression> Parser::parseUnaryExpression(int priority) {
+    TokenType type = m_lexer.Peek().type;
+    switch (type) {
+        // primitives
+    case TokenType::Identifier:
+    case TokenType::Int:
+    case TokenType::Real:
+    case TokenType::True:
+    case TokenType::False:
+        // return type.Next()???
+        break;
+    case TokenType::OpenParen:
+        ast::Expression expr = parseBinaryExpression(priority + 1);
+        if (m_lexer.Peek().type == TokenType::CloseParen) {
+            return expr;
+        }
+        // error
+        return nullptr
+    }
+    // else if (opType = TokenType::OpenParen){
+    //     // check braces
+
+    // }
+    return nullptr
+}
+
+int getPriority(TokenType token) {
+    switch (token) {
+    case TokenType::And:
+    case TokenType::Or:
+    case TokenType::Xor:
+        return 0;
+    case TokenType::Less:
+    case TokenType::Greater:
+    case TokenType::Eq:
+    case TokenType::Leq:
+    case TokenType::Geq:
+    case TokenType::Neq:
+        return 1;
+    case TokenType::Add:
+    case TokenType::Sub:
+        return 2;
+    case TokenType::Mul:
+    case TokenType::Div:
+    case TokenType::Mod:
+        return 3;
+    case TokenType::Not:
+        return 4;
+    }
+    // throw error
+    return -1;
 }
 
 // ---- End separation

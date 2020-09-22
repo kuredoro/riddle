@@ -35,8 +35,8 @@ public:
     sPtr<ast::ForLoop> parseForLoop();
     sPtr<ast::IfStatement> parseIfStatement();
     sPtr<ast::Expression> parseExpression();
-    sPtr<ast::UnaryExpression> parseUnaryExpression();
-    sPtr<ast::BinaryExpression> parseBinaryExpression();
+    sPtr<ast::UnaryExpression> parseUnaryExpression(int priority);
+    sPtr<ast::BinaryExpression> parseBinaryExpression(int priority);
     std::vector<Error> getErrors();
 
 private:
@@ -44,6 +44,7 @@ private:
     std::vector<Error> m_errors;
     lexer::Token skipWhile(std::function<bool(lexer::Token)>);
     static bool isNewLine(lexer::Token);
+    int getPriority(lexer::TokenType);
 };
 
 } // namespace parser

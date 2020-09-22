@@ -173,11 +173,19 @@ struct IfStatement : Statement {
     sPtr<Body> elseBody;
     bool operator==(const IfStatement& other) const {
         return Node::operator==(other) && condition == other.condition &&
-               ifBody == other.elseBody && ifBody == other.elseBody;
+               ifBody == other.ifBody && elseBody == other.elseBody;
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
 struct Expression : Node {
+    sPtr<Expression> operator1;
+    sPtr<Expression> operator2;
+    lexer::Token operation;
+
+    bool operator==(const Expression& other) const {
+        return Node::operator==(other) && operator1 == other.operator1 &&
+               operator2 == other.operator2 && operation == other.operation;
+    }
     void accept(Visitor& v) override { v.visit(this); }
 };
 struct UnaryExpression : Expression {
