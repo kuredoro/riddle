@@ -234,14 +234,14 @@ namespace parser
 
     sPtr<ast::Variable> Parser::parseVariable() {
 	    ast::Variable variable;
-        auto token = m_lexer.Next();
+        auto token = skipWhile(isNewLine);
         if (token.type != TokenType::Var) {
             m_errors.push_back(Error{
                 .pos = token.pos,
                 .message = "Expected \"var\" keyword but didn't find it.",
             });
         }
-        token = m_lexer.Next();
+        token = skipWhile(isNewLine);
         if (token.type != TokenType::Identifier) {
             m_errors.push_back(Error{
                 .pos = token.pos,
@@ -249,7 +249,7 @@ namespace parser
             });
         }
 	    variable.name = token;
-        token = m_lexer.Next();
+        token = skipWhile(isNewLine);
         if (token.type != TokenType::Is && token.type != TokenType::Colon) {
             m_errors.push_back(Error{
                 .pos = token.pos,
@@ -258,10 +258,10 @@ namespace parser
         }
         switch (token.type)
         {
-	    case TokenType::Colon:
+	        case TokenType::Colon:
                 variable.type = parseType();
                 if ((token = m_lexer.Peek()).type != TokenType::Is) break;
-		else m_lexer.Next();
+		        else m_lexer.Next();
             case TokenType::Is:
                 variable.expression = parseExpression();
                 break;
@@ -292,15 +292,13 @@ namespace parser
                 continue;
             default:
                 body.statements.push_back(parseStatement());
-                //while (m_lexer.Peek().type != TokenType::NewLine)
-                //    m_lexer.Next();
             }
         }
         return std::make_shared<ast::Body>(body);
     }
 
     sPtr<ast::Statement> Parser::parseStatement() {
-        auto currentToken = m_lexer.Peek();
+        auto currentToken = skipWhile(isNewLine);
         switch (currentToken.type)
         {
         case TokenType::Identifier:
@@ -332,7 +330,7 @@ namespace parser
     }
 
     sPtr<ast::Assignment> Parser::parseAssignment(sPtr<ast::Expression> left) {
-        auto currentToken = m_lexer.Next();
+        auto currentToken = skipWhile(isNewLine);
         ast::Assignment assignment;
 	    if (currentToken.type != TokenType::Assign)
         {
