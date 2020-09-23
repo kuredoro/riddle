@@ -243,7 +243,7 @@ sPtr<ast::RecordType> Parser::parseRecordType() {
   
     sPtr<ast::Variable> Parser::parseVariable() {
 	    ast::Variable variable;
-        auto token = skipWhile(isNewLine);
+        Token token = skipWhile(isNewLine);
         if (token.type != TokenType::Var) {
             m_errors.push_back(Error{
                 .pos = token.pos,
@@ -276,16 +276,16 @@ sPtr<ast::RecordType> Parser::parseRecordType() {
                 break;
             default:
                 m_errors.push_back(Error{
-                    .pos = currentToken.pos,
+                    .pos = token.pos,
                     .message = "Expected an \"is\" keyword or : after the identifier.",
                 });
         }
         return std::make_shared<ast::Variable>(variable);
   }        
   
-   sPtr<ast::Body> Parser::parseBody() {
-	ast::Body body;
-        auto currentToken;
+    sPtr<ast::Body> Parser::parseBody() {
+	    ast::Body body;
+        Token currentToken;
         while ((currentToken = m_lexer.Peek()).type != TokenType::End)
         {
             switch (currentToken.type)
@@ -308,12 +308,14 @@ sPtr<ast::RecordType> Parser::parseRecordType() {
 
     sPtr<ast::Statement> Parser::parseStatement() {
         auto currentToken = skipWhile(isNewLine);
+        sPtr<ast::Expression> expression;
         switch (currentToken.type)
         {
         case TokenType::Identifier:
-	        sPtr<Expression> expression = parseExpression();
-	        if (dynamic_cast<sPtr<ast::RoutineCall>>(expression))
-	            return expression;
+	        expression = parseExpression();
+            ast::RoutineCall* routineCall = dynamic_cast<ast::RoutineCall*>(expression.get());
+	        if (routineCall != nullptr)
+	            return std::make_shared<ast::RoutineCall>(*routineCall);
             else 
                 return parseAssignment(expression);
         case TokenType::While:
@@ -324,9 +326,9 @@ sPtr<ast::RecordType> Parser::parseRecordType() {
             return parseIfStatement();
         default:
             m_errors.push_back(Error{
-                    .pos = currentToken.pos,
-                    .message = "Unexpected token",
-                });
+                .pos = currentToken.pos,
+                .message = "Unexpected token",
+            });
 	    return nullptr;
         }
         ;
@@ -341,14 +343,17 @@ sPtr<ast::RecordType> Parser::parseRecordType() {
                 .pos = currentToken.pos,
                 .message = "Expected := but didn't find it.",
             });
+            return nullptr;
+        }
 	    assignment.LeftExpression = left;
 	    assignment.RightExpression = parseExpression();
-      return std::make_shared<ast::Assignment>(assignment);
+        return std::make_shared<ast::Assignment>(assignment);
     }
 
-      sPtr<ast::RoutineCall> parseRoutineCall() {
+    sPtr<ast::RoutineCall> Parser::parseRoutineCall() {
         return nullptr;
     }
+    
 // ---- @MefAldemisov
 
 sPtr<ast::WhileLoop> Parser::parseWhileLoop() {

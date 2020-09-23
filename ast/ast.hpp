@@ -133,7 +133,7 @@ struct RecordType : Type {
 struct Variable : Node {
     lexer::Token name;
     sPtr<Type> type;
-    sPtr<Expression> Expression;
+    sPtr<Expression> expression;
     bool operator==(const Variable& other) const {
         return Node::operator==(other)
                 && name == other.name && type == other.type;
@@ -148,7 +148,7 @@ struct Body : Node {
     std::vector<sPtr<Type>> types;
     bool operator==(const Body& other) const {
         return Node::operator==(other)
-                && name == other.name && type == other.type;
+                && types == other.types && variables == other.variables && statements == other.statements;
     }
     void accept(Visitor& v) override {
         v.visit(this);
