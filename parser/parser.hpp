@@ -44,7 +44,8 @@ private:
     std::vector<Error> m_errors;
     lexer::Token skipWhile(std::function<bool(lexer::Token)>);
     static bool isNewLine(lexer::Token);
-    int getPriority(lexer::TokenType);
+    bool isPrimitive(lexer::TokenType);
+    int opPrec(lexer::TokenType token);
 };
 
 } // namespace parser
