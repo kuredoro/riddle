@@ -85,7 +85,10 @@ Token Lexer::Peek() {
     if (currentToken == nullptr) {
         currentToken = std::make_shared<Token>(scanNext());
     } else if (currentToken->type == TokenType::Eof) {
-        throw "End-of-file already reached";
+        Token t;
+        t.type = TokenType::Eof;
+        return t;
+        // throw "End-of-file already reached";
     }
     return *currentToken;
 }

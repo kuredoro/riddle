@@ -137,7 +137,8 @@ public:
             if (node->operand2) {
                 depth++;
                 node->operand1->accept(*this);
-                fmt::print("{:|>{}}- [BinaryOperator]>\n", "", depth);
+                fmt::print("{:|>{}}- [BinaryOperator, '{}']>\n", "", depth,
+                           node->operation.lit);
                 node->operand2->accept(*this);
             } else {
                 fmt::print("{:|>{}}- [UnaryOperator, '{}']>\n", "", depth,

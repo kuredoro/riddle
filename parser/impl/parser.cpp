@@ -567,8 +567,8 @@ sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
         }
         ast::Expression expr;
         expr.operand1 = lhs;
-        expr.operand2 = parseBinaryExpression(prec + 1);
         expr.operation = op;
+        expr.operand2 = parseBinaryExpression(prec + 1);
         lhs = std::make_shared<ast::Expression>(expr);
     }
 }
