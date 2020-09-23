@@ -469,35 +469,8 @@ sPtr<ast::IfStatement> Parser::parseIfStatement() {
 // ---- @aabounegm
 
 sPtr<ast::Expression> Parser::parseExpression() {
-    ast::Expression expression = parseBinaryExpression();
-    return expression;
+    return parseBinaryExpression(1);
 }
-
-// sPtr<ast::Expression> Parser::parseUnaryExpression(int priority) {
-//     TokenType type = m_lexer.Peek().type;
-//     switch (type) {
-//         // primitives
-//     case TokenType::Identifier:
-//     case TokenType::Int:
-//     case TokenType::Real:
-//     case TokenType::True:
-//     case TokenType::False:
-//         // return type.Next()???
-//         break;
-//     case TokenType::OpenParen:
-//         ast::Expression expr = parseBinaryExpression(priority + 1);
-//         if (m_lexer.Peek().type == TokenType::CloseParen) {
-//             return expr;
-//         }
-//         // error
-//         return nullptr
-//     }
-//     // else if (opType = TokenType::OpenParen){
-//     //     // check braces
-
-//     // }
-//     return nullptr
-// }
 
 int opPrec(TokenType token) {
     switch (token) {
@@ -537,16 +510,16 @@ bool isPrimitive(TokenType token) {
 
 sPtr<ast::Expression> Parser::parseUnaryExpression() {
     Token tok = m_lexer.Peek();
-    ast::UnaryExpression expr;
+    ast::Expression expr;
     if (opPrec(tok.type) >= 0) {
         if (tok.type == TokenType::Not || tok.type == TokenType::Sub ||
-            tok.type == TokenType::Sum) {
+            tok.type == TokenType::Add) {
             tok = m_lexer.Next();
             expr.operation = tok;
             expr.operand1 = parseUnaryExpression();
-            return expr;
-        } else if (tok.type = TokenType::OpenParen) {
-            ast::Expression expr = parseBinaryExpression();
+            return std::make_shared<ast::Expression>(expr);
+        } else if (tok.type == TokenType::OpenParen) {
+            sPtr<ast::Expression> expr = parseBinaryExpression(1);
             if (m_lexer.Peek().type == TokenType::CloseParen) {
                 tok = m_lexer.Next();
                 return expr;
@@ -567,13 +540,15 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
         }
     } else if (isPrimitive(tok.type)) {
         tok = m_lexer.Next();
-        sPtr<ast::Expression> prim;
+        ast::Expression expr;
+        ast::Primitive prim;
         prim.value = tok;
-        return prim;
+        expr.operand1 = std::make_shared<ast::Primitive>(prim);
+        return std::make_shared<ast::Expression>(expr);
     }
     return nullptr;
 }
-sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1 = 1) {
+sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
     sPtr<ast::Expression> lhs = parseUnaryExpression();
 
     for (;;) {
@@ -586,12 +561,12 @@ sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1 = 1) {
         if (prec < prec1) {
             return lhs;
         }
-        ast::BinaryExpression expr;
+        ast::Expression expr;
         sPtr<ast::Expression> rhs = parseBinaryExpression(prec + 1);
         expr.operand1 = lhs;
         expr.operand2 = rhs;
         expr.operation = op;
-        lhs = std::make_shared<Expression> expr;
+        lhs = std::make_shared<ast::Expression>(expr);
     }
 }
 

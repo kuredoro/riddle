@@ -129,17 +129,32 @@ public:
             depth--;
         }
     };
-    void visit(ast::Expression* node) override{
+    void visit(ast::Expression* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [IfStatement]> null\n", "", depth);
+        } else {
+            // if binary
+            if (node->operand2) {
+                depth++;
+                node->operand1->accept(*this);
+                fmt::print("{:|>{}}- [BinaryOperator]>\n", "", depth);
+                depth++;
+                node->operand2->accept(*this);
+            } else {
+                fmt::print("{:|>{}}- [UnaryOperator]>\n", "", depth);
+                depth++;
+                node->operand1->accept(*this);
+            }
 
+            depth--;
+        }
     };
-    void visit(ast::UnaryExpression* node) override{
-
-    };
-    void visit(ast::BinaryExpression* node) override{
-
-    };
-    void visit(ast::Primary* node) override{
-
+    void visit(ast::Primary* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [ForLoop]> null\n", "", depth);
+        } else {
+            fmt::print("{:|>{}}- [Primary]>\n", "", depth);
+        }
     };
 
 private:

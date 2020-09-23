@@ -35,8 +35,8 @@ public:
     sPtr<ast::ForLoop> parseForLoop();
     sPtr<ast::IfStatement> parseIfStatement();
     sPtr<ast::Expression> parseExpression();
-    sPtr<ast::UnaryExpression> parseUnaryExpression(int priority);
-    sPtr<ast::BinaryExpression> parseBinaryExpression(int priority);
+    sPtr<ast::Expression> parseUnaryExpression();
+    sPtr<ast::Expression> parseBinaryExpression(int);
     std::vector<Error> getErrors();
 
 private:

@@ -27,8 +27,9 @@ struct WhileLoop;
 struct ForLoop;
 struct IfStatement;
 struct Expression;
-struct UnaryExpression;
-struct BinaryExpression;
+// struct UnaryExpression;
+// struct BinaryExpression;
+struct Primary;
 
 class Visitor {
 public:
@@ -49,8 +50,10 @@ public:
     virtual void visit(ForLoop* node) = 0;
     virtual void visit(IfStatement* node) = 0;
     virtual void visit(Expression* node) = 0;
-    virtual void visit(UnaryExpression* node) = 0;
-    virtual void visit(BinaryExpression* node) = 0;
+    virtual void visit(Primary* node) = 0;
+
+    // virtual void visit(UnaryExpression* node) = 0;
+    // virtual void visit(BinaryExpression* node) = 0;
 };
 
 // TODO: fill the following structs with relevant data
@@ -177,38 +180,21 @@ struct IfStatement : Statement {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
+
 struct Expression : Node {
-    bool isBinary;
-
-    bool operator==(const Expression& other) const {
-        return Node::operator==(other) && isBinary == other.isBinary;
-    }
-    void accept(Visitor& v) override { v.visit(this); }
-};
-struct UnaryExpression : Expression {
-    lexer::Token operation;
-    sPtr<Expression> operand1;
-
-    bool operator==(const UnaryExpression& other) const {
-        return Node::operator==(other) && operand1 == other.operand1 &&
-               operation == other.operation;
-    }
-    void accept(Visitor& v) override { v.visit(this); }
-};
-struct BinaryExpression : Expression {
     sPtr<Expression> operand1;
     sPtr<Expression> operand2;
     lexer::Token operation;
 
-    bool operator==(const BinaryExpression& other) const {
+    bool operator==(const Expression& other) const {
         return Node::operator==(other) && operand1 == other.operand1 &&
                operand2 == other.operand2 && operation == other.operation;
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
 struct Primitive : Expression {
-    lexer : Token value;
-    bool operator==(const BinaryExpression& other) const {
+    lexer::Token value;
+    bool operator==(const Primitive& other) const {
         return Node::operator==(other) && value == other.value;
     }
     void accept(Visitor& v) override { v.visit(this); }
