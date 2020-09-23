@@ -45,7 +45,7 @@ private:
     lexer::Token skipWhile(std::function<bool(lexer::Token)>);
     static bool isNewLine(lexer::Token);
     bool isPrimitive(lexer::TokenType);
-    int opPrec(lexer::TokenType token);
+    int opPrec(lexer::TokenType);
 };
 
 } // namespace parser

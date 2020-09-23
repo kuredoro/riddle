@@ -472,7 +472,7 @@ sPtr<ast::Expression> Parser::parseExpression() {
     return parseBinaryExpression(1);
 }
 
-int opPrec(TokenType token) {
+int Parser::opPrec(TokenType token) {
     switch (token) {
     case TokenType::Or:  // or
     case TokenType::Xor: // xor
@@ -502,7 +502,7 @@ int opPrec(TokenType token) {
     }
 }
 
-bool isPrimitive(TokenType token) {
+bool Parser::isPrimitive(TokenType token) {
     return token == TokenType::Identifier || token == TokenType::Int ||
            token == TokenType::Real || token == TokenType::True ||
            token == TokenType::False;
