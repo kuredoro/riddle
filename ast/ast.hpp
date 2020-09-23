@@ -63,6 +63,9 @@ struct Node {
     virtual void accept(Visitor& v) = 0;
     virtual ~Node() = default;
 };
+struct Expression : Node {
+    void accept(Visitor& v) override { v.visit(this); }
+};
 struct Program : Node {
     std::vector<sPtr<Routine>> routines;
     std::vector<sPtr<Variable>> variables;
@@ -201,9 +204,6 @@ struct IfStatement : Statement {
         return Node::operator==(other) && condition == other.condition &&
                ifBody == other.elseBody && ifBody == other.elseBody;
     }
-    void accept(Visitor& v) override { v.visit(this); }
-};
-struct Expression : Node {
     void accept(Visitor& v) override { v.visit(this); }
 };
 struct UnaryExpression : Expression {
