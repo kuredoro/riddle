@@ -311,27 +311,30 @@ sPtr<ast::RecordType> Parser::parseRecordType() {
         sPtr<ast::Expression> expression;
         switch (currentToken.type)
         {
-        case TokenType::Identifier:
+        case TokenType::Identifier:{
 	        expression = parseExpression();
             ast::RoutineCall* routineCall = dynamic_cast<ast::RoutineCall*>(expression.get());
 	        if (routineCall != nullptr)
 	            return std::make_shared<ast::RoutineCall>(*routineCall);
             else 
                 return parseAssignment(expression);
-        case TokenType::While:
+            }
+        case TokenType::While:{
             return parseWhileLoop();
-        case TokenType::For:
+            }
+        case TokenType::For:{
             return parseForLoop();
-	    case TokenType::If:
+            }
+	    case TokenType::If:{
             return parseIfStatement();
+            }
         default:
             m_errors.push_back(Error{
                 .pos = currentToken.pos,
                 .message = "Unexpected token",
             });
-	    return nullptr;
         }
-        ;
+        return nullptr;
     }
   
     sPtr<ast::Assignment> Parser::parseAssignment(sPtr<ast::Expression> left) {
