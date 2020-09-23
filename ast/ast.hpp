@@ -206,5 +206,12 @@ struct BinaryExpression : Expression {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
+struct Primitive : Expression {
+    lexer : Token value;
+    bool operator==(const BinaryExpression& other) const {
+        return Node::operator==(other) && value == other.value;
+    }
+    void accept(Visitor& v) override { v.visit(this); }
+};
 
 } // namespace ast

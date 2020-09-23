@@ -524,7 +524,6 @@ int opPrec(TokenType token) {
         return 6;
     case TokenType::Dot: // .
         return 7;
-
     default:
         return -1; // unknown op
     }
@@ -537,17 +536,27 @@ bool isPrimitive(TokenType token) {
 }
 
 sPtr<ast::Expression> Parser::parseUnaryExpression() {
-    // TODO check BRACES
-    Token tok = m_lexer.Next();
+    Token tok = m_lexer.Peek();
     ast::UnaryExpression expr;
     if (opPrec(tok.type) >= 0) {
-        /* add operand chain */
         if (tok.type == TokenType::Not || tok.type == TokenType::Sub ||
             tok.type == TokenType::Sum) {
-            // expr.begin = tok.pos;
+            tok = m_lexer.Next();
             expr.operation = tok;
             expr.operand1 = parseUnaryExpression();
             return expr;
+        } else if (tok.type = TokenType::OpenParen) {
+            ast::Expression expr = parseBinaryExpression();
+            if (m_lexer.Peek().type == TokenType::CloseParen) {
+                tok = m_lexer.Next();
+                return expr;
+            }
+            // error
+            m_errors.push_back(Error{
+                .pos = tok.pos,
+                .message = "Expected to find ')'",
+            });
+            return nullptr;
         } else {
             // throw error
             m_errors.push_back(Error{
@@ -557,7 +566,10 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
             return nullptr;
         }
     } else if (isPrimitive(tok.type)) {
-        return tok; // ToDo wrap token as an expression
+        tok = m_lexer.Next();
+        sPtr<ast::Expression> prim;
+        prim.value = tok;
+        return prim;
     }
     return nullptr;
 }
