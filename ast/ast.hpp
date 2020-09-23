@@ -29,7 +29,7 @@ struct IfStatement;
 struct Expression;
 // struct UnaryExpression;
 // struct BinaryExpression;
-struct Primary;
+struct Primitive;
 
 class Visitor {
 public:
@@ -50,7 +50,7 @@ public:
     virtual void visit(ForLoop* node) = 0;
     virtual void visit(IfStatement* node) = 0;
     virtual void visit(Expression* node) = 0;
-    virtual void visit(Primary* node) = 0;
+    virtual void visit(Primitive* node) = 0;
 
     // virtual void visit(UnaryExpression* node) = 0;
     // virtual void visit(BinaryExpression* node) = 0;

@@ -131,29 +131,28 @@ public:
     };
     void visit(ast::Expression* node) override {
         if (node == nullptr) {
-            fmt::print("{:|>{}}- [IfStatement]> null\n", "", depth);
+            fmt::print("{:|>{}}- [Expression]> null\n", "", depth);
         } else {
             // if binary
             if (node->operand2) {
                 depth++;
                 node->operand1->accept(*this);
                 fmt::print("{:|>{}}- [BinaryOperator]>\n", "", depth);
-                depth++;
                 node->operand2->accept(*this);
             } else {
-                fmt::print("{:|>{}}- [UnaryOperator]>\n", "", depth);
+                fmt::print("{:|>{}}- [UnaryOperator, '{}']>\n", "", depth,
+                           node->operation.lit);
                 depth++;
                 node->operand1->accept(*this);
             }
-
             depth--;
         }
     };
-    void visit(ast::Primary* node) override {
+    void visit(ast::Primitive* node) override {
         if (node == nullptr) {
-            fmt::print("{:|>{}}- [ForLoop]> null\n", "", depth);
+            fmt::print("{:|>{}}- [Primary]> null\n", "", depth);
         } else {
-            fmt::print("{:|>{}}- [Primary]>\n", "", depth);
+            fmt::print("{:|>{}}- [Primary, {}]>\n", "", depth, node->value.lit);
         }
     };
 
@@ -184,7 +183,7 @@ int main(int argc, char* argv[]) {
         lexer::Lexer lx{line};
         parser::Parser parser(lx);
 
-        auto ast = parser.parseForLoop();
+        auto ast = parser.parseExpression();
         auto errors = parser.getErrors();
         if (errors.empty()) {
             PrintVisitor v;

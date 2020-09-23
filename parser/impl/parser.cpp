@@ -514,11 +514,14 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
     if (opPrec(tok.type) >= 0) {
         if (tok.type == TokenType::Not || tok.type == TokenType::Sub ||
             tok.type == TokenType::Add) {
+
             tok = m_lexer.Next();
             expr.operation = tok;
             expr.operand1 = parseUnaryExpression();
             return std::make_shared<ast::Expression>(expr);
+
         } else if (tok.type == TokenType::OpenParen) {
+
             sPtr<ast::Expression> expr = parseBinaryExpression(1);
             if (m_lexer.Peek().type == TokenType::CloseParen) {
                 tok = m_lexer.Next();
@@ -549,6 +552,7 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
     return nullptr;
 }
 sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
+
     sPtr<ast::Expression> lhs = parseUnaryExpression();
 
     for (;;) {
@@ -562,9 +566,8 @@ sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
             return lhs;
         }
         ast::Expression expr;
-        sPtr<ast::Expression> rhs = parseBinaryExpression(prec + 1);
         expr.operand1 = lhs;
-        expr.operand2 = rhs;
+        expr.operand2 = parseBinaryExpression(prec + 1);
         expr.operation = op;
         lhs = std::make_shared<ast::Expression>(expr);
     }
