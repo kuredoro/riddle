@@ -29,7 +29,7 @@ public:
     sPtr<ast::Variable> parseVariable();
     sPtr<ast::Body> parseBody();
     sPtr<ast::Statement> parseStatement();
-    sPtr<ast::Assignment> parseAssignment();
+    sPtr<ast::Assignment> parseAssignment(sPtr<ast::Expression> left);
     sPtr<ast::RoutineCall> parseRoutineCall();
     sPtr<ast::WhileLoop> parseWhileLoop();
     sPtr<ast::ForLoop> parseForLoop();
