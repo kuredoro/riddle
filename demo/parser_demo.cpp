@@ -138,6 +138,9 @@ public:
     void visit(ast::BinaryExpression* node) override{
 
     };
+    void visit(ast::Primary* node) override{
+
+    };
 
 private:
     size_t depth;

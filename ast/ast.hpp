@@ -178,20 +178,32 @@ struct IfStatement : Statement {
     void accept(Visitor& v) override { v.visit(this); }
 };
 struct Expression : Node {
-    sPtr<Expression> operator1;
-    sPtr<Expression> operator2;
-    lexer::Token operation;
+    bool isBinary;
 
     bool operator==(const Expression& other) const {
-        return Node::operator==(other) && operator1 == other.operator1 &&
-               operator2 == other.operator2 && operation == other.operation;
+        return Node::operator==(other) && isBinary == other.isBinary;
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
 struct UnaryExpression : Expression {
+    lexer::Token operation;
+    sPtr<Expression> operand1;
+
+    bool operator==(const UnaryExpression& other) const {
+        return Node::operator==(other) && operand1 == other.operand1 &&
+               operation == other.operation;
+    }
     void accept(Visitor& v) override { v.visit(this); }
 };
 struct BinaryExpression : Expression {
+    sPtr<Expression> operand1;
+    sPtr<Expression> operand2;
+    lexer::Token operation;
+
+    bool operator==(const BinaryExpression& other) const {
+        return Node::operator==(other) && operand1 == other.operand1 &&
+               operand2 == other.operand2 && operation == other.operation;
+    }
     void accept(Visitor& v) override { v.visit(this); }
 };
 

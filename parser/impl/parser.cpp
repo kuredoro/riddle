@@ -468,98 +468,119 @@ sPtr<ast::IfStatement> Parser::parseIfStatement() {
 
 // ---- @aabounegm
 
-ssPtr<ast::Expression> Parser::parseExpression() {
-    // TODO: Concrete implementation
-    // Expression : Relation { ( and | or | xor ) Relation }
-    /* Relation : Simple [ ( < | <= | > | >= | = | /= ) Simple ]
-        Simple : Factor { ( + | - ) Factor }
-        Factor : Summand { ( * | / | % ) Summand }
-        Summand : Primary | ( Expression )
-        */
-    // Token currentToken = m_lexer.Next();
-    int p;
-    ast::Expression expression = parseBinaryExpression(-1);
-    while ((p = getPriority(m_lexer.Peek().type)) >=
-           0) { // TODO move to the parse Binary
-        expression.operand1 = expression;
-        expression.operation = m_lexer.Next();
-        expression.operand2 = parseBinaryExpression(p);
-        /* code */
-    }
-
-    // x = parseBinaryExpression();
-    // while Peek next token getPriority() >=0 :
-    //  new bin Expr:= x += parseBinaryExpression();
-    //
-}
-
-sPtr<ast::Expression> Parser::parseBinaryExpression(int priority) {
-    ast::Expression expression;
-    expression.operand1 =
-        parseUnaryExpression(priority); // do I need priority for unary?
-    int p;
-    TokenType opType = m_lexer.Peek().type;
-    if ((p = getPriority(opType)>=0) {
-        if (p < priority) {
-            return expression.operand1;
-        }
-        expression.operator= m_lexer.Next();
-        expression.operand2 = parseBinaryExpression(p);
-    }
+sPtr<ast::Expression> Parser::parseExpression() {
+    ast::Expression expression = parseBinaryExpression();
     return expression;
 }
 
-sPtr<ast::Expression> Parser::parseUnaryExpression(int priority) {
-    TokenType type = m_lexer.Peek().type;
-    switch (type) {
-        // primitives
-    case TokenType::Identifier:
-    case TokenType::Int:
-    case TokenType::Real:
-    case TokenType::True:
-    case TokenType::False:
-        // return type.Next()???
-        break;
-    case TokenType::OpenParen:
-        ast::Expression expr = parseBinaryExpression(priority + 1);
-        if (m_lexer.Peek().type == TokenType::CloseParen) {
-            return expr;
-        }
-        // error
-        return nullptr
-    }
-    // else if (opType = TokenType::OpenParen){
-    //     // check braces
+// sPtr<ast::Expression> Parser::parseUnaryExpression(int priority) {
+//     TokenType type = m_lexer.Peek().type;
+//     switch (type) {
+//         // primitives
+//     case TokenType::Identifier:
+//     case TokenType::Int:
+//     case TokenType::Real:
+//     case TokenType::True:
+//     case TokenType::False:
+//         // return type.Next()???
+//         break;
+//     case TokenType::OpenParen:
+//         ast::Expression expr = parseBinaryExpression(priority + 1);
+//         if (m_lexer.Peek().type == TokenType::CloseParen) {
+//             return expr;
+//         }
+//         // error
+//         return nullptr
+//     }
+//     // else if (opType = TokenType::OpenParen){
+//     //     // check braces
 
-    // }
-    return nullptr
+//     // }
+//     return nullptr
+// }
+
+int opPrec(TokenType token) {
+    switch (token) {
+    case TokenType::Or:  // or
+    case TokenType::Xor: // xor
+        return 1;
+    case TokenType::And: // and
+        return 2;
+    case TokenType::Eq:      // =
+    case TokenType::Neq:     // /=
+    case TokenType::Less:    // <
+    case TokenType::Leq:     // <=
+    case TokenType::Greater: // >
+    case TokenType::Geq:     // >=
+        return 3;
+    case TokenType::Add: // +
+    case TokenType::Sub: // -
+        return 4;
+    case TokenType::Mul: // *
+    case TokenType::Div: // /
+    case TokenType::Mod: // %
+        return 5;
+    case TokenType::Not: // not
+        return 6;
+    case TokenType::Dot: // .
+        return 7;
+
+    default:
+        return -1; // unknown op
+    }
 }
 
-int getPriority(TokenType token) {
-    switch (token) {
-    case TokenType::And:
-    case TokenType::Or:
-    case TokenType::Xor:
-        return 0;
-    case TokenType::Less:
-    case TokenType::Greater:
-    case TokenType::Eq:
-    case TokenType::Leq:
-    case TokenType::Geq:
-    case TokenType::Neq:
-        return 1;
-    case TokenType::Add:
-    case TokenType::Sub:
-        return 2;
-    case TokenType::Mul:
-    case TokenType::Div:
-    case TokenType::Mod:
-        return 3;
-    case TokenType::Not:
-        return 4;
+bool isPrimitive(TokenType token) {
+    return token == TokenType::Identifier || token == TokenType::Int ||
+           token == TokenType::Real || token == TokenType::True ||
+           token == TokenType::False;
+}
+
+sPtr<ast::Expression> Parser::parseUnaryExpression() {
+    // TODO check BRACES
+    Token tok = m_lexer.Next();
+    ast::UnaryExpression expr;
+    if (opPrec(tok.type) >= 0) {
+        /* add operand chain */
+        if (tok.type == TokenType::Not || tok.type == TokenType::Sub ||
+            tok.type == TokenType::Sum) {
+            // expr.begin = tok.pos;
+            expr.operation = tok;
+            expr.operand1 = parseUnaryExpression();
+            return expr;
+        } else {
+            // throw error
+            m_errors.push_back(Error{
+                .pos = tok.pos,
+                .message = "Expected to find unary operator",
+            });
+            return nullptr;
+        }
+    } else if (isPrimitive(tok.type)) {
+        return tok; // ToDo wrap token as an expression
     }
-    // throw error
-    return -1;
+    return nullptr;
+}
+sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1 = 1) {
+    sPtr<ast::Expression> lhs = parseUnaryExpression();
+
+    for (;;) {
+        Token op = m_lexer.Peek();
+        int prec = opPrec(op.type);
+        if (prec == -1) {
+            return lhs;
+        }
+        op = m_lexer.Next();
+        if (prec < prec1) {
+            return lhs;
+        }
+        ast::BinaryExpression expr;
+        sPtr<ast::Expression> rhs = parseBinaryExpression(prec + 1);
+        expr.operand1 = lhs;
+        expr.operand2 = rhs;
+        expr.operation = op;
+        lhs = std::make_shared<Expression> expr;
+    }
 }
 
 // ---- End separation
