@@ -571,7 +571,7 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
                     return nullptr;
                 }
                 t = m_lexer.Next(); // read ')'
-                expr.operand1 = std::make_shared<ast::Expression>(rc);
+                expr.operand1 = std::make_shared<ast::RoutineCall>(rc);
                 return std::make_shared<ast::Expression>(expr);
 
             } else if (t.type == TokenType::Dot ||
@@ -579,19 +579,19 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
                 // we can have a.b.c[7+9].d[0].a
                 // Identifier { . Identifier | [ Expression ] }
                 ast::ModifiablePrimary mp;
-                ast::Primitive root;
-                root.value = tok;
-                expr.operation = t;
+                // ast::Primitive root;
+                // root.value = tok;
+                // expr.operation = t;
 
-                mp.args.push_back(std::make_shared<ast::Expression>(root));
+                // mp.args.push_back(std::make_shared<ast::Expression>(root));
 
                 while (m_lexer.Peek().type == TokenType::Dot ||
                        m_lexer.Peek().type == TokenType::OpenBrack) {
 
-                    t = m_lexer.Next();
+                    t = m_lexer.Next(); // read either dot or '['
                     ast::Primitive e;
                     e.value = t;
-                    mp.args.push_back(std::make_shared<ast::Expression>(e));
+                    mp.args.push_back(std::make_shared<ast::Primitive>(e));
                     if (t.type == TokenType::Dot) {
                         // read, check and save identifier
 
@@ -603,10 +603,12 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
                             return nullptr;
                         }
                         e.value = m_lexer.Next();
-                        mp.args.push_back(std::make_shared<ast::Expression>(e));
+                        mp.args.push_back(std::make_shared<ast::Primitive>(e));
 
                     } else { // if []
+
                         mp.args.push_back(parseBinaryExpression(0));
+
                         // read and save expression
                         if (m_lexer.Peek().type != TokenType::CloseBrack) {
                             m_errors.push_back(Error{
@@ -618,7 +620,7 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
                         t = m_lexer.Next();
                     }
                 }
-                expr.operand1 = std::make_shared<ast::Expression>(mp);
+                expr.operand1 = std::make_shared<ast::ModifiablePrimary>(mp);
                 return std::make_shared<ast::Expression>(expr);
             }
         }
@@ -644,6 +646,7 @@ sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
         if (prec < prec1) {
             return lhs;
         }
+
         op = m_lexer.Next();
 
         ast::Expression expr;
