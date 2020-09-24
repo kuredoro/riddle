@@ -30,6 +30,8 @@ struct Expression;
 // struct UnaryExpression;
 // struct BinaryExpression;
 struct Primitive;
+struct RoutineCall;
+struct ModifiablePrimary;
 
 class Visitor {
 public:
@@ -45,13 +47,14 @@ public:
     virtual void visit(Body* node) = 0;
     virtual void visit(Statement* node) = 0;
     virtual void visit(Assignment* node) = 0;
-    virtual void visit(RoutineCall* node) = 0;
+    // virtual void visit(RoutineCall* node) = 0;
     virtual void visit(WhileLoop* node) = 0;
     virtual void visit(ForLoop* node) = 0;
     virtual void visit(IfStatement* node) = 0;
     virtual void visit(Expression* node) = 0;
     virtual void visit(Primitive* node) = 0;
-
+    virtual void visit(ModifiablePrimary* node) = 0;
+    virtual void visit(RoutineCall* node) = 0;
     // virtual void visit(UnaryExpression* node) = 0;
     // virtual void visit(BinaryExpression* node) = 0;
 };
@@ -145,9 +148,9 @@ struct Statement : Node {
 struct Assignment : Statement {
     void accept(Visitor& v) override { v.visit(this); }
 };
-struct RoutineCall : Statement {
-    void accept(Visitor& v) override { v.visit(this); }
-};
+// struct RoutineCall : Statement {
+//     void accept(Visitor& v) override { v.visit(this); }
+// };
 struct WhileLoop : Statement {
     sPtr<Expression> condition;
     sPtr<Body> body;
@@ -199,5 +202,22 @@ struct Primitive : Expression {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
+struct ModifiablePrimary : Expression {
+    std::vector<sPtr<Expression>> args;
 
+    bool operator==(const ModifiablePrimary& other) const {
+        return Node::operator==(other) && args == other.args;
+    }
+    void accept(Visitor& v) override { v.visit(this); }
+};
+struct RoutineCall : Expression {
+    lexer::Token routine;
+    std::vector<sPtr<Expression>> args;
+
+    bool operator==(const RoutineCall& other) const {
+        return Node::operator==(other) && args == other.args &&
+               routine == other.routine;
+    }
+    void accept(Visitor& v) override { v.visit(this); }
+};
 } // namespace ast

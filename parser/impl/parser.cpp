@@ -496,7 +496,8 @@ int Parser::opPrec(TokenType token) {
     case TokenType::Not:       // not
     case TokenType::OpenParen: // ()
         return 6;
-    case TokenType::Dot: // .
+    case TokenType::Dot:       // .
+    case TokenType::OpenBrack: // []
         return 7;
     default:
         return -1; // unknown op
@@ -544,6 +545,77 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
         }
     } else if (isPrimitive(tok.type)) {
         tok = m_lexer.Next();
+        // check if More Then Identifier
+        if (tok.type == TokenType::Identifier) {
+
+            Token t = m_lexer.Peek();
+            if (t.type == TokenType::OpenParen) {
+                // parse routineCall:
+                ast::RoutineCall rc;
+                rc.routine = tok; // save the function name
+                do {
+                    t = m_lexer.Next(); // first call-read '(', others - ','
+                    // read expression
+                    sPtr<ast::Expression> expr = parseBinaryExpression(0);
+                    // append to the vector
+                    rc.args.push_back(expr);
+
+                } while (m_lexer.Peek().type == TokenType::Comma);
+
+                if (m_lexer.Peek().type != TokenType::CloseParen) {
+                    m_errors.push_back(Error{
+                        .pos = m_lexer.Peek().pos,
+                        .message = "Expected to find ')'",
+                    });
+                    return nullptr;
+                }
+                t = m_lexer.Next(); // read ')'
+                return std::make_shared<ast::Expression>(rc);
+            } else if (t.type == TokenType::Dot ||
+                       t.type == TokenType::OpenBrack) {
+                // we can have a.b.c[7+9].d[0].a
+                // Identifier { . Identifier | [ Expression ] }
+                ast::ModifiablePrimary mp;
+                ast::Primitive root;
+                root.value = tok;
+                mp.args.push_back(std::make_shared<ast::Expression>(root));
+
+                while (m_lexer.Peek().type == TokenType::Dot ||
+                       m_lexer.Peek().type == TokenType::OpenBrack) {
+
+                    t = m_lexer.Next();
+                    ast::Primitive e;
+                    e.value = t;
+                    mp.args.push_back(std::make_shared<ast::Expression>(e));
+                    if (t.type == TokenType::Dot) {
+                        // read, check and save identifier
+
+                        if (m_lexer.Peek().type != TokenType::Identifier) {
+                            m_errors.push_back(Error{
+                                .pos = m_lexer.Peek().pos,
+                                .message = "Expected to find an identifier",
+                            });
+                            return nullptr;
+                        }
+                        e.value = m_lexer.Next();
+                        mp.args.push_back(std::make_shared<ast::Expression>(e));
+
+                    } else { // if []
+                        mp.args.push_back(parseBinaryExpression(0));
+                        // read and save expression
+                        if (m_lexer.Peek().type != TokenType::CloseBrack) {
+                            m_errors.push_back(Error{
+                                .pos = m_lexer.Peek().pos,
+                                .message = "Expected to find a ']' token",
+                            });
+                            return nullptr;
+                        }
+                        t = m_lexer.Next();
+                    }
+                }
+                return std::make_shared<ast::Expression>(mp);
+            }
+        }
         ast::Expression expr;
         ast::Primitive prim;
         prim.value = tok;
@@ -581,8 +653,8 @@ sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
 bool Parser::isNewLine(Token tok) { return tok.type == TokenType::NewLine; }
 
 /**
- * Skips all tokens that match the given predicate, returning the first token
- * that doesn't
+ * Skips all tokens that match the given predicate, returning the first
+ * token that doesn't
  */
 Token Parser::skipWhile(std::function<bool(Token)> pred) {
     while (pred(m_lexer.Peek())) {

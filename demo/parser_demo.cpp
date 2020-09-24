@@ -88,9 +88,9 @@ public:
     void visit(ast::Assignment* node) override{
 
     };
-    void visit(ast::RoutineCall* node) override{
+    // void visit(ast::RoutineCall* node) override{
 
-    };
+    // };
     void visit(ast::WhileLoop* node) override {
         if (node == nullptr) {
             fmt::print("{:|>{}}- [WhileLoop]> null\n", "", depth);
@@ -154,6 +154,21 @@ public:
             fmt::print("{:|>{}}- [Primary]> null\n", "", depth);
         } else {
             fmt::print("{:|>{}}- [Primary, {}]>\n", "", depth, node->value.lit);
+        }
+    };
+    void visit(ast::ModifiablePrimary* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [ModifiablePrimary]> null\n", "", depth);
+        } else {
+            fmt::print("{:|>{}}- [ModifiablePrimary]>\n", "", depth);
+        }
+    };
+    void visit(ast::RoutineCall* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [RoutineCall]> null\n", "", depth);
+        } else {
+            fmt::print("{:|>{}}- [RoutineCall, {}]>\n", "", depth,
+                       node->routine.lit);
         }
     };
 
