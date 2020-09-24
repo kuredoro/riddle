@@ -135,26 +135,28 @@ public:
         } else {
             // if binary
             if (node->operand2) {
+
+                fmt::print("{:|>{}}- [BinaryOperator]> {}\n", "", depth,
+                           node->operation.lit);
                 depth++;
                 node->operand1->accept(*this);
-                fmt::print("{:|>{}}- [BinaryOperator, '{}']>\n", "", depth,
-                           node->operation.lit);
                 node->operand2->accept(*this);
+                depth--;
             } else {
 
-                fmt::print("{:|>{}}- [UnaryOperator, '{}']>\n", "", depth,
+                fmt::print("{:|>{}}- [UnaryOperator]> {}\n", "", depth,
                            node->operation.lit);
                 depth++;
                 node->operand1->accept(*this);
+                depth--;
             }
-            depth--;
         }
     };
     void visit(ast::Primitive* node) override {
         if (node == nullptr) {
             fmt::print("{:|>{}}- [Primitive]> null\n", "", depth);
         } else {
-            fmt::print("{:|>{}}- [Primitive, '{}']>\n", "", depth,
+            fmt::print("{:|>{}}- [Primitive]> {}\n", "", depth,
                        node->value.lit);
         }
     };
@@ -162,7 +164,7 @@ public:
         if (node == nullptr) {
             fmt::print("{:|>{}}- [ModifiablePrimary]> null\n", "", depth);
         } else {
-            fmt::print("{:|>{}}- [ModifiablePrimary (size {})]>\n", "", depth,
+            fmt::print("{:|>{}}- [ModifiablePrimary]> size {} \n", "", depth,
                        node->args.size());
             depth++;
             for (int i = 0; i < node->args.size(); i++) {
@@ -175,7 +177,7 @@ public:
         if (node == nullptr) {
             fmt::print("{:|>{}}- [RoutineCall]> null\n", "", depth);
         } else {
-            fmt::print("{:|>{}}- [RoutineCall, {}]>\n", "", depth,
+            fmt::print("{:|>{}}- [RoutineCall]> {}\n", "", depth,
                        node->routine.lit);
             depth++;
             for (int i = 0; i < node->args.size(); i++) {
