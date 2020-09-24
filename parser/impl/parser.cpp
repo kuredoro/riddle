@@ -469,7 +469,7 @@ sPtr<ast::IfStatement> Parser::parseIfStatement() {
 // ---- @aabounegm
 
 sPtr<ast::Expression> Parser::parseExpression() {
-    return parseBinaryExpression(1);
+    return parseBinaryExpression(0);
 }
 
 int Parser::opPrec(TokenType token) {
@@ -493,7 +493,8 @@ int Parser::opPrec(TokenType token) {
     case TokenType::Div: // /
     case TokenType::Mod: // %
         return 5;
-    case TokenType::Not: // not
+    case TokenType::Not:       // not
+    case TokenType::OpenParen: // ()
         return 6;
     case TokenType::Dot: // .
         return 7;
@@ -521,8 +522,8 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
             return std::make_shared<ast::Expression>(expr);
 
         } else if (tok.type == TokenType::OpenParen) {
-
-            sPtr<ast::Expression> expr = parseBinaryExpression(1);
+            tok = m_lexer.Next();
+            sPtr<ast::Expression> expr = parseBinaryExpression(0);
             if (m_lexer.Peek().type == TokenType::CloseParen) {
                 tok = m_lexer.Next();
                 return expr;
@@ -551,6 +552,7 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
     }
     return nullptr;
 }
+
 sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
 
     sPtr<ast::Expression> lhs = parseUnaryExpression();
@@ -561,10 +563,11 @@ sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
         if (prec == -1) {
             return lhs;
         }
-        op = m_lexer.Next();
         if (prec < prec1) {
             return lhs;
         }
+        op = m_lexer.Next();
+
         ast::Expression expr;
         expr.operand1 = lhs;
         expr.operation = op;
