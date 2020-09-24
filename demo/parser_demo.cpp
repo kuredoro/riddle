@@ -141,6 +141,7 @@ public:
                            node->operation.lit);
                 node->operand2->accept(*this);
             } else {
+
                 fmt::print("{:|>{}}- [UnaryOperator, '{}']>\n", "", depth,
                            node->operation.lit);
                 depth++;
@@ -151,9 +152,10 @@ public:
     };
     void visit(ast::Primitive* node) override {
         if (node == nullptr) {
-            fmt::print("{:|>{}}- [Primary]> null\n", "", depth);
+            fmt::print("{:|>{}}- [Primitive]> null\n", "", depth);
         } else {
-            fmt::print("{:|>{}}- [Primary, {}]>\n", "", depth, node->value.lit);
+            fmt::print("{:|>{}}- [Primitive, {}]>\n", "", depth,
+                       node->value.lit);
         }
     };
     void visit(ast::ModifiablePrimary* node) override {

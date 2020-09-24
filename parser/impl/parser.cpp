@@ -553,12 +553,13 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
                 // parse routineCall:
                 ast::RoutineCall rc;
                 rc.routine = tok; // save the function name
+                expr.operation = t;
                 do {
                     t = m_lexer.Next(); // first call-read '(', others - ','
                     // read expression
-                    sPtr<ast::Expression> expr = parseBinaryExpression(0);
+                    sPtr<ast::Expression> e = parseBinaryExpression(0);
                     // append to the vector
-                    rc.args.push_back(expr);
+                    rc.args.push_back(e);
 
                 } while (m_lexer.Peek().type == TokenType::Comma);
 
@@ -570,7 +571,9 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
                     return nullptr;
                 }
                 t = m_lexer.Next(); // read ')'
-                return std::make_shared<ast::Expression>(rc);
+                expr.operand1 = std::make_shared<ast::Expression>(rc);
+                return std::make_shared<ast::Expression>(expr);
+
             } else if (t.type == TokenType::Dot ||
                        t.type == TokenType::OpenBrack) {
                 // we can have a.b.c[7+9].d[0].a
@@ -578,6 +581,8 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
                 ast::ModifiablePrimary mp;
                 ast::Primitive root;
                 root.value = tok;
+                expr.operation = t;
+
                 mp.args.push_back(std::make_shared<ast::Expression>(root));
 
                 while (m_lexer.Peek().type == TokenType::Dot ||
@@ -613,7 +618,8 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
                         t = m_lexer.Next();
                     }
                 }
-                return std::make_shared<ast::Expression>(mp);
+                expr.operand1 = std::make_shared<ast::Expression>(mp);
+                return std::make_shared<ast::Expression>(expr);
             }
         }
         ast::Expression expr;
