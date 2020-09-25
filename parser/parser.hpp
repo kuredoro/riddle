@@ -30,13 +30,14 @@ public:
     sPtr<ast::Body> parseBody();
     sPtr<ast::Statement> parseStatement();
     sPtr<ast::Assignment> parseAssignment();
-    sPtr<ast::RoutineCall> parseRoutineCall();
     sPtr<ast::WhileLoop> parseWhileLoop();
     sPtr<ast::ForLoop> parseForLoop();
     sPtr<ast::IfStatement> parseIfStatement();
     sPtr<ast::Expression> parseExpression();
     sPtr<ast::Expression> parseUnaryExpression();
     sPtr<ast::Expression> parseBinaryExpression(int prec1 = 0);
+    sPtr<ast::RoutineCall> parseRoutineCall();
+    sPtr<ast::ModifiablePrimary> parseModifiablePrimary(lexer::Token);
     std::vector<Error> getErrors();
 
 private:

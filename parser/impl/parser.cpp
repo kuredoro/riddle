@@ -513,15 +513,15 @@ bool Parser::isPrimitive(TokenType token) {
 
 sPtr<ast::Expression> Parser::parseUnaryExpression() {
     Token tok = m_lexer.Peek();
-    ast::Expression expr;
+    ast::UnaryExpression expr;
     if (opPrec(tok.type) >= 0) {
         if (tok.type == TokenType::Not || tok.type == TokenType::Sub ||
             tok.type == TokenType::Add) {
 
             tok = m_lexer.Next();
             expr.operation = tok;
-            expr.operand1 = parseUnaryExpression();
-            return std::make_shared<ast::Expression>(expr);
+            expr.operand = parseUnaryExpression();
+            return std::make_shared<ast::UnaryExpression>(expr);
 
         } else if (tok.type == TokenType::OpenParen) {
             tok = m_lexer.Next();
@@ -555,7 +555,7 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
                 // parse routineCall:
                 ast::RoutineCall rc;
                 rc.routine = tok; // save the function name
-                expr.operation = t;
+                // expr.operation = t;
                 do {
                     t = m_lexer.Next(); // first call-read '(', others - ','
                     // read expression
@@ -573,64 +573,22 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
                     return nullptr;
                 }
                 t = m_lexer.Next(); // read ')'
-                expr.operand1 = std::make_shared<ast::RoutineCall>(rc);
-                return std::make_shared<ast::Expression>(expr);
+                return std::make_shared<ast::RoutineCall>(rc);
+                // return std::make_shared<ast::Expression>(expr);
 
             } else if (t.type == TokenType::Dot ||
                        t.type == TokenType::OpenBrack) {
                 // we can have a.b.c[7+9].d[0].a
                 // Identifier { . Identifier | [ Expression ] }
-                ast::ModifiablePrimary mp;
-                // ast::Primitive root;
-                // root.value = tok;
-                // expr.operation = t;
-
-                // mp.args.push_back(std::make_shared<ast::Expression>(root));
-
-                while (m_lexer.Peek().type == TokenType::Dot ||
-                       m_lexer.Peek().type == TokenType::OpenBrack) {
-
-                    t = m_lexer.Next(); // read either dot or '['
-                    ast::Primitive e;
-                    e.value = t;
-                    mp.args.push_back(std::make_shared<ast::Primitive>(e));
-                    if (t.type == TokenType::Dot) {
-                        // read, check and save identifier
-
-                        if (m_lexer.Peek().type != TokenType::Identifier) {
-                            m_errors.push_back(Error{
-                                .pos = m_lexer.Peek().pos,
-                                .message = "Expected to find an identifier",
-                            });
-                            return nullptr;
-                        }
-                        e.value = m_lexer.Next();
-                        mp.args.push_back(std::make_shared<ast::Primitive>(e));
-
-                    } else { // if []
-
-                        mp.args.push_back(parseBinaryExpression(0));
-
-                        // read and save expression
-                        if (m_lexer.Peek().type != TokenType::CloseBrack) {
-                            m_errors.push_back(Error{
-                                .pos = m_lexer.Peek().pos,
-                                .message = "Expected to find a ']' token",
-                            });
-                            return nullptr;
-                        }
-                        t = m_lexer.Next();
-                    }
-                }
-                expr.operand1 = std::make_shared<ast::ModifiablePrimary>(mp);
-                return std::make_shared<ast::Expression>(expr);
+                return parseModifiablePrimary(tok); // pass Identifier
             }
         }
-        ast::Expression expr;
+        // ast::Expression expr;
         ast::Primitive prim;
         prim.value = tok;
-        expr.operand1 = std::make_shared<ast::Primitive>(prim);
-        return std::make_shared<ast::Expression>(expr);
+        return std::make_shared<ast::Primitive>(prim);
+        // expr.operand = std::make_shared<ast::Primitive>(prim);
+        // return std::make_shared<ast::Expression>(expr);
     }
     return nullptr;
 }
@@ -649,13 +607,58 @@ sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
 
         op = m_lexer.Next();
 
-        ast::Expression expr;
+        ast::BinaryExpression expr;
         expr.operand1 = lhs;
         expr.operation = op;
         expr.operand2 = parseBinaryExpression(prec + 1);
-        lhs = std::make_shared<ast::Expression>(expr);
+        lhs = std::make_shared<ast::BinaryExpression>(expr);
     }
 }
+
+sPtr<ast::ModifiablePrimary> Parser::parseModifiablePrimary(Token root) {
+    ast::ModifiablePrimary mp;
+    Token t;
+    ast::Primitive r;
+    r.value = root;
+    mp.args.push_back(std::make_shared<ast::Primitive>(r));
+
+    while (m_lexer.Peek().type == TokenType::Dot ||
+           m_lexer.Peek().type == TokenType::OpenBrack) {
+
+        t = m_lexer.Next(); // read either dot or '['
+        ast::Primitive e;
+        e.value = t;
+        mp.args.push_back(std::make_shared<ast::Primitive>(e));
+        if (t.type == TokenType::Dot) {
+            // read, check and save identifier
+
+            if (m_lexer.Peek().type != TokenType::Identifier) {
+                m_errors.push_back(Error{
+                    .pos = m_lexer.Peek().pos,
+                    .message = "Expected to find an identifier",
+                });
+                return nullptr;
+            }
+            e.value = m_lexer.Next();
+            mp.args.push_back(std::make_shared<ast::Primitive>(e));
+
+        } else { // if []
+
+            mp.args.push_back(parseExpression());
+
+            // read and save expression
+            if (m_lexer.Peek().type != TokenType::CloseBrack) {
+                m_errors.push_back(Error{
+                    .pos = m_lexer.Peek().pos,
+                    .message = "Expected to find a ']' token",
+                });
+                return nullptr;
+            }
+            t = m_lexer.Next();
+        }
+    }
+    return std::make_shared<ast::ModifiablePrimary>(mp);
+};
 
 // ---- End separation
 

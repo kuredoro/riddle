@@ -129,27 +129,30 @@ public:
             depth--;
         }
     };
-    void visit(ast::Expression* node) override {
+    void visit(ast::Expression* node) override{
+
+    };
+    void visit(ast::UnaryExpression* node) override {
         if (node == nullptr) {
-            fmt::print("{:|>{}}- [Expression]> null\n", "", depth);
+            fmt::print("{:|>{}}- [UnaryExpression]> null\n", "", depth);
         } else {
-            // if binary
-            if (node->operand2 != nullptr) {
-
-                fmt::print("{:|>{}}- [BinaryOperator]> {}\n", "", depth,
-                           node->operation.lit);
-                depth++;
-                node->operand1->accept(*this);
-                node->operand2->accept(*this);
-                depth--;
-            } else {
-
-                fmt::print("{:|>{}}- [UnaryOperator]> {}\n", "", depth,
-                           node->operation.lit);
-                depth++;
-                node->operand1->accept(*this);
-                depth--;
-            }
+            fmt::print("{:|>{}}- [UnaryExpression]> {}\n", "", depth,
+                       node->operation.lit);
+            depth++;
+            node->operand->accept(*this);
+            depth--;
+        }
+    };
+    void visit(ast::BinaryExpression* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [BinaryExpression]> null\n", "", depth);
+        } else {
+            fmt::print("{:|>{}}- [BinaryOperator]> {}\n", "", depth,
+                       node->operation.lit);
+            depth++;
+            node->operand1->accept(*this);
+            node->operand2->accept(*this);
+            depth--;
         }
     };
     void visit(ast::Primitive* node) override {
