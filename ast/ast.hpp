@@ -217,13 +217,12 @@ struct ModifiablePrimary : Expression {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
-struct RoutineCall : Expression {
+struct RoutineCall : Expression, Statement {
     lexer::Token routine;
     std::vector<sPtr<Expression>> args;
 
     bool operator==(const RoutineCall& other) const {
-        return Node::operator==(other) && args == other.args &&
-               routine == other.routine;
+        return args == other.args && routine == other.routine;
     }
     void accept(Visitor& v) override { v.visit(this); }
 };

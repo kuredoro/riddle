@@ -472,6 +472,168 @@ sPtr<ast::Expression> Parser::parseExpression() {
     return parseBinaryExpression();
 }
 
+sPtr<ast::Expression> Parser::parseUnaryExpression() {
+    Token tok = m_lexer.Peek();
+    ast::UnaryExpression expr;
+    if (opPrec(tok.type) >= 0) {
+        // if has operations on primary
+        if (tok.type == TokenType::Not || tok.type == TokenType::Sub ||
+            tok.type == TokenType::Add) {
+            // math unary operations
+            tok = m_lexer.Next();
+            expr.operation = tok;
+            expr.operand = parseUnaryExpression();
+            return std::make_shared<ast::UnaryExpression>(expr);
+
+        } else if (tok.type == TokenType::OpenParen) {
+            // parenthesis -> more priority
+            tok = m_lexer.Next();
+            sPtr<ast::Expression> expr = parseBinaryExpression(0);
+            if (m_lexer.Peek().type != TokenType::CloseParen) {
+                m_errors.push_back(Error{
+                    .pos = tok.pos,
+                    .message = "Expected to find ')'",
+                });
+                while (m_lexer.Peek().type != TokenType::CloseParen)
+                    m_lexer.Next();
+                return nullptr;
+            }
+            tok = m_lexer.Next(); // read ')'
+            return expr;
+        } else {
+            // throw error
+            m_errors.push_back(Error{
+                .pos = tok.pos,
+                .message = "Expected to find unary operator",
+            });
+            return nullptr;
+        }
+    } else if (isPrimitive(tok.type)) {
+        // if is pure primitive
+        tok = m_lexer.Next();
+        // check if More Then Identifier
+        if (tok.type == TokenType::Identifier) {
+            Token t = m_lexer.Peek();
+            switch (t.type) {
+            case TokenType::OpenParen:
+                return parseRoutineCall(tok);
+            case TokenType::Dot:
+            case TokenType::OpenBrack:
+                return parseModifiablePrimary(tok);
+            default:
+                break;
+            }
+        }
+        // return Primitive only
+        ast::Primitive prim;
+        prim.value = tok;
+        return std::make_shared<ast::Primitive>(prim);
+    }
+    return nullptr;
+}
+
+sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
+
+    sPtr<ast::Expression> lhs = parseUnaryExpression();
+
+    for (;;) {
+        Token op = m_lexer.Peek();
+        int prec = opPrec(op.type);
+
+        if (prec < prec1) {
+            return lhs;
+        }
+
+        op = m_lexer.Next();
+
+        ast::BinaryExpression expr;
+        expr.operand1 = lhs;
+        expr.operation = op;
+        expr.operand2 = parseBinaryExpression(prec + 1);
+        lhs = std::make_shared<ast::BinaryExpression>(expr);
+    }
+}
+
+sPtr<ast::RoutineCall> Parser::parseRoutineCall(Token routineName) {
+    ast::RoutineCall rc;
+    rc.routine = routineName; // save the function name
+    Token t;
+    do {
+        t = m_lexer.Next(); // first call-read '(', others - ','
+        rc.args.push_back(parseExpression());
+
+    } while (m_lexer.Peek().type == TokenType::Comma);
+
+    if (m_lexer.Peek().type != TokenType::CloseParen) {
+        m_errors.push_back(Error{
+            .pos = m_lexer.Peek().pos,
+            .message = "Expected to find ')'",
+        });
+        return nullptr;
+    }
+    t = m_lexer.Next(); // read ')'
+    return std::make_shared<ast::RoutineCall>(rc);
+}
+
+sPtr<ast::ModifiablePrimary> Parser::parseModifiablePrimary(Token root) {
+    // we can have a.b.c[7+9].d[0].a
+    // Identifier { . Identifier | [ Expression ] }
+    ast::ModifiablePrimary mp;
+    Token t;
+    ast::Primitive r;
+    r.value = root;
+    mp.args.push_back(std::make_shared<ast::Primitive>(r));
+
+    while (m_lexer.Peek().type == TokenType::Dot ||
+           m_lexer.Peek().type == TokenType::OpenBrack) {
+
+        t = m_lexer.Next(); // read either dot or '['
+        ast::Primitive e;
+        e.value = t;
+        mp.args.push_back(std::make_shared<ast::Primitive>(e));
+        if (t.type == TokenType::Dot) {
+            // read, check and save identifier
+            if (m_lexer.Peek().type != TokenType::Identifier) {
+                m_errors.push_back(Error{
+                    .pos = m_lexer.Peek().pos,
+                    .message = "Expected to find an identifier",
+                });
+                return nullptr;
+            }
+            e.value = m_lexer.Next();
+            mp.args.push_back(std::make_shared<ast::Primitive>(e));
+
+        } else { // if []
+            mp.args.push_back(parseExpression());
+            // read and save expression
+            if (m_lexer.Peek().type != TokenType::CloseBrack) {
+                m_errors.push_back(Error{
+                    .pos = m_lexer.Peek().pos,
+                    .message = "Expected to find a ']' token",
+                });
+                return nullptr;
+            }
+            t = m_lexer.Next(); // read ']'
+        }
+    }
+    return std::make_shared<ast::ModifiablePrimary>(mp);
+};
+
+// ---- End separation
+
+bool Parser::isNewLine(Token tok) { return tok.type == TokenType::NewLine; }
+
+/**
+ * Skips all tokens that match the given predicate, returning the first
+ * token that doesn't
+ */
+Token Parser::skipWhile(std::function<bool(Token)> pred) {
+    while (pred(m_lexer.Peek())) {
+        m_lexer.Next();
+    }
+    return m_lexer.Next();
+}
+
 int Parser::opPrec(TokenType token) {
     switch (token) {
     case TokenType::Or:  // or
@@ -509,171 +671,6 @@ bool Parser::isPrimitive(TokenType token) {
     return token == TokenType::Identifier || token == TokenType::Int ||
            token == TokenType::Real || token == TokenType::True ||
            token == TokenType::False;
-}
-
-sPtr<ast::Expression> Parser::parseUnaryExpression() {
-    Token tok = m_lexer.Peek();
-    ast::UnaryExpression expr;
-    if (opPrec(tok.type) >= 0) {
-        if (tok.type == TokenType::Not || tok.type == TokenType::Sub ||
-            tok.type == TokenType::Add) {
-
-            tok = m_lexer.Next();
-            expr.operation = tok;
-            expr.operand = parseUnaryExpression();
-            return std::make_shared<ast::UnaryExpression>(expr);
-
-        } else if (tok.type == TokenType::OpenParen) {
-            tok = m_lexer.Next();
-            sPtr<ast::Expression> expr = parseBinaryExpression(0);
-            if (m_lexer.Peek().type != TokenType::CloseParen) {
-                m_errors.push_back(Error{
-                    .pos = tok.pos,
-                    .message = "Expected to find ')'",
-                });
-                while (m_lexer.Peek().type != TokenType::CloseParen)
-                    m_lexer.Next();
-                return nullptr;
-            }
-            tok = m_lexer.Next();
-            return expr;
-        } else {
-            // throw error
-            m_errors.push_back(Error{
-                .pos = tok.pos,
-                .message = "Expected to find unary operator",
-            });
-            return nullptr;
-        }
-    } else if (isPrimitive(tok.type)) {
-        tok = m_lexer.Next();
-        // check if More Then Identifier
-        if (tok.type == TokenType::Identifier) {
-
-            Token t = m_lexer.Peek();
-            switch (t.type) {
-            case TokenType::OpenParen:
-                return parseRoutineCall(tok);
-            case TokenType::Dot:
-            case TokenType::OpenBrack:
-                return parseModifiablePrimary(tok);
-            default:
-                break;
-            }
-        }
-        ast::Primitive prim;
-        prim.value = tok;
-        return std::make_shared<ast::Primitive>(prim);
-    }
-    return nullptr;
-}
-
-sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
-
-    sPtr<ast::Expression> lhs = parseUnaryExpression();
-
-    for (;;) {
-        Token op = m_lexer.Peek();
-        int prec = opPrec(op.type);
-
-        if (prec < prec1) {
-            return lhs;
-        }
-
-        op = m_lexer.Next();
-
-        ast::BinaryExpression expr;
-        expr.operand1 = lhs;
-        expr.operation = op;
-        expr.operand2 = parseBinaryExpression(prec + 1);
-        lhs = std::make_shared<ast::BinaryExpression>(expr);
-    }
-}
-
-sPtr<ast::RoutineCall> Parser::parseRoutineCall(Token routineName) {
-    ast::RoutineCall rc;
-    rc.routine = routineName; // save the function name
-    Token t;
-    do {
-        t = m_lexer.Next(); // first call-read '(', others - ','
-        // read expression
-        sPtr<ast::Expression> e = parseExpression();
-        // append to the vector
-        rc.args.push_back(e);
-
-    } while (m_lexer.Peek().type == TokenType::Comma);
-
-    if (m_lexer.Peek().type != TokenType::CloseParen) {
-        m_errors.push_back(Error{
-            .pos = m_lexer.Peek().pos,
-            .message = "Expected to find ')'",
-        });
-        return nullptr;
-    }
-    t = m_lexer.Next(); // read ')'
-    return std::make_shared<ast::RoutineCall>(rc);
-}
-
-sPtr<ast::ModifiablePrimary> Parser::parseModifiablePrimary(Token root) {
-    // we can have a.b.c[7+9].d[0].a
-    // Identifier { . Identifier | [ Expression ] }
-    ast::ModifiablePrimary mp;
-    Token t;
-    ast::Primitive r;
-    r.value = root;
-    mp.args.push_back(std::make_shared<ast::Primitive>(r));
-
-    while (m_lexer.Peek().type == TokenType::Dot ||
-           m_lexer.Peek().type == TokenType::OpenBrack) {
-
-        t = m_lexer.Next(); // read either dot or '['
-        ast::Primitive e;
-        e.value = t;
-        mp.args.push_back(std::make_shared<ast::Primitive>(e));
-        if (t.type == TokenType::Dot) {
-            // read, check and save identifier
-
-            if (m_lexer.Peek().type != TokenType::Identifier) {
-                m_errors.push_back(Error{
-                    .pos = m_lexer.Peek().pos,
-                    .message = "Expected to find an identifier",
-                });
-                return nullptr;
-            }
-            e.value = m_lexer.Next();
-            mp.args.push_back(std::make_shared<ast::Primitive>(e));
-
-        } else { // if []
-
-            mp.args.push_back(parseExpression());
-
-            // read and save expression
-            if (m_lexer.Peek().type != TokenType::CloseBrack) {
-                m_errors.push_back(Error{
-                    .pos = m_lexer.Peek().pos,
-                    .message = "Expected to find a ']' token",
-                });
-                return nullptr;
-            }
-            t = m_lexer.Next();
-        }
-    }
-    return std::make_shared<ast::ModifiablePrimary>(mp);
-};
-
-// ---- End separation
-
-bool Parser::isNewLine(Token tok) { return tok.type == TokenType::NewLine; }
-
-/**
- * Skips all tokens that match the given predicate, returning the first
- * token that doesn't
- */
-Token Parser::skipWhile(std::function<bool(Token)> pred) {
-    while (pred(m_lexer.Peek())) {
-        m_lexer.Next();
-    }
-    return m_lexer.Next();
 }
 
 std::vector<parser::Error> Parser::getErrors() { return m_errors; }
