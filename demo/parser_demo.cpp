@@ -88,9 +88,6 @@ public:
     void visit(ast::Assignment* node) override{
 
     };
-    // void visit(ast::RoutineCall* node) override{
-
-    // };
     void visit(ast::WhileLoop* node) override {
         if (node == nullptr) {
             fmt::print("{:|>{}}- [WhileLoop]> null\n", "", depth);

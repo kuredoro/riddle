@@ -551,44 +551,19 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
         if (tok.type == TokenType::Identifier) {
 
             Token t = m_lexer.Peek();
-            if (t.type == TokenType::OpenParen) {
-                // parse routineCall:
-                ast::RoutineCall rc;
-                rc.routine = tok; // save the function name
-                // expr.operation = t;
-                do {
-                    t = m_lexer.Next(); // first call-read '(', others - ','
-                    // read expression
-                    sPtr<ast::Expression> e = parseExpression();
-                    // append to the vector
-                    rc.args.push_back(e);
-
-                } while (m_lexer.Peek().type == TokenType::Comma);
-
-                if (m_lexer.Peek().type != TokenType::CloseParen) {
-                    m_errors.push_back(Error{
-                        .pos = m_lexer.Peek().pos,
-                        .message = "Expected to find ')'",
-                    });
-                    return nullptr;
-                }
-                t = m_lexer.Next(); // read ')'
-                return std::make_shared<ast::RoutineCall>(rc);
-                // return std::make_shared<ast::Expression>(expr);
-
-            } else if (t.type == TokenType::Dot ||
-                       t.type == TokenType::OpenBrack) {
-                // we can have a.b.c[7+9].d[0].a
-                // Identifier { . Identifier | [ Expression ] }
-                return parseModifiablePrimary(tok); // pass Identifier
+            switch (t.type) {
+            case TokenType::OpenParen:
+                return parseRoutineCall(tok);
+            case TokenType::Dot:
+            case TokenType::OpenBrack:
+                return parseModifiablePrimary(tok);
+            default:
+                break;
             }
         }
-        // ast::Expression expr;
         ast::Primitive prim;
         prim.value = tok;
         return std::make_shared<ast::Primitive>(prim);
-        // expr.operand = std::make_shared<ast::Primitive>(prim);
-        // return std::make_shared<ast::Expression>(expr);
     }
     return nullptr;
 }
@@ -615,7 +590,33 @@ sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
     }
 }
 
+sPtr<ast::RoutineCall> Parser::parseRoutineCall(Token routineName) {
+    ast::RoutineCall rc;
+    rc.routine = routineName; // save the function name
+    Token t;
+    do {
+        t = m_lexer.Next(); // first call-read '(', others - ','
+        // read expression
+        sPtr<ast::Expression> e = parseExpression();
+        // append to the vector
+        rc.args.push_back(e);
+
+    } while (m_lexer.Peek().type == TokenType::Comma);
+
+    if (m_lexer.Peek().type != TokenType::CloseParen) {
+        m_errors.push_back(Error{
+            .pos = m_lexer.Peek().pos,
+            .message = "Expected to find ')'",
+        });
+        return nullptr;
+    }
+    t = m_lexer.Next(); // read ')'
+    return std::make_shared<ast::RoutineCall>(rc);
+}
+
 sPtr<ast::ModifiablePrimary> Parser::parseModifiablePrimary(Token root) {
+    // we can have a.b.c[7+9].d[0].a
+    // Identifier { . Identifier | [ Expression ] }
     ast::ModifiablePrimary mp;
     Token t;
     ast::Primitive r;
