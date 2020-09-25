@@ -488,7 +488,7 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
         } else if (tok.type == TokenType::OpenParen) {
             // parenthesis -> more priority
             tok = m_lexer.Next();
-            sPtr<ast::Expression> expr = parseBinaryExpression(0);
+            sPtr<ast::Expression> expr = parseBinaryExpression();
             if (m_lexer.Peek().type != TokenType::CloseParen) {
                 m_errors.push_back(Error{
                     .pos = tok.pos,
