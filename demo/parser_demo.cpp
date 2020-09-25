@@ -134,7 +134,7 @@ public:
             fmt::print("{:|>{}}- [Expression]> null\n", "", depth);
         } else {
             // if binary
-            if (node->operand2) {
+            if (node->operand2 != nullptr) {
 
                 fmt::print("{:|>{}}- [BinaryOperator]> {}\n", "", depth,
                            node->operation.lit);
