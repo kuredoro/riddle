@@ -633,7 +633,7 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
     return nullptr;
 }
 
-sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
+sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1 = 0) {
 
     sPtr<ast::Expression> lhs = parseUnaryExpression();
 
