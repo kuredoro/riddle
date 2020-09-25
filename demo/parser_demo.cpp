@@ -170,8 +170,8 @@ public:
             for (int i = 0; i < node->args.size(); i++) {
                 node->args[i]->accept(*this);
             }
+            depth--;
         }
-        depth--;
     };
     void visit(ast::RoutineCall* node) override {
         if (node == nullptr) {
@@ -183,6 +183,7 @@ public:
             for (int i = 0; i < node->args.size(); i++) {
                 node->args[i]->accept(*this);
             }
+            depth--;
         }
     };
 

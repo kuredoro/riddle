@@ -36,7 +36,7 @@ public:
     sPtr<ast::IfStatement> parseIfStatement();
     sPtr<ast::Expression> parseExpression();
     sPtr<ast::Expression> parseUnaryExpression();
-    sPtr<ast::Expression> parseBinaryExpression(int);
+    sPtr<ast::Expression> parseBinaryExpression(int prec1 = 0);
     std::vector<Error> getErrors();
 
 private:

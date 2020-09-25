@@ -469,7 +469,7 @@ sPtr<ast::IfStatement> Parser::parseIfStatement() {
 // ---- @aabounegm
 
 sPtr<ast::Expression> Parser::parseExpression() {
-    return parseBinaryExpression(0);
+    return parseBinaryExpression();
 }
 
 int Parser::opPrec(TokenType token) {
@@ -479,26 +479,27 @@ int Parser::opPrec(TokenType token) {
         return 1;
     case TokenType::And: // and
         return 2;
-    case TokenType::Eq:      // =
-    case TokenType::Neq:     // /=
+    case TokenType::Eq:  // =
+    case TokenType::Neq: // /=
+        return 3;
     case TokenType::Less:    // <
     case TokenType::Leq:     // <=
     case TokenType::Greater: // >
     case TokenType::Geq:     // >=
-        return 3;
+        return 4;
     case TokenType::Add: // +
     case TokenType::Sub: // -
-        return 4;
+        return 5;
     case TokenType::Mul: // *
     case TokenType::Div: // /
     case TokenType::Mod: // %
-        return 5;
+        return 6;
     case TokenType::Not:       // not
     case TokenType::OpenParen: // ()
-        return 6;
+        return 7;
     case TokenType::Dot:       // .
     case TokenType::OpenBrack: // []
-        return 7;
+        return 8;
     default:
         return -1; // unknown op
     }
@@ -530,7 +531,8 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
                     .pos = tok.pos,
                     .message = "Expected to find ')'",
                 });
-                while (m_lexer.Peek().type != TokenType::CloseParen) m_lexer.Next();
+                while (m_lexer.Peek().type != TokenType::CloseParen)
+                    m_lexer.Next();
                 return nullptr;
             }
             tok = m_lexer.Next();
@@ -557,7 +559,7 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
                 do {
                     t = m_lexer.Next(); // first call-read '(', others - ','
                     // read expression
-                    sPtr<ast::Expression> e = parseBinaryExpression(0);
+                    sPtr<ast::Expression> e = parseExpression();
                     // append to the vector
                     rc.args.push_back(e);
 
@@ -633,16 +635,14 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
     return nullptr;
 }
 
-sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1 = 0) {
+sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
 
     sPtr<ast::Expression> lhs = parseUnaryExpression();
 
     for (;;) {
         Token op = m_lexer.Peek();
         int prec = opPrec(op.type);
-        if (prec == -1) {
-            return lhs;
-        }
+
         if (prec < prec1) {
             return lhs;
         }
