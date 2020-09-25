@@ -525,16 +525,16 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
         } else if (tok.type == TokenType::OpenParen) {
             tok = m_lexer.Next();
             sPtr<ast::Expression> expr = parseBinaryExpression(0);
-            if (m_lexer.Peek().type == TokenType::CloseParen) {
-                tok = m_lexer.Next();
-                return expr;
+            if (m_lexer.Peek().type != TokenType::CloseParen) {
+                m_errors.push_back(Error{
+                    .pos = tok.pos,
+                    .message = "Expected to find ')'",
+                });
+                while (m_lexer.Peek().type != TokenType::CloseParen) m_lexer.Next();
+                return nullptr;
             }
-            // error
-            m_errors.push_back(Error{
-                .pos = tok.pos,
-                .message = "Expected to find ')'",
-            });
-            return nullptr;
+            tok = m_lexer.Next();
+            return expr;
         } else {
             // throw error
             m_errors.push_back(Error{
