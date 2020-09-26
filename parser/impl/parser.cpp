@@ -119,7 +119,8 @@ sPtr<ast::Routine> Parser::parseRoutine() {
             ;
         return nullptr;
     }
-    while (m_lexer.Peek().type != TokenType::NewLine) m_lexer.Next();
+    while (m_lexer.Peek().type != TokenType::NewLine)
+        m_lexer.Next();
     routineNode.body = parseBody();
     currentToken = skipWhile(isNewLine);
     if (currentToken.type != TokenType::End) {
@@ -353,8 +354,6 @@ sPtr<ast::Assignment> Parser::parseAssignment(sPtr<ast::Expression> left) {
     assignment.rhs = parseExpression();
     return std::make_shared<ast::Assignment>(assignment);
 }
-
-sPtr<ast::RoutineCall> Parser::parseRoutineCall() { return nullptr; }
 
 // ---- @MefAldemisov
 
