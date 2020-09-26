@@ -144,7 +144,7 @@ public:
         if (node == nullptr) {
             fmt::print("{:|>{}}- [BinaryExpression]> null\n", "", depth);
         } else {
-            fmt::print("{:|>{}}- [BinaryOperator]> {}\n", "", depth,
+            fmt::print("{:|>{}}- [BinaryExpression]> {}\n", "", depth,
                        node->operation.lit);
             depth++;
             node->operand1->accept(*this);
@@ -152,12 +152,11 @@ public:
             depth--;
         }
     };
-    void visit(ast::Primitive* node) override {
+    void visit(ast::Primary* node) override {
         if (node == nullptr) {
-            fmt::print("{:|>{}}- [Primitive]> null\n", "", depth);
+            fmt::print("{:|>{}}- [Primary]> null\n", "", depth);
         } else {
-            fmt::print("{:|>{}}- [Primitive]> {}\n", "", depth,
-                       node->value.lit);
+            fmt::print("{:|>{}}- [Primary]> {}\n", "", depth, node->value.lit);
         }
     };
     void visit(ast::RoutineCall* node) override {

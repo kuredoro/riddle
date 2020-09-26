@@ -508,18 +508,19 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
             });
             return nullptr;
         }
-    } else if (isPrimitive(tok.type)) {
+    } else if (isPrimary(tok.type)) {
         // if is pure primitive
         tok = m_lexer.Next();
         // check if parametrized routine call
         if (tok.type == TokenType::Identifier &&
             m_lexer.Peek().type == TokenType::OpenParen) {
             return parseRoutineCall(tok);
+            // TODO: if ambiguous, make an identifier
         }
         // return Primitive only
-        ast::Primitive prim;
+        ast::Primary prim;
         prim.value = tok;
-        return std::make_shared<ast::Primitive>(prim);
+        return std::make_shared<ast::Primary>(prim);
     }
     return nullptr;
 } // namespace parser
@@ -563,11 +564,20 @@ sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
 sPtr<ast::RoutineCall> Parser::parseRoutineCall(Token routineName) {
     ast::RoutineCall rc;
     rc.routine = routineName; // save the function name
-    Token t;
+    Token t = m_lexer.Peek();
+    if (t.type != TokenType::OpenParen) {
+        m_errors.push_back(Error{
+            .pos = t.pos,
+            .message = "Expected to find '('",
+        });
+        return nullptr;
+    }
     do {
-        t = m_lexer.Next(); // first call-read '(', others - ','
-        rc.args.push_back(parseExpression());
-
+        m_lexer.Next(); // first call-read '(', others - ','
+        sPtr<ast::Expression> e = parseExpression();
+        if (e != nullptr) {
+            rc.args.push_back(e);
+        }
     } while (m_lexer.Peek().type == TokenType::Comma);
 
     if (m_lexer.Peek().type != TokenType::CloseParen) {
@@ -575,6 +585,7 @@ sPtr<ast::RoutineCall> Parser::parseRoutineCall(Token routineName) {
             .pos = m_lexer.Peek().pos,
             .message = "Expected to find ')'",
         });
+
         return nullptr;
     }
     t = m_lexer.Next(); // read ')'
@@ -629,7 +640,7 @@ int Parser::opPrec(TokenType token) {
     }
 }
 
-bool Parser::isPrimitive(TokenType token) {
+bool Parser::isPrimary(TokenType token) {
     return token == TokenType::Identifier || token == TokenType::Int ||
            token == TokenType::Real || token == TokenType::True ||
            token == TokenType::False;

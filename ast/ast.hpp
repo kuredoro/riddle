@@ -28,7 +28,7 @@ struct IfStatement;
 struct Expression;
 struct UnaryExpression;
 struct BinaryExpression;
-struct Primitive;
+struct Primary;
 struct RoutineCall;
 
 class Visitor {
@@ -49,7 +49,7 @@ public:
     virtual void visit(ForLoop* node) = 0;
     virtual void visit(IfStatement* node) = 0;
     virtual void visit(Expression* node) = 0;
-    virtual void visit(Primitive* node) = 0;
+    virtual void visit(Primary* node) = 0;
     virtual void visit(RoutineCall* node) = 0;
     virtual void visit(UnaryExpression* node) = 0;
     virtual void visit(BinaryExpression* node) = 0;
@@ -200,9 +200,9 @@ struct BinaryExpression : Expression {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
-struct Primitive : Expression {
+struct Primary : Expression {
     lexer::Token value;
-    bool operator==(const Primitive& other) const {
+    bool operator==(const Primary& other) const {
         return Node::operator==(other) && value == other.value;
     }
     void accept(Visitor& v) override { v.visit(this); }
