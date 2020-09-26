@@ -148,8 +148,8 @@ struct Body : Node {
     std::vector<sPtr<Variable>> variables;
     std::vector<sPtr<Type>> types;
     bool operator==(const Body& other) const {
-        return Node::operator==(other)
-                && types == other.types && variables == other.variables && statements == other.statements;
+        return Node::operator==(other) && statements == other.statements &&
+               variables == other.variables && types == other.types;
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
@@ -157,10 +157,9 @@ struct Statement : virtual Node {
     void accept(Visitor& v) override { v.visit(this); }
 };
 struct Assignment : Statement {
-    sPtr<Expression> LeftExpression;
-    sPtr<Expression> RightExpression;
-    void accept(Visitor& v) override {
-        v.visit(this);
+    sPtr<Expression> lhs, rhs; // Left/Right-Hand-Side
+    bool operator==(const Assignment& other) const {
+        return Node::operator==(other) && lhs == other.lhs && rhs == other.rhs;
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
