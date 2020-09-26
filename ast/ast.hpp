@@ -63,7 +63,7 @@ struct Node {
     virtual void accept(Visitor& v) = 0;
     virtual ~Node() = default;
 };
-struct Expression : Node {
+struct Expression : virtual Node {
     void accept(Visitor& v) override { v.visit(this); }
 };
 struct Program : Node {
@@ -153,7 +153,7 @@ struct Body : Node {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
-struct Statement : Node {
+struct Statement : virtual Node {
     void accept(Visitor& v) override { v.visit(this); }
 };
 struct Assignment : Statement {
@@ -164,12 +164,8 @@ struct Assignment : Statement {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
-struct RoutineCall : Statement, Expression {
-    std::vector<sPtr<Expression>> parameters;
-    lexer::Token name;
-    void accept(Visitor& v) override {
-        v.visit(this);
-    }
+struct RoutineCall : Statement {
+    void accept(Visitor& v) override { v.visit(this); }
 };
 struct WhileLoop : Statement {
     sPtr<Expression> condition;
