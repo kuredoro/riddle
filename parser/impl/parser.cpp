@@ -240,71 +240,77 @@ sPtr<ast::RecordType> Parser::parseRecordType() {
 }
 
 // ---- @CrazyDream1
-  
-    sPtr<ast::Variable> Parser::parseVariable() {
-	    ast::Variable variable;
-        Token token = skipWhile(isNewLine);
-        if (token.type != TokenType::Var) {
-            m_errors.push_back(Error{
-                .pos = token.pos,
-                .message = "Expected \"var\" keyword but didn't find it.",
-            });
-        }
-        token = skipWhile(isNewLine);
-        if (token.type != TokenType::Identifier) {
-            m_errors.push_back(Error{
-                .pos = token.pos,
-                .message = "Expected an identifier after \"var\" keyword.",
-            });
-        }
-	    variable.name = token;
-        token = skipWhile(isNewLine);
-        if (token.type != TokenType::Is && token.type != TokenType::Colon) {
-            m_errors.push_back(Error{
-                .pos = token.pos,
-                .message = "Expected an \"is\" keyword or : after the identifier.",
-            });
-        }
-        switch (token.type)
-        {
-	        case TokenType::Colon:
-                variable.type = parseType();
-                if ((token = m_lexer.Peek()).type != TokenType::Is) break;
-		        else m_lexer.Next();
-            case TokenType::Is:
-                variable.expression = parseExpression();
-                break;
-            default:
-                m_errors.push_back(Error{
-                    .pos = token.pos,
-                    .message = "Expected an \"is\" keyword or : after the identifier.",
-                });
-        }
-        return std::make_shared<ast::Variable>(variable);
-  }        
-  
-    sPtr<ast::Body> Parser::parseBody() {
-	    ast::Body body;
-        Token currentToken;
-        while ((currentToken = m_lexer.Peek()).type != TokenType::End)
-        {
-            switch (currentToken.type)
-            {
-            case TokenType::Var:
-                body.variables.push_back(parseVariable());
-                continue;
-            case TokenType::Type:
-                body.types.push_back(parseType());
-                continue;
-            case TokenType::NewLine:
-                m_lexer.Next();
-                continue;
-            default:
-                body.statements.push_back(parseStatement());
-            }
-        }
-        return std::make_shared<ast::Body>(body);
+
+sPtr<ast::Variable> Parser::parseVariable() {
+    Token token = skipWhile(isNewLine);
+    if (token.type != TokenType::Var) {
+        m_errors.push_back(Error{
+            .pos = token.pos,
+            .message = "Expected \"var\" keyword but didn't find it.",
+        });
+        return nullptr;
     }
+    token = skipWhile(isNewLine);
+    if (token.type != TokenType::Identifier) {
+        m_errors.push_back(Error{
+            .pos = token.pos,
+            .message = "Expected an identifier after \"var\" keyword.",
+        });
+        return nullptr;
+    }
+    ast::Variable variable;
+    variable.name = token;
+    token = skipWhile(isNewLine);
+    if (token.type != TokenType::Is && token.type != TokenType::Colon) {
+        m_errors.push_back(Error{
+            .pos = token.pos,
+            .message = "Expected an 'is' keyword or ':' after the identifier.",
+        });
+        return nullptr;
+    }
+    if (token.type == TokenType::Colon) {
+        variable.type = parseType();
+        token = skipWhile(isNewLine);
+    }
+    if (token.type == TokenType::Is) {
+        variable.expression = parseExpression();
+        token = skipWhile(isNewLine);
+    }
+
+    if (token.type != TokenType::Semicolon &&
+        token.type != TokenType::NewLine) {
+        m_errors.push_back(Error{
+            .pos = token.pos,
+            .message = "Expected a new line or ';'.",
+        });
+        return nullptr;
+    }
+    return std::make_shared<ast::Variable>(variable);
+}
+  }        
+}
+
+sPtr<ast::Body> Parser::parseBody() {
+    ast::Body body;
+    Token currentToken;
+    while ((currentToken = m_lexer.Peek()).type != TokenType::End) {
+        switch (currentToken.type) {
+        case TokenType::Var:
+            body.variables.push_back(parseVariable());
+            break;
+        case TokenType::Type:
+            body.types.push_back(parseType());
+            break;
+        case TokenType::NewLine:
+            m_lexer.Next();
+            break;
+        default:
+            body.statements.push_back(parseStatement());
+        }
+    }
+    m_lexer.Next();
+    return std::make_shared<ast::Body>(body);
+}
 
     sPtr<ast::Statement> Parser::parseStatement() {
         auto currentToken = skipWhile(isNewLine);
