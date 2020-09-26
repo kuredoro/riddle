@@ -138,12 +138,10 @@ struct Variable : Node {
     sPtr<Type> type;
     sPtr<Expression> expression;
     bool operator==(const Variable& other) const {
-        return Node::operator==(other)
-                && name == other.name && type == other.type;
+        return Node::operator==(other) && name == other.name &&
+               type == other.type && expression == other.expression;
     }
-    void accept(Visitor& v) override {
-        v.visit(this);
-    }
+    void accept(Visitor& v) override { v.visit(this); }
 };
 struct Body : Node {
     std::vector<sPtr<Statement>> statements;
@@ -153,9 +151,7 @@ struct Body : Node {
         return Node::operator==(other)
                 && types == other.types && variables == other.variables && statements == other.statements;
     }
-    void accept(Visitor& v) override {
-        v.visit(this);
-    }
+    void accept(Visitor& v) override { v.visit(this); }
 };
 struct Statement : Node {
     void accept(Visitor& v) override { v.visit(this); }
@@ -166,6 +162,7 @@ struct Assignment : Statement {
     void accept(Visitor& v) override {
         v.visit(this);
     }
+    void accept(Visitor& v) override { v.visit(this); }
 };
 struct RoutineCall : Statement, Expression {
     std::vector<sPtr<Expression>> parameters;
