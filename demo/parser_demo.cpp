@@ -59,8 +59,12 @@ public:
         } else {
             fmt::print("{:|>{}}- [ArrayType]>\n", "", depth);
             depth++;
-            node->length->accept(*this);
-            node->elementType->accept(*this);
+            if (node->length != nullptr) {
+                node->length->accept(*this);
+            }
+            if (node->elementType != nullptr) {
+                node->elementType->accept(*this);
+            }
             depth--;
         }
     };
