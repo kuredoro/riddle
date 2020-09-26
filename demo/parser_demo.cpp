@@ -59,8 +59,12 @@ public:
         } else {
             fmt::print("{:|>{}}- [ArrayType]>\n", "", depth);
             depth++;
-            node->length->accept(*this);
-            node->elementType->accept(*this);
+            if (node->length != nullptr) {
+                node->length->accept(*this);
+            }
+            if (node->elementType != nullptr) {
+                node->elementType->accept(*this);
+            }
             depth--;
         }
     };
@@ -76,8 +80,18 @@ public:
             depth--;
         }
     };
-    void visit(ast::Variable* node) override{
-
+    void visit(ast::Variable* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [VariableDecl]> null\n", "", depth);
+        } else {
+            fmt::print("{:|>{}}- [VariableDecl]> {}\n", "", depth,
+                       node->name.lit);
+            depth++;
+            if (node->type != nullptr) {
+                node->type->accept(*this);
+            }
+            depth--;
+        }
     };
     void visit(ast::Body* node) override{
 

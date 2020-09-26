@@ -65,6 +65,9 @@ struct Node {
     virtual void accept(Visitor& v) = 0;
     virtual ~Node() = default;
 };
+struct Expression : virtual Node {
+    void accept(Visitor& v) override { v.visit(this); }
+};
 struct Program : Node {
     std::vector<sPtr<Routine>> routines;
     std::vector<sPtr<Variable>> variables;
@@ -133,15 +136,33 @@ struct RecordType : Type {
     void accept(Visitor& v) override { v.visit(this); }
 };
 struct Variable : Node {
+    lexer::Token name;
+    sPtr<Type> type;
+    sPtr<Expression> expression;
+    bool operator==(const Variable& other) const {
+        return Node::operator==(other) && name == other.name &&
+               type == other.type && expression == other.expression;
+    }
     void accept(Visitor& v) override { v.visit(this); }
 };
 struct Body : Node {
+    std::vector<sPtr<Statement>> statements;
+    std::vector<sPtr<Variable>> variables;
+    std::vector<sPtr<Type>> types;
+    bool operator==(const Body& other) const {
+        return Node::operator==(other) && statements == other.statements &&
+               variables == other.variables && types == other.types;
+    }
     void accept(Visitor& v) override { v.visit(this); }
 };
-struct Statement : Node {
+struct Statement : virtual Node {
     void accept(Visitor& v) override { v.visit(this); }
 };
 struct Assignment : Statement {
+    sPtr<Expression> lhs, rhs; // Left/Right-Hand-Side
+    bool operator==(const Assignment& other) const {
+        return Node::operator==(other) && lhs == other.lhs && rhs == other.rhs;
+    }
     void accept(Visitor& v) override { v.visit(this); }
 };
 struct WhileLoop : Statement {
@@ -174,9 +195,6 @@ struct IfStatement : Statement {
         return Node::operator==(other) && condition == other.condition &&
                ifBody == other.ifBody && elseBody == other.elseBody;
     }
-    void accept(Visitor& v) override { v.visit(this); }
-};
-struct Expression : Node {
     void accept(Visitor& v) override { v.visit(this); }
 };
 struct UnaryExpression : Expression {
