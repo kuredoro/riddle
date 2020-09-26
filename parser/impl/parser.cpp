@@ -1,5 +1,6 @@
 #include "parser.hpp"
 #include "token.hpp"
+#include <memory>
 
 namespace parser {
 
@@ -287,8 +288,6 @@ sPtr<ast::Variable> Parser::parseVariable() {
     }
     return std::make_shared<ast::Variable>(variable);
 }
-  }        
-}
 
 sPtr<ast::Body> Parser::parseBody() {
     ast::Body body;
@@ -312,57 +311,50 @@ sPtr<ast::Body> Parser::parseBody() {
     return std::make_shared<ast::Body>(body);
 }
 
-    sPtr<ast::Statement> Parser::parseStatement() {
-        auto currentToken = skipWhile(isNewLine);
-        sPtr<ast::Expression> expression;
-        switch (currentToken.type)
-        {
-        case TokenType::Identifier:{
-	        expression = parseExpression();
-            ast::RoutineCall* routineCall = dynamic_cast<ast::RoutineCall*>(expression.get());
-	        if (routineCall != nullptr)
-	            return std::make_shared<ast::RoutineCall>(*routineCall);
-            else 
-                return parseAssignment(expression);
-            }
-        case TokenType::While:{
-            return parseWhileLoop();
-            }
-        case TokenType::For:{
-            return parseForLoop();
-            }
-	    case TokenType::If:{
-            return parseIfStatement();
-            }
-        default:
-            m_errors.push_back(Error{
-                .pos = currentToken.pos,
-                .message = "Unexpected token",
-            });
+sPtr<ast::Statement> Parser::parseStatement() {
+    // TODO: skip whitespace
+    auto currentToken = m_lexer.Peek();
+    sPtr<ast::Expression> expression;
+    switch (currentToken.type) {
+    case TokenType::Identifier:
+        expression = parseExpression();
+        if (m_lexer.Peek().type == TokenType::Assign) {
+            return parseAssignment(expression);
         }
+        return std::dynamic_pointer_cast<ast::RoutineCall>(expression);
+    case TokenType::While:
+        return parseWhileLoop();
+    case TokenType::For:
+        return parseForLoop();
+    case TokenType::If:
+        return parseIfStatement();
+    default:
+        m_errors.push_back(Error{
+            .pos = currentToken.pos,
+            .message = "Unexpected token",
+        });
+        // TODO: skip to next line
         return nullptr;
     }
-  
-    sPtr<ast::Assignment> Parser::parseAssignment(sPtr<ast::Expression> left) {
-        auto currentToken = skipWhile(isNewLine);
-        ast::Assignment assignment;
-	    if (currentToken.type != TokenType::Assign)
-        {
-            m_errors.push_back(Error{
-                .pos = currentToken.pos,
-                .message = "Expected := but didn't find it.",
-            });
-            return nullptr;
-        }
-	    assignment.LeftExpression = left;
-	    assignment.RightExpression = parseExpression();
-        return std::make_shared<ast::Assignment>(assignment);
-    }
+}
 
-    sPtr<ast::RoutineCall> Parser::parseRoutineCall() {
+sPtr<ast::Assignment> Parser::parseAssignment(sPtr<ast::Expression> left) {
+    auto currentToken = skipWhile(isNewLine);
+    if (currentToken.type != TokenType::Assign) {
+        m_errors.push_back(Error{
+            .pos = currentToken.pos,
+            .message = "Expected ':=' but didn't find it.",
+        });
         return nullptr;
     }
-    
+    ast::Assignment assignment;
+    assignment.lhs = left;
+    assignment.rhs = parseExpression();
+    return std::make_shared<ast::Assignment>(assignment);
+}
+
+sPtr<ast::RoutineCall> Parser::parseRoutineCall() { return nullptr; }
+
 // ---- @MefAldemisov
 
 sPtr<ast::WhileLoop> Parser::parseWhileLoop() {
