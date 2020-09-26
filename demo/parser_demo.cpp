@@ -80,8 +80,18 @@ public:
             depth--;
         }
     };
-    void visit(ast::Variable* node) override{
-
+    void visit(ast::Variable* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [VariableDecl]> null\n", "", depth);
+        } else {
+            fmt::print("{:|>{}}- [VariableDecl]> {}\n", "", depth,
+                       node->name.lit);
+            depth++;
+            if (node->type != nullptr) {
+                node->type->accept(*this);
+            }
+            depth--;
+        }
     };
     void visit(ast::Body* node) override{
 
@@ -170,7 +180,7 @@ int main(int argc, char* argv[]) {
         lexer::Lexer lx{line};
         parser::Parser parser(lx);
 
-        auto ast = parser.parseForLoop();
+        auto ast = parser.parseParameter();
         auto errors = parser.getErrors();
         if (errors.empty()) {
             PrintVisitor v;
