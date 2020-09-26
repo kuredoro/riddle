@@ -1,9 +1,7 @@
 #pragma once
-
+#include "lexer.hpp"
 #include <memory>
 #include <vector>
-
-#include "lexer.hpp"
 
 namespace ast {
 
@@ -55,8 +53,6 @@ public:
     virtual void visit(BinaryExpression* node) = 0;
 };
 
-// TODO: fill the following structs with relevant data
-
 struct Node {
     lexer::Token::Position begin, end;
     bool operator==(const Node& other) const {
@@ -65,9 +61,11 @@ struct Node {
     virtual void accept(Visitor& v) = 0;
     virtual ~Node() = default;
 };
+
 struct Expression : virtual Node {
     void accept(Visitor& v) override { v.visit(this); }
 };
+
 struct Program : Node {
     std::vector<sPtr<Routine>> routines;
     std::vector<sPtr<Variable>> variables;
@@ -78,6 +76,7 @@ struct Program : Node {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
+
 struct Routine : Node {
     lexer::Token name;
     std::vector<sPtr<Parameter>> parameters;
@@ -90,6 +89,7 @@ struct Routine : Node {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
+
 struct Parameter : Node {
     lexer::Token name;
     sPtr<Type> type;
@@ -99,9 +99,11 @@ struct Parameter : Node {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
+
 struct Type : Node {
     virtual void accept(Visitor& v) override { v.visit(this); }
 };
+
 /**
  * To handle the "Identifier" kind of type
  */
@@ -112,6 +114,7 @@ struct AliasedType : Type {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
+
 struct PrimitiveType : Type {
     lexer::Token type;
     bool operator==(const PrimitiveType& other) const {
@@ -119,6 +122,7 @@ struct PrimitiveType : Type {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
+
 struct ArrayType : Type {
     sPtr<Expression> length;
     sPtr<Type> elementType;
@@ -128,6 +132,7 @@ struct ArrayType : Type {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
+
 struct RecordType : Type {
     std::vector<sPtr<Variable>> fields;
     bool operator==(const RecordType& other) const {
@@ -135,6 +140,7 @@ struct RecordType : Type {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
+
 struct Variable : Node {
     lexer::Token name;
     sPtr<Type> type;
@@ -145,6 +151,7 @@ struct Variable : Node {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
+
 struct Body : Node {
     std::vector<sPtr<Statement>> statements;
     std::vector<sPtr<Variable>> variables;
@@ -155,9 +162,11 @@ struct Body : Node {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
+
 struct Statement : virtual Node {
     void accept(Visitor& v) override { v.visit(this); }
 };
+
 struct Assignment : Statement {
     sPtr<Expression> lhs, rhs; // Left/Right-Hand-Side
     bool operator==(const Assignment& other) const {
@@ -165,6 +174,7 @@ struct Assignment : Statement {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
+
 struct WhileLoop : Statement {
     sPtr<Expression> condition;
     sPtr<Body> body;
@@ -174,6 +184,7 @@ struct WhileLoop : Statement {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
+
 struct ForLoop : Statement {
     lexer::Token loopVar;
     sPtr<Expression> rangeFrom;
@@ -187,6 +198,7 @@ struct ForLoop : Statement {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
+
 struct IfStatement : Statement {
     sPtr<Expression> condition;
     sPtr<Body> ifBody;
@@ -197,6 +209,7 @@ struct IfStatement : Statement {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
+
 struct UnaryExpression : Expression {
     sPtr<Expression> operand;
     lexer::Token operation;
@@ -207,6 +220,7 @@ struct UnaryExpression : Expression {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
+
 struct BinaryExpression : Expression {
     sPtr<Expression> operand1;
     sPtr<Expression> operand2;
@@ -218,6 +232,7 @@ struct BinaryExpression : Expression {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
+
 struct Primary : Expression {
     lexer::Token value;
     bool operator==(const Primary& other) const {
@@ -225,6 +240,7 @@ struct Primary : Expression {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
+
 struct RoutineCall : Expression, Statement {
     lexer::Token routine;
     std::vector<sPtr<Expression>> args;
@@ -234,4 +250,5 @@ struct RoutineCall : Expression, Statement {
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
+
 } // namespace ast
