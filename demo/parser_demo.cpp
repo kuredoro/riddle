@@ -88,9 +88,6 @@ public:
     void visit(ast::Assignment* node) override{
 
     };
-    void visit(ast::RoutineCall* node) override{
-
-    };
     void visit(ast::WhileLoop* node) override {
         if (node == nullptr) {
             fmt::print("{:|>{}}- [WhileLoop]> null\n", "", depth);
@@ -132,11 +129,48 @@ public:
     void visit(ast::Expression* node) override{
 
     };
-    void visit(ast::UnaryExpression* node) override{
-
+    void visit(ast::UnaryExpression* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [UnaryExpression]> null\n", "", depth);
+        } else {
+            fmt::print("{:|>{}}- [UnaryExpression]> {}\n", "", depth,
+                       node->operation.lit);
+            depth++;
+            node->operand->accept(*this);
+            depth--;
+        }
     };
-    void visit(ast::BinaryExpression* node) override{
-
+    void visit(ast::BinaryExpression* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [BinaryExpression]> null\n", "", depth);
+        } else {
+            fmt::print("{:|>{}}- [BinaryExpression]> {}\n", "", depth,
+                       node->operation.lit);
+            depth++;
+            node->operand1->accept(*this);
+            node->operand2->accept(*this);
+            depth--;
+        }
+    };
+    void visit(ast::Primary* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [Primary]> null\n", "", depth);
+        } else {
+            fmt::print("{:|>{}}- [Primary]> {}\n", "", depth, node->value.lit);
+        }
+    };
+    void visit(ast::RoutineCall* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [RoutineCall]> null\n", "", depth);
+        } else {
+            fmt::print("{:|>{}}- [RoutineCall]> {}\n", "", depth,
+                       node->routine.lit);
+            depth++;
+            for (int i = 0; i < node->args.size(); i++) {
+                node->args[i]->accept(*this);
+            }
+            depth--;
+        }
     };
 
 private:
@@ -166,7 +200,7 @@ int main(int argc, char* argv[]) {
         lexer::Lexer lx{line};
         parser::Parser parser(lx);
 
-        auto ast = parser.parseForLoop();
+        auto ast = parser.parseExpression();
         auto errors = parser.getErrors();
         if (errors.empty()) {
             PrintVisitor v;

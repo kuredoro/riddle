@@ -22,13 +22,14 @@ struct Variable;
 struct Body;
 struct Statement;
 struct Assignment;
-struct RoutineCall;
 struct WhileLoop;
 struct ForLoop;
 struct IfStatement;
 struct Expression;
 struct UnaryExpression;
 struct BinaryExpression;
+struct Primary;
+struct RoutineCall;
 
 class Visitor {
 public:
@@ -44,11 +45,12 @@ public:
     virtual void visit(Body* node) = 0;
     virtual void visit(Statement* node) = 0;
     virtual void visit(Assignment* node) = 0;
-    virtual void visit(RoutineCall* node) = 0;
     virtual void visit(WhileLoop* node) = 0;
     virtual void visit(ForLoop* node) = 0;
     virtual void visit(IfStatement* node) = 0;
     virtual void visit(Expression* node) = 0;
+    virtual void visit(Primary* node) = 0;
+    virtual void visit(RoutineCall* node) = 0;
     virtual void visit(UnaryExpression* node) = 0;
     virtual void visit(BinaryExpression* node) = 0;
 };
@@ -142,9 +144,6 @@ struct Statement : Node {
 struct Assignment : Statement {
     void accept(Visitor& v) override { v.visit(this); }
 };
-struct RoutineCall : Statement {
-    void accept(Visitor& v) override { v.visit(this); }
-};
 struct WhileLoop : Statement {
     sPtr<Expression> condition;
     sPtr<Body> body;
@@ -173,7 +172,7 @@ struct IfStatement : Statement {
     sPtr<Body> elseBody;
     bool operator==(const IfStatement& other) const {
         return Node::operator==(other) && condition == other.condition &&
-               ifBody == other.elseBody && ifBody == other.elseBody;
+               ifBody == other.ifBody && elseBody == other.elseBody;
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
@@ -181,10 +180,40 @@ struct Expression : Node {
     void accept(Visitor& v) override { v.visit(this); }
 };
 struct UnaryExpression : Expression {
+    sPtr<Expression> operand;
+    lexer::Token operation;
+
+    bool operator==(const UnaryExpression& other) const {
+        return Node::operator==(other) && operand == other.operand &&
+               operation == other.operation;
+    }
     void accept(Visitor& v) override { v.visit(this); }
 };
 struct BinaryExpression : Expression {
+    sPtr<Expression> operand1;
+    sPtr<Expression> operand2;
+    lexer::Token operation;
+
+    bool operator==(const BinaryExpression& other) const {
+        return Node::operator==(other) && operand1 == other.operand1 &&
+               operand2 == other.operand2 && operation == other.operation;
+    }
     void accept(Visitor& v) override { v.visit(this); }
 };
+struct Primary : Expression {
+    lexer::Token value;
+    bool operator==(const Primary& other) const {
+        return Node::operator==(other) && value == other.value;
+    }
+    void accept(Visitor& v) override { v.visit(this); }
+};
+struct RoutineCall : Expression, Statement {
+    lexer::Token routine;
+    std::vector<sPtr<Expression>> args;
 
+    bool operator==(const RoutineCall& other) const {
+        return args == other.args && routine == other.routine;
+    }
+    void accept(Visitor& v) override { v.visit(this); }
+};
 } // namespace ast
