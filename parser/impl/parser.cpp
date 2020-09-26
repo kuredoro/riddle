@@ -1,5 +1,6 @@
 #include "parser.hpp"
 #include "token.hpp"
+#include <memory>
 
 namespace parser {
 
@@ -118,7 +119,8 @@ sPtr<ast::Routine> Parser::parseRoutine() {
             ;
         return nullptr;
     }
-    while (m_lexer.Peek().type != TokenType::NewLine) m_lexer.Next();
+    while (m_lexer.Peek().type != TokenType::NewLine)
+        m_lexer.Next();
     routineNode.body = parseBody();
     currentToken = skipWhile(isNewLine);
     if (currentToken.type != TokenType::End) {
@@ -243,25 +245,115 @@ sPtr<ast::RecordType> Parser::parseRecordType() {
 // ---- @CrazyDream1
 
 sPtr<ast::Variable> Parser::parseVariable() {
-    auto token = m_lexer.Next();
+    Token token = skipWhile(isNewLine);
     if (token.type != TokenType::Var) {
         m_errors.push_back(Error{
             .pos = token.pos,
             .message = "Expected \"var\" keyword but didn't find it.",
         });
+        return nullptr;
     }
-    token = m_lexer.Next();
+    token = skipWhile(isNewLine);
     if (token.type != TokenType::Identifier) {
         m_errors.push_back(Error{
             .pos = token.pos,
             .message = "Expected an identifier after \"var\" keyword.",
         });
+        return nullptr;
     }
-    // ...
-    return nullptr;
+    ast::Variable variable;
+    variable.name = token;
+    token = skipWhile(isNewLine);
+    if (token.type != TokenType::Is && token.type != TokenType::Colon) {
+        m_errors.push_back(Error{
+            .pos = token.pos,
+            .message = "Expected an 'is' keyword or ':' after the identifier.",
+        });
+        return nullptr;
+    }
+    if (token.type == TokenType::Colon) {
+        variable.type = parseType();
+        token = skipWhile(isNewLine);
+    }
+    if (token.type == TokenType::Is) {
+        variable.expression = parseExpression();
+        token = skipWhile(isNewLine);
+    }
+
+    if (token.type != TokenType::Semicolon &&
+        token.type != TokenType::NewLine) {
+        m_errors.push_back(Error{
+            .pos = token.pos,
+            .message = "Expected a new line or ';'.",
+        });
+        return nullptr;
+    }
+    return std::make_shared<ast::Variable>(variable);
 }
 
-sPtr<ast::Body> Parser::parseBody() { return nullptr; }
+sPtr<ast::Body> Parser::parseBody() {
+    ast::Body body;
+    Token currentToken;
+    while ((currentToken = m_lexer.Peek()).type != TokenType::End) {
+        switch (currentToken.type) {
+        case TokenType::Var:
+            body.variables.push_back(parseVariable());
+            break;
+        case TokenType::Type:
+            body.types.push_back(parseType());
+            break;
+        case TokenType::NewLine:
+            m_lexer.Next();
+            break;
+        default:
+            body.statements.push_back(parseStatement());
+        }
+    }
+    m_lexer.Next();
+    return std::make_shared<ast::Body>(body);
+}
+
+sPtr<ast::Statement> Parser::parseStatement() {
+    // TODO: skip whitespace
+    auto currentToken = m_lexer.Peek();
+    sPtr<ast::Expression> expression;
+    switch (currentToken.type) {
+    case TokenType::Identifier:
+        expression = parseExpression();
+        if (m_lexer.Peek().type == TokenType::Assign) {
+            return parseAssignment(expression);
+        }
+        return std::dynamic_pointer_cast<ast::RoutineCall>(expression);
+    case TokenType::While:
+        return parseWhileLoop();
+    case TokenType::For:
+        return parseForLoop();
+    case TokenType::If:
+        return parseIfStatement();
+    default:
+        m_errors.push_back(Error{
+            .pos = currentToken.pos,
+            .message = "Unexpected token",
+        });
+        // TODO: skip to next line
+        return nullptr;
+    }
+}
+
+sPtr<ast::Assignment> Parser::parseAssignment(sPtr<ast::Expression> left) {
+    auto currentToken = skipWhile(isNewLine);
+    if (currentToken.type != TokenType::Assign) {
+        m_errors.push_back(Error{
+            .pos = currentToken.pos,
+            .message = "Expected ':=' but didn't find it.",
+        });
+        return nullptr;
+    }
+    ast::Assignment assignment;
+    assignment.lhs = left;
+    assignment.rhs = parseExpression();
+    return std::make_shared<ast::Assignment>(assignment);
+}
 
 // ---- @MefAldemisov
 
