@@ -511,18 +511,10 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
     } else if (isPrimitive(tok.type)) {
         // if is pure primitive
         tok = m_lexer.Next();
-        // check if More Then Identifier
-        if (tok.type == TokenType::Identifier) {
-            Token t = m_lexer.Peek();
-            switch (t.type) {
-            case TokenType::OpenParen:
-                return parseRoutineCall(tok);
-            case TokenType::Dot:
-            case TokenType::OpenBrack:
-                return parseModifiablePrimary(tok);
-            default:
-                break;
-            }
+        // check if parametrized routine call
+        if (tok.type == TokenType::Identifier &&
+            m_lexer.Peek().type == TokenType::OpenParen) {
+            return parseRoutineCall(tok);
         }
         // return Primitive only
         ast::Primitive prim;
@@ -530,7 +522,7 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
         return std::make_shared<ast::Primitive>(prim);
     }
     return nullptr;
-}
+} // namespace parser
 
 sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
 
@@ -549,7 +541,21 @@ sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
         ast::BinaryExpression expr;
         expr.operand1 = lhs;
         expr.operation = op;
-        expr.operand2 = parseBinaryExpression(prec + 1);
+
+        if (op.type == TokenType::OpenBrack) {
+            expr.operand2 = parseBinaryExpression(0);
+            // if op == [ -> check the end ']'
+            if (m_lexer.Peek().type != TokenType::CloseBrack) {
+                m_errors.push_back(Error{
+                    .pos = m_lexer.Peek().pos,
+                    .message = "Expected to find a ']' token",
+                });
+                return nullptr;
+            }
+            m_lexer.Next();
+        } else {
+            expr.operand2 = parseBinaryExpression(prec + 1);
+        }
         lhs = std::make_shared<ast::BinaryExpression>(expr);
     }
 }
@@ -574,50 +580,6 @@ sPtr<ast::RoutineCall> Parser::parseRoutineCall(Token routineName) {
     t = m_lexer.Next(); // read ')'
     return std::make_shared<ast::RoutineCall>(rc);
 }
-
-sPtr<ast::ModifiablePrimary> Parser::parseModifiablePrimary(Token root) {
-    // we can have a.b.c[7+9].d[0].a
-    // Identifier { . Identifier | [ Expression ] }
-    ast::ModifiablePrimary mp;
-    Token t;
-    ast::Primitive r;
-    r.value = root;
-    mp.args.push_back(std::make_shared<ast::Primitive>(r));
-
-    while (m_lexer.Peek().type == TokenType::Dot ||
-           m_lexer.Peek().type == TokenType::OpenBrack) {
-
-        t = m_lexer.Next(); // read either dot or '['
-        ast::Primitive e;
-        e.value = t;
-        mp.args.push_back(std::make_shared<ast::Primitive>(e));
-        if (t.type == TokenType::Dot) {
-            // read, check and save identifier
-            if (m_lexer.Peek().type != TokenType::Identifier) {
-                m_errors.push_back(Error{
-                    .pos = m_lexer.Peek().pos,
-                    .message = "Expected to find an identifier",
-                });
-                return nullptr;
-            }
-            e.value = m_lexer.Next();
-            mp.args.push_back(std::make_shared<ast::Primitive>(e));
-
-        } else { // if []
-            mp.args.push_back(parseExpression());
-            // read and save expression
-            if (m_lexer.Peek().type != TokenType::CloseBrack) {
-                m_errors.push_back(Error{
-                    .pos = m_lexer.Peek().pos,
-                    .message = "Expected to find a ']' token",
-                });
-                return nullptr;
-            }
-            t = m_lexer.Next(); // read ']'
-        }
-    }
-    return std::make_shared<ast::ModifiablePrimary>(mp);
-};
 
 // ---- End separation
 

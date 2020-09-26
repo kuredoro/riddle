@@ -160,19 +160,6 @@ public:
                        node->value.lit);
         }
     };
-    void visit(ast::ModifiablePrimary* node) override {
-        if (node == nullptr) {
-            fmt::print("{:|>{}}- [ModifiablePrimary]> null\n", "", depth);
-        } else {
-            fmt::print("{:|>{}}- [ModifiablePrimary]> size {} \n", "", depth,
-                       node->args.size());
-            depth++;
-            for (int i = 0; i < node->args.size(); i++) {
-                node->args[i]->accept(*this);
-            }
-            depth--;
-        }
-    };
     void visit(ast::RoutineCall* node) override {
         if (node == nullptr) {
             fmt::print("{:|>{}}- [RoutineCall]> null\n", "", depth);

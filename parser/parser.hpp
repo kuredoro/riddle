@@ -37,7 +37,6 @@ public:
     sPtr<ast::Expression> parseUnaryExpression();
     sPtr<ast::Expression> parseBinaryExpression(int prec1 = 0);
     sPtr<ast::RoutineCall> parseRoutineCall(lexer::Token);
-    sPtr<ast::ModifiablePrimary> parseModifiablePrimary(lexer::Token);
     std::vector<Error> getErrors();
 
 private:

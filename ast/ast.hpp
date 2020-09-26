@@ -30,7 +30,6 @@ struct UnaryExpression;
 struct BinaryExpression;
 struct Primitive;
 struct RoutineCall;
-struct ModifiablePrimary;
 
 class Visitor {
 public:
@@ -51,7 +50,6 @@ public:
     virtual void visit(IfStatement* node) = 0;
     virtual void visit(Expression* node) = 0;
     virtual void visit(Primitive* node) = 0;
-    virtual void visit(ModifiablePrimary* node) = 0;
     virtual void visit(RoutineCall* node) = 0;
     virtual void visit(UnaryExpression* node) = 0;
     virtual void visit(BinaryExpression* node) = 0;
@@ -206,14 +204,6 @@ struct Primitive : Expression {
     lexer::Token value;
     bool operator==(const Primitive& other) const {
         return Node::operator==(other) && value == other.value;
-    }
-    void accept(Visitor& v) override { v.visit(this); }
-};
-struct ModifiablePrimary : Expression {
-    std::vector<sPtr<Expression>> args;
-
-    bool operator==(const ModifiablePrimary& other) const {
-        return Node::operator==(other) && args == other.args;
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
