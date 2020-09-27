@@ -7,8 +7,6 @@ namespace parser {
 using lexer::Token;
 using lexer::TokenType;
 
-// ---- @kureduro
-
 static std::array<TokenType, 2> primitives{
     TokenType::IntegerType,
     TokenType::RealType,
@@ -242,8 +240,6 @@ sPtr<ast::RecordType> Parser::parseRecordType() {
     return std::make_shared<ast::RecordType>(recordNode);
 }
 
-// ---- @CrazyDream1
-
 sPtr<ast::Variable> Parser::parseVariable() {
     Token token = skipWhile(isNewLine);
     if (token.type != TokenType::Var) {
@@ -354,8 +350,6 @@ sPtr<ast::Assignment> Parser::parseAssignment(sPtr<ast::Expression> left) {
     assignment.rhs = parseExpression();
     return std::make_shared<ast::Assignment>(assignment);
 }
-
-// ---- @MefAldemisov
 
 sPtr<ast::WhileLoop> Parser::parseWhileLoop() {
     // condition: Expr
@@ -559,8 +553,6 @@ sPtr<ast::IfStatement> Parser::parseIfStatement() {
     return std::make_shared<ast::IfStatement>(ifNode);
 }
 
-// ---- @aabounegm
-
 sPtr<ast::Expression> Parser::parseExpression() {
     return parseBinaryExpression();
 }
@@ -684,8 +676,6 @@ sPtr<ast::RoutineCall> Parser::parseRoutineCall(Token routineName) {
     t = m_lexer.Next(); // read ')'
     return std::make_shared<ast::RoutineCall>(rc);
 }
-
-// ---- End separation
 
 bool Parser::isNewLine(Token tok) { return tok.type == TokenType::NewLine; }
 
