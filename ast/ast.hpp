@@ -19,6 +19,7 @@ struct RecordType;
 struct VariableDecl;
 struct Body;
 struct Statement;
+struct ReturnStatement;
 struct Assignment;
 struct WhileLoop;
 struct ForLoop;
@@ -42,6 +43,7 @@ public:
     virtual void visit(VariableDecl* node) = 0;
     virtual void visit(Body* node) = 0;
     virtual void visit(Statement* node) = 0;
+    virtual void visit(ReturnStatement* node) = 0;
     virtual void visit(Assignment* node) = 0;
     virtual void visit(WhileLoop* node) = 0;
     virtual void visit(ForLoop* node) = 0;
@@ -206,6 +208,14 @@ struct IfStatement : Statement {
     bool operator==(const IfStatement& other) const {
         return Node::operator==(other) && condition == other.condition &&
                ifBody == other.ifBody && elseBody == other.elseBody;
+    }
+    void accept(Visitor& v) override { v.visit(this); }
+};
+
+struct ReturnStatement : Statement {
+    sPtr<Expression> expression;
+    bool operator==(const ReturnStatement& other) const {
+        return Node::operator==(other) && expression == other.expression;
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
