@@ -18,7 +18,7 @@ std::vector<std::string> g_TokTypeStr{
     "Record",    "Array", "True",        "False",      "While",
     "For",       "Loop",  "End",         "Reverse,",   "In,",
     "If",        "Then",  "Else",        "Not",        "And",
-    "Or",        "Xor",
+    "Or",        "Xor",   "Return",
 };
 
 std::string to_string(lexer::TokenType type) {
