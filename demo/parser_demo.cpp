@@ -310,6 +310,38 @@ int main(int argc, char* argv[]) {
     }
 
     for (;;) {
+        int choice;
+        typedef parser::sPtr<ast::Node> (parser::Parser::*ParserFunc)();
+        ParserFunc parseFunc;
+        fmt::print("What do you want to parse?\n");
+        fmt::print("(0) Exit\n");
+        fmt::print("(1) routine\n");
+        fmt::print("(2) expression\n");
+        fmt::print("(3) type declaration\n");
+        fmt::print("(4) statement\n");
+        fmt::print("Enter a number> ");
+        std::cin >> choice;
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        switch (choice) {
+        case 0:
+            return 0;
+        case 1:
+            parseFunc = (ParserFunc)(&parser::Parser::parseRoutineDecl);
+            break;
+        case 2:
+            parseFunc = (ParserFunc)(&parser::Parser::parseExpression);
+            break;
+        case 3:
+            parseFunc = (ParserFunc)(&parser::Parser::parseTypeDecl);
+            break;
+        case 4:
+            parseFunc = (ParserFunc)(&parser::Parser::parseStatement);
+            break;
+        default:
+            fmt::print("Invalid option\n");
+            return 1;
+        }
+
         fmt::print("riddle> ");
         std::string line;
         std::getline(std::cin, line);
@@ -317,7 +349,7 @@ int main(int argc, char* argv[]) {
         lexer::Lexer lx{line};
         parser::Parser parser(lx);
 
-        auto ast = parser.parseExpression();
+        auto ast = (parser.*parseFunc)();
         auto errors = parser.getErrors();
         if (errors.empty()) {
             PrintVisitor v;
@@ -331,6 +363,7 @@ int main(int argc, char* argv[]) {
                            error.message);
             }
         }
+        fmt::print("\n");
     }
 
     return 0;
