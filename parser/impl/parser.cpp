@@ -7,9 +7,10 @@ namespace parser {
 using lexer::Token;
 using lexer::TokenType;
 
-static std::array<TokenType, 2> primitives{
+static std::array<TokenType, 3> primitives{
     TokenType::IntegerType,
     TokenType::RealType,
+    TokenType::Boolean,
 };
 
 sPtr<ast::Program> Parser::parseProgram() {
