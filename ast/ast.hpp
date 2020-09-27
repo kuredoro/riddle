@@ -11,6 +11,7 @@ struct Node;
 struct Program;
 struct RoutineDecl;
 struct Parameter;
+struct TypeDecl;
 struct Type;
 struct AliasedType;
 struct PrimitiveType;
@@ -37,6 +38,7 @@ public:
     virtual void visit(RoutineDecl* node) = 0;
     virtual void visit(Parameter* node) = 0;
     virtual void visit(Type* node) = 0;
+    virtual void visit(TypeDecl* node) = 0;
     virtual void visit(PrimitiveType* node) = 0;
     virtual void visit(ArrayType* node) = 0;
     virtual void visit(RecordType* node) = 0;
@@ -71,7 +73,7 @@ struct Expression : virtual Node {
 struct Program : Node {
     std::vector<sPtr<RoutineDecl>> routines;
     std::vector<sPtr<VariableDecl>> variables;
-    std::vector<sPtr<Type>> types;
+    std::vector<sPtr<TypeDecl>> types;
     bool operator==(const Program& other) const {
         return Node::operator==(other) && routines == other.routines &&
                variables == other.variables && types == other.types;
@@ -100,6 +102,15 @@ struct Parameter : Node {
                type == other.type;
     }
     void accept(Visitor& v) override { v.visit(this); }
+};
+
+struct TypeDecl : Node {
+    std::string name;
+    sPtr<Type> type;
+    bool operator==(const TypeDecl& other) const {
+        return Node::operator==(other) && name == other.name;
+    }
+    virtual void accept(Visitor& v) override { v.visit(this); }
 };
 
 struct Type : Node {
@@ -157,7 +168,7 @@ struct VariableDecl : Node {
 struct Body : Node {
     std::vector<sPtr<Statement>> statements;
     std::vector<sPtr<VariableDecl>> variables;
-    std::vector<sPtr<Type>> types;
+    std::vector<sPtr<TypeDecl>> types;
     bool operator==(const Body& other) const {
         return Node::operator==(other) && statements == other.statements &&
                variables == other.variables && types == other.types;
