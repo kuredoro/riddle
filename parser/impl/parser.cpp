@@ -14,21 +14,22 @@ static std::array<TokenType, 2> primitives{
 
 sPtr<ast::Program> Parser::parseProgram() {
     ast::Program programNode;
-    Token currentToken;
-    while ((currentToken = m_lexer.Peek()).type != TokenType::Eof) {
+    Token currentToken = m_lexer.Peek();
+    programNode.begin = currentToken.pos;
+    while (currentToken.type != TokenType::Eof) {
         switch (currentToken.type) {
         case TokenType::Routine:
             programNode.routines.push_back(parseRoutineDecl());
-            continue;
+            break;
         case TokenType::Var:
             programNode.variables.push_back(parseVariableDecl());
-            continue;
+            break;
         case TokenType::Type:
             programNode.types.push_back(parseType());
-            continue;
+            break;
         case TokenType::NewLine:
             m_lexer.Next();
-            continue;
+            break;
         default:
             m_errors.push_back(Error{
                 .pos = currentToken.pos,
@@ -37,13 +38,16 @@ sPtr<ast::Program> Parser::parseProgram() {
             while (m_lexer.Peek().type != TokenType::NewLine)
                 m_lexer.Next();
         }
+        currentToken = m_lexer.Peek();
     }
+    programNode.end = currentToken.pos;
     return std::make_shared<ast::Program>(programNode);
 }
 
 sPtr<ast::RoutineDecl> Parser::parseRoutineDecl() {
     ast::RoutineDecl routineNode;
     Token currentToken = skipWhile(isNewLine);
+    routineNode.begin = currentToken.pos;
     if (currentToken.type != TokenType::Routine) {
         m_errors.push_back(Error{
             .pos = currentToken.pos,
@@ -131,12 +135,14 @@ sPtr<ast::RoutineDecl> Parser::parseRoutineDecl() {
             ;
         return nullptr;
     }
+    routineNode.end = currentToken.pos;
     return std::make_shared<ast::RoutineDecl>(routineNode);
 }
 
 sPtr<ast::Parameter> Parser::parseParameter() {
     ast::Parameter parameterNode;
     Token currentToken = skipWhile(isNewLine);
+    parameterNode.begin = currentToken.pos;
     if (currentToken.type != TokenType::Identifier) {
         m_errors.push_back(Error{
             .pos = currentToken.pos,
@@ -164,6 +170,9 @@ sPtr<ast::Parameter> Parser::parseParameter() {
         return nullptr;
     }
     parameterNode.type = parseType();
+    if (parameterNode.type != nullptr) {
+        parameterNode.end = parameterNode.type->end;
+    }
     return std::make_shared<ast::Parameter>(parameterNode);
 }
 
@@ -173,8 +182,10 @@ sPtr<ast::Type> Parser::parseType() {
                                     std::end(primitives), currentToken.type);
         type != std::end(primitives)) {
         ast::PrimitiveType typeNode;
+        typeNode.begin = currentToken.pos;
         typeNode.type = currentToken;
         m_lexer.Next();
+        typeNode.end = currentToken.pos;
         return std::make_shared<ast::PrimitiveType>(typeNode);
     } else if (currentToken.type == TokenType::Array) {
         return parseArrayType();
@@ -182,8 +193,10 @@ sPtr<ast::Type> Parser::parseType() {
         return parseRecordType();
     } else if (currentToken.type == TokenType::Identifier) {
         ast::AliasedType typeNode;
+        typeNode.begin = currentToken.pos;
         typeNode.name = currentToken;
         m_lexer.Next();
+        typeNode.end = currentToken.pos;
         return std::make_shared<ast::AliasedType>(typeNode);
     } else {
         m_errors.push_back(Error{
@@ -196,14 +209,15 @@ sPtr<ast::Type> Parser::parseType() {
 }
 
 sPtr<ast::ArrayType> Parser::parseArrayType() {
+    ast::ArrayType arrayNode;
     Token currentToken = m_lexer.Next();
+    arrayNode.begin = currentToken.pos;
     if (currentToken.type != TokenType::Array) {
         m_errors.push_back(
             Error{.pos = currentToken.pos,
                   .message = "Expected 'array' keyword but did not find it"});
         return nullptr;
     }
-    ast::ArrayType arrayNode;
     if (m_lexer.Peek().type == TokenType::OpenBrack) {
         m_lexer.Next();
         arrayNode.length = parseExpression();
@@ -217,6 +231,9 @@ sPtr<ast::ArrayType> Parser::parseArrayType() {
         }
     }
     arrayNode.elementType = parseType();
+    if (arrayNode.elementType != nullptr) {
+        arrayNode.end = arrayNode.elementType->end;
+    }
     return std::make_shared<ast::ArrayType>(arrayNode);
 }
 
@@ -229,6 +246,7 @@ sPtr<ast::RecordType> Parser::parseRecordType() {
         return nullptr;
     }
     ast::RecordType recordNode;
+    recordNode.begin = currentToken.pos;
     while (m_lexer.Peek().type == TokenType::NewLine)
         m_lexer.Next();
     while (m_lexer.Peek().type != TokenType::End) {
@@ -236,77 +254,84 @@ sPtr<ast::RecordType> Parser::parseRecordType() {
         while (m_lexer.Peek().type == TokenType::NewLine)
             m_lexer.Next();
     }
-    m_lexer.Next();
+    currentToken = m_lexer.Next(); // consume "end"
+    recordNode.end = currentToken.pos;
     return std::make_shared<ast::RecordType>(recordNode);
 }
 
 sPtr<ast::VariableDecl> Parser::parseVariableDecl() {
-    Token token = skipWhile(isNewLine);
-    if (token.type != TokenType::Var) {
+    ast::VariableDecl variableNode;
+    Token currentToken = skipWhile(isNewLine);
+    variableNode.begin = currentToken.pos;
+    if (currentToken.type != TokenType::Var) {
         m_errors.push_back(Error{
-            .pos = token.pos,
+            .pos = currentToken.pos,
             .message = "Expected \"var\" keyword but didn't find it.",
         });
         return nullptr;
     }
-    token = skipWhile(isNewLine);
-    if (token.type != TokenType::Identifier) {
+    currentToken = skipWhile(isNewLine);
+    if (currentToken.type != TokenType::Identifier) {
         m_errors.push_back(Error{
-            .pos = token.pos,
+            .pos = currentToken.pos,
             .message = "Expected an identifier after \"var\" keyword.",
         });
         return nullptr;
     }
-    ast::VariableDecl variable;
-    variable.name = token;
-    token = skipWhile(isNewLine);
-    if (token.type != TokenType::Is && token.type != TokenType::Colon) {
+    variableNode.name = currentToken;
+    currentToken = skipWhile(isNewLine);
+    if (currentToken.type != TokenType::Is &&
+        currentToken.type != TokenType::Colon) {
         m_errors.push_back(Error{
-            .pos = token.pos,
+            .pos = currentToken.pos,
             .message = "Expected an 'is' keyword or ':' after the identifier.",
         });
         return nullptr;
     }
-    if (token.type == TokenType::Colon) {
-        variable.type = parseType();
-        token = skipWhile(isNewLine);
+    if (currentToken.type == TokenType::Colon) {
+        variableNode.type = parseType();
+        currentToken = skipWhile(isNewLine);
     }
-    if (token.type == TokenType::Is) {
-        variable.expression = parseExpression();
-        token = skipWhile(isNewLine);
+    if (currentToken.type == TokenType::Is) {
+        variableNode.expression = parseExpression();
+        currentToken = skipWhile(isNewLine);
     }
 
-    if (token.type != TokenType::Semicolon &&
-        token.type != TokenType::NewLine) {
+    if (currentToken.type != TokenType::Semicolon &&
+        currentToken.type != TokenType::NewLine) {
         m_errors.push_back(Error{
-            .pos = token.pos,
+            .pos = currentToken.pos,
             .message = "Expected a new line or ';'.",
         });
         return nullptr;
     }
-    return std::make_shared<ast::VariableDecl>(variable);
+    variableNode.end = currentToken.pos;
+    return std::make_shared<ast::VariableDecl>(variableNode);
 }
 
 sPtr<ast::Body> Parser::parseBody() {
-    ast::Body body;
-    Token currentToken;
-    while ((currentToken = m_lexer.Peek()).type != TokenType::End) {
+    ast::Body bodyNode;
+    Token currentToken = m_lexer.Peek();
+    bodyNode.begin = currentToken.pos;
+    while (currentToken.type != TokenType::End) {
         switch (currentToken.type) {
         case TokenType::Var:
-            body.variables.push_back(parseVariableDecl());
+            bodyNode.variables.push_back(parseVariableDecl());
             break;
         case TokenType::Type:
-            body.types.push_back(parseType());
+            bodyNode.types.push_back(parseType());
             break;
         case TokenType::NewLine:
             m_lexer.Next();
             break;
         default:
-            body.statements.push_back(parseStatement());
+            bodyNode.statements.push_back(parseStatement());
         }
+        currentToken = m_lexer.Peek();
     }
-    m_lexer.Next();
-    return std::make_shared<ast::Body>(body);
+    currentToken = m_lexer.Next(); // consume "end"
+    bodyNode.end = currentToken.pos;
+    return std::make_shared<ast::Body>(bodyNode);
 }
 
 sPtr<ast::Statement> Parser::parseStatement() {
@@ -345,10 +370,14 @@ sPtr<ast::Assignment> Parser::parseAssignment(sPtr<ast::Expression> left) {
         });
         return nullptr;
     }
-    ast::Assignment assignment;
-    assignment.lhs = left;
-    assignment.rhs = parseExpression();
-    return std::make_shared<ast::Assignment>(assignment);
+    ast::Assignment assignmentNode;
+    assignmentNode.begin = currentToken.pos;
+    assignmentNode.lhs = left;
+    assignmentNode.rhs = parseExpression();
+    if (assignmentNode.rhs != nullptr) {
+        assignmentNode.end = assignmentNode.rhs->end;
+    }
+    return std::make_shared<ast::Assignment>(assignmentNode);
 }
 
 sPtr<ast::WhileLoop> Parser::parseWhileLoop() {
@@ -357,6 +386,7 @@ sPtr<ast::WhileLoop> Parser::parseWhileLoop() {
     // WhileLoop : while Expression loop Body end
     ast::WhileLoop whileNode;
     Token currentToken = skipWhile(isNewLine);
+    whileNode.begin = currentToken.pos;
     if (currentToken.type != TokenType::While) {
         m_errors.push_back(Error{
             .pos = currentToken.pos,
@@ -393,21 +423,17 @@ sPtr<ast::WhileLoop> Parser::parseWhileLoop() {
             ;
         return nullptr;
     }
+    whileNode.end = currentToken.pos;
     return std::make_shared<ast::WhileLoop>(whileNode);
 }
 
 sPtr<ast::ForLoop> Parser::parseForLoop() {
-    /** ForLoop : for Identifier Range loop Body end
-    Range : in [ reverse ] Expression .. Expression
+    /**
+     * ForLoop : for Identifier Range loop Body end
+     * Range : in [ reverse ] Expression .. Expression
+     * reverse: bool
+     */
 
-    loop var: Identifier
-    rangeFrom: Expression
-    rangeTo: Expression
-    reverse: bool
-    body: Body
-    */
-
-    // check 'for' kwd
     ast::ForLoop forNode;
     Token currentToken = skipWhile(isNewLine);
     if (currentToken.type != TokenType::For) {
@@ -417,7 +443,9 @@ sPtr<ast::ForLoop> Parser::parseForLoop() {
         });
         return nullptr;
     }
+    forNode.begin = currentToken.pos;
     currentToken = skipWhile(isNewLine);
+
     // check Identifier
     if (currentToken.type != TokenType::Identifier) {
         m_errors.push_back(Error{
@@ -430,7 +458,8 @@ sPtr<ast::ForLoop> Parser::parseForLoop() {
         return nullptr;
     }
     forNode.loopVar = currentToken; // should be an Identifier
-    // check 'in' kwd
+
+    // check 'in' keyword
     currentToken = skipWhile(isNewLine);
     if (currentToken.type != TokenType::In) {
         m_errors.push_back(Error{
@@ -441,18 +470,16 @@ sPtr<ast::ForLoop> Parser::parseForLoop() {
             ;
         return nullptr;
     }
-    // check optional 'reverse' kwd
+    // check optional 'reverse' keyword
     while (m_lexer.Peek().type == TokenType::NewLine)
         m_lexer.Next();
     forNode.reverse = (m_lexer.Peek().type == TokenType::Reverse);
     if (forNode.reverse) {
         currentToken = m_lexer.Next();
     }
-    // check Expression
     forNode.rangeFrom = parseExpression();
     currentToken = m_lexer.Next();
 
-    // check two dots
     if (currentToken.type != TokenType::TwoDots) {
         m_errors.push_back(Error{
             .pos = currentToken.pos,
@@ -462,10 +489,8 @@ sPtr<ast::ForLoop> Parser::parseForLoop() {
             ;
         return nullptr;
     }
-    // check Expression
     forNode.rangeTo = parseExpression();
 
-    // check loop kwd
     currentToken = skipWhile(isNewLine);
     if (currentToken.type != TokenType::Loop) {
         m_errors.push_back(Error{
@@ -477,11 +502,9 @@ sPtr<ast::ForLoop> Parser::parseForLoop() {
             ;
         return nullptr;
     }
-    // read body
     forNode.body = parseBody();
     currentToken = skipWhile(isNewLine);
 
-    // check end kwd
     if (currentToken.type != TokenType::End) {
         m_errors.push_back(Error{
             .pos = currentToken.pos,
@@ -492,18 +515,17 @@ sPtr<ast::ForLoop> Parser::parseForLoop() {
             ;
         return nullptr;
     }
+    forNode.end = currentToken.pos;
     return std::make_shared<ast::ForLoop>(forNode);
 }
 
 sPtr<ast::IfStatement> Parser::parseIfStatement() {
-
-    // if Expression then Body [ else Body ] end
-    // cond: Expression
-    // then: Body
-    // else: Body
-    // check if token
+    /**
+     * if Expression then Body [ else Body ] end
+     */
     ast::IfStatement ifNode;
     Token currentToken = skipWhile(isNewLine);
+    ifNode.begin = currentToken.pos;
 
     if (currentToken.type != TokenType::If) {
         m_errors.push_back(Error{
@@ -512,12 +534,9 @@ sPtr<ast::IfStatement> Parser::parseIfStatement() {
         });
         return nullptr;
     }
-    // read condition
     ifNode.condition = parseExpression();
 
-    // check then kwd
     currentToken = skipWhile(isNewLine);
-
     if (currentToken.type != TokenType::Then) {
         m_errors.push_back(Error{
             .pos = currentToken.pos,
@@ -528,18 +547,14 @@ sPtr<ast::IfStatement> Parser::parseIfStatement() {
             ;
         return nullptr;
     }
-    // read  if body
     ifNode.ifBody = parseBody();
-    // check if ther is an 'else' kwd
-    currentToken = skipWhile(isNewLine);
 
+    currentToken = skipWhile(isNewLine);
     if (currentToken.type == TokenType::Else) {
-        // read else body
         ifNode.elseBody = parseBody();
         currentToken = skipWhile(isNewLine);
     }
 
-    // check end kwd
     if (currentToken.type != TokenType::End) {
         m_errors.push_back(Error{
             .pos = currentToken.pos,
@@ -550,6 +565,7 @@ sPtr<ast::IfStatement> Parser::parseIfStatement() {
             ;
         return nullptr;
     }
+    ifNode.end = currentToken.pos;
     return std::make_shared<ast::IfStatement>(ifNode);
 }
 
@@ -558,60 +574,65 @@ sPtr<ast::Expression> Parser::parseExpression() {
 }
 
 sPtr<ast::Expression> Parser::parseUnaryExpression() {
-    Token tok = m_lexer.Peek();
-    ast::UnaryExpression expr;
-    if (opPrec(tok.type) >= 0) {
-        // if has operations on primary
-        if (tok.type == TokenType::Not || tok.type == TokenType::Sub ||
-            tok.type == TokenType::Add) {
-            // math unary operations
-            tok = m_lexer.Next();
-            expr.operation = tok;
-            expr.operand = parseUnaryExpression();
-            return std::make_shared<ast::UnaryExpression>(expr);
+    Token currentToken = m_lexer.Peek();
 
-        } else if (tok.type == TokenType::OpenParen) {
+    if (opPrec(currentToken.type) >= 0) {
+        // if has operations on primary
+        if (currentToken.type == TokenType::Not ||
+            currentToken.type == TokenType::Sub ||
+            currentToken.type == TokenType::Add) {
+            // math unary operations
+            ast::UnaryExpression exprNode;
+            exprNode.begin = currentToken.pos;
+            currentToken = m_lexer.Next();
+            exprNode.operation = currentToken;
+            exprNode.operand = parseUnaryExpression();
+            if (exprNode.operand != nullptr) {
+                exprNode.end = exprNode.operand->end;
+            }
+            return std::make_shared<ast::UnaryExpression>(exprNode);
+        } else if (currentToken.type == TokenType::OpenParen) {
             // parenthesis -> more priority
-            tok = m_lexer.Next();
-            sPtr<ast::Expression> expr = parseBinaryExpression();
+            currentToken = m_lexer.Next();
+            sPtr<ast::Expression> exprNode = parseBinaryExpression();
             if (m_lexer.Peek().type != TokenType::CloseParen) {
                 m_errors.push_back(Error{
-                    .pos = tok.pos,
+                    .pos = currentToken.pos,
                     .message = "Expected to find ')'",
                 });
                 while (m_lexer.Peek().type != TokenType::CloseParen)
                     m_lexer.Next();
                 return nullptr;
             }
-            tok = m_lexer.Next(); // read ')'
-            return expr;
+            currentToken = m_lexer.Next(); // read ')'
+            return exprNode;
         } else {
-            // throw error
             m_errors.push_back(Error{
-                .pos = tok.pos,
+                .pos = currentToken.pos,
                 .message = "Expected to find unary operator",
             });
             return nullptr;
         }
-    } else if (isPrimary(tok.type)) {
-        // if is pure primitive
-        tok = m_lexer.Next();
+    } else if (isPrimary(currentToken.type)) {
+        // if is pure primary
+        ast::Primary primNode;
+        primNode.begin = currentToken.pos;
+        currentToken = m_lexer.Next();
         // check if parametrized routine call
-        if (tok.type == TokenType::Identifier &&
+        if (currentToken.type == TokenType::Identifier &&
             m_lexer.Peek().type == TokenType::OpenParen) {
-            return parseRoutineCall(tok);
+            return parseRoutineCall(currentToken);
             // TODO: if ambiguous, make an identifier
         }
         // return Primitive only
-        ast::Primary prim;
-        prim.value = tok;
-        return std::make_shared<ast::Primary>(prim);
+        primNode.value = currentToken;
+        primNode.end = currentToken.pos;
+        return std::make_shared<ast::Primary>(primNode);
     }
     return nullptr;
-} // namespace parser
+}
 
 sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
-
     sPtr<ast::Expression> lhs = parseUnaryExpression();
 
     for (;;) {
@@ -625,6 +646,9 @@ sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
         op = m_lexer.Next();
 
         ast::BinaryExpression expr;
+        if (lhs != nullptr) {
+            expr.begin = lhs->begin;
+        }
         expr.operand1 = lhs;
         expr.operation = op;
 
@@ -642,17 +666,19 @@ sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
         } else {
             expr.operand2 = parseBinaryExpression(prec + 1);
         }
+        expr.end = op.pos;
         lhs = std::make_shared<ast::BinaryExpression>(expr);
     }
 }
 
 sPtr<ast::RoutineCall> Parser::parseRoutineCall(Token routineName) {
-    ast::RoutineCall rc;
-    rc.routine = routineName; // save the function name
-    Token t = m_lexer.Peek();
-    if (t.type != TokenType::OpenParen) {
+    ast::RoutineCall rountineCallNode;
+    rountineCallNode.routine = routineName; // save the function name
+    rountineCallNode.begin = routineName.pos;
+    Token currentToken = m_lexer.Peek();
+    if (currentToken.type != TokenType::OpenParen) {
         m_errors.push_back(Error{
-            .pos = t.pos,
+            .pos = currentToken.pos,
             .message = "Expected to find '('",
         });
         return nullptr;
@@ -661,7 +687,7 @@ sPtr<ast::RoutineCall> Parser::parseRoutineCall(Token routineName) {
         m_lexer.Next(); // first call-read '(', others - ','
         sPtr<ast::Expression> e = parseExpression();
         if (e != nullptr) {
-            rc.args.push_back(e);
+            rountineCallNode.args.push_back(e);
         }
     } while (m_lexer.Peek().type == TokenType::Comma);
 
@@ -673,8 +699,9 @@ sPtr<ast::RoutineCall> Parser::parseRoutineCall(Token routineName) {
 
         return nullptr;
     }
-    t = m_lexer.Next(); // read ')'
-    return std::make_shared<ast::RoutineCall>(rc);
+    currentToken = m_lexer.Next(); // read ')'
+    rountineCallNode.end = currentToken.pos;
+    return std::make_shared<ast::RoutineCall>(rountineCallNode);
 }
 
 bool Parser::isNewLine(Token tok) { return tok.type == TokenType::NewLine; }
