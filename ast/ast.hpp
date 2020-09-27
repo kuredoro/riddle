@@ -9,14 +9,14 @@ template <typename T> using sPtr = std::shared_ptr<T>;
 
 struct Node;
 struct Program;
-struct Routine;
+struct RoutineDecl;
 struct Parameter;
 struct Type;
 struct AliasedType;
 struct PrimitiveType;
 struct ArrayType;
 struct RecordType;
-struct Variable;
+struct VariableDecl;
 struct Body;
 struct Statement;
 struct Assignment;
@@ -33,13 +33,13 @@ class Visitor {
 public:
     virtual ~Visitor() = default;
     virtual void visit(Program* node) = 0;
-    virtual void visit(Routine* node) = 0;
+    virtual void visit(RoutineDecl* node) = 0;
     virtual void visit(Parameter* node) = 0;
     virtual void visit(Type* node) = 0;
     virtual void visit(PrimitiveType* node) = 0;
     virtual void visit(ArrayType* node) = 0;
     virtual void visit(RecordType* node) = 0;
-    virtual void visit(Variable* node) = 0;
+    virtual void visit(VariableDecl* node) = 0;
     virtual void visit(Body* node) = 0;
     virtual void visit(Statement* node) = 0;
     virtual void visit(Assignment* node) = 0;
@@ -67,8 +67,8 @@ struct Expression : virtual Node {
 };
 
 struct Program : Node {
-    std::vector<sPtr<Routine>> routines;
-    std::vector<sPtr<Variable>> variables;
+    std::vector<sPtr<RoutineDecl>> routines;
+    std::vector<sPtr<VariableDecl>> variables;
     std::vector<sPtr<Type>> types;
     bool operator==(const Program& other) const {
         return Node::operator==(other) && routines == other.routines &&
@@ -77,12 +77,12 @@ struct Program : Node {
     void accept(Visitor& v) override { v.visit(this); }
 };
 
-struct Routine : Node {
+struct RoutineDecl : Node {
     lexer::Token name;
     std::vector<sPtr<Parameter>> parameters;
     sPtr<Type> returnType;
     sPtr<Body> body;
-    bool operator==(const Routine& other) const {
+    bool operator==(const RoutineDecl& other) const {
         return Node::operator==(other) && name == other.name &&
                returnType == other.returnType && body == other.body &&
                parameters == other.parameters;
@@ -134,18 +134,18 @@ struct ArrayType : Type {
 };
 
 struct RecordType : Type {
-    std::vector<sPtr<Variable>> fields;
+    std::vector<sPtr<VariableDecl>> fields;
     bool operator==(const RecordType& other) const {
         return Node::operator==(other) && fields == other.fields;
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
 
-struct Variable : Node {
+struct VariableDecl : Node {
     lexer::Token name;
     sPtr<Type> type;
     sPtr<Expression> expression;
-    bool operator==(const Variable& other) const {
+    bool operator==(const VariableDecl& other) const {
         return Node::operator==(other) && name == other.name &&
                type == other.type && expression == other.expression;
     }
@@ -154,7 +154,7 @@ struct Variable : Node {
 
 struct Body : Node {
     std::vector<sPtr<Statement>> statements;
-    std::vector<sPtr<Variable>> variables;
+    std::vector<sPtr<VariableDecl>> variables;
     std::vector<sPtr<Type>> types;
     bool operator==(const Body& other) const {
         return Node::operator==(other) && statements == other.statements &&

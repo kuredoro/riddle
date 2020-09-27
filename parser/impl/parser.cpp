@@ -18,10 +18,10 @@ sPtr<ast::Program> Parser::parseProgram() {
     while ((currentToken = m_lexer.Peek()).type != TokenType::Eof) {
         switch (currentToken.type) {
         case TokenType::Routine:
-            programNode.routines.push_back(parseRoutine());
+            programNode.routines.push_back(parseRoutineDecl());
             continue;
         case TokenType::Var:
-            programNode.variables.push_back(parseVariable());
+            programNode.variables.push_back(parseVariableDecl());
             continue;
         case TokenType::Type:
             programNode.types.push_back(parseType());
@@ -41,8 +41,8 @@ sPtr<ast::Program> Parser::parseProgram() {
     return std::make_shared<ast::Program>(programNode);
 }
 
-sPtr<ast::Routine> Parser::parseRoutine() {
-    ast::Routine routineNode;
+sPtr<ast::RoutineDecl> Parser::parseRoutineDecl() {
+    ast::RoutineDecl routineNode;
     Token currentToken = skipWhile(isNewLine);
     if (currentToken.type != TokenType::Routine) {
         m_errors.push_back(Error{
@@ -131,7 +131,7 @@ sPtr<ast::Routine> Parser::parseRoutine() {
             ;
         return nullptr;
     }
-    return std::make_shared<ast::Routine>(routineNode);
+    return std::make_shared<ast::RoutineDecl>(routineNode);
 }
 
 sPtr<ast::Parameter> Parser::parseParameter() {
@@ -232,7 +232,7 @@ sPtr<ast::RecordType> Parser::parseRecordType() {
     while (m_lexer.Peek().type == TokenType::NewLine)
         m_lexer.Next();
     while (m_lexer.Peek().type != TokenType::End) {
-        recordNode.fields.push_back(parseVariable());
+        recordNode.fields.push_back(parseVariableDecl());
         while (m_lexer.Peek().type == TokenType::NewLine)
             m_lexer.Next();
     }
@@ -240,7 +240,7 @@ sPtr<ast::RecordType> Parser::parseRecordType() {
     return std::make_shared<ast::RecordType>(recordNode);
 }
 
-sPtr<ast::Variable> Parser::parseVariable() {
+sPtr<ast::VariableDecl> Parser::parseVariableDecl() {
     Token token = skipWhile(isNewLine);
     if (token.type != TokenType::Var) {
         m_errors.push_back(Error{
@@ -257,7 +257,7 @@ sPtr<ast::Variable> Parser::parseVariable() {
         });
         return nullptr;
     }
-    ast::Variable variable;
+    ast::VariableDecl variable;
     variable.name = token;
     token = skipWhile(isNewLine);
     if (token.type != TokenType::Is && token.type != TokenType::Colon) {
@@ -284,7 +284,7 @@ sPtr<ast::Variable> Parser::parseVariable() {
         });
         return nullptr;
     }
-    return std::make_shared<ast::Variable>(variable);
+    return std::make_shared<ast::VariableDecl>(variable);
 }
 
 sPtr<ast::Body> Parser::parseBody() {
@@ -293,7 +293,7 @@ sPtr<ast::Body> Parser::parseBody() {
     while ((currentToken = m_lexer.Peek()).type != TokenType::End) {
         switch (currentToken.type) {
         case TokenType::Var:
-            body.variables.push_back(parseVariable());
+            body.variables.push_back(parseVariableDecl());
             break;
         case TokenType::Type:
             body.types.push_back(parseType());

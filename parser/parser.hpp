@@ -20,13 +20,13 @@ class Parser {
 public:
     Parser(lexer::Lexer lexer) : m_lexer(lexer) {}
     sPtr<ast::Program> parseProgram();
-    sPtr<ast::Routine> parseRoutine();
+    sPtr<ast::RoutineDecl> parseRoutineDecl();
     sPtr<ast::Parameter> parseParameter();
     sPtr<ast::Type> parseType();
     sPtr<ast::PrimitiveType> parsePrimitiveType();
     sPtr<ast::ArrayType> parseArrayType();
     sPtr<ast::RecordType> parseRecordType();
-    sPtr<ast::Variable> parseVariable();
+    sPtr<ast::VariableDecl> parseVariableDecl();
     sPtr<ast::Body> parseBody();
     sPtr<ast::Statement> parseStatement();
     sPtr<ast::Assignment> parseAssignment(sPtr<ast::Expression> left);
