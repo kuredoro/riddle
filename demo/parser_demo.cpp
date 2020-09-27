@@ -9,9 +9,37 @@
 class PrintVisitor : public ast::Visitor {
 public:
     PrintVisitor(size_t depth = 0) : depth(depth) {}
-    void visit(ast::Program* node) override {}
-    void visit(ast::RoutineDecl* node) override{
-
+    void visit(ast::Program* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [Program]> null\n", "", depth);
+            return;
+        }
+        fmt::print("{:|>{}}- [Program]>\n", "", depth);
+        depth++;
+        for (auto type : node->types) {
+            type->accept(*this);
+        }
+        for (auto routine : node->routines) {
+            routine->accept(*this);
+        }
+        for (auto variableDecl : node->variables) {
+            variableDecl->accept(*this);
+        }
+        depth--;
+    }
+    void visit(ast::RoutineDecl* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [RoutineDecl]> null\n", "", depth);
+            return;
+        }
+        fmt::print("{:|>{}}- [RoutineDecl]> {}\n", "", depth, node->name.lit);
+        depth++;
+        for (auto parameter : node->parameters) {
+            parameter->accept(*this);
+        }
+        node->body->accept(*this);
+        node->returnType->accept(*this);
+        depth--;
     };
     void visit(ast::Parameter* node) override {
         if (node == nullptr) {
@@ -93,14 +121,39 @@ public:
             depth--;
         }
     };
-    void visit(ast::Body* node) override{
-
+    void visit(ast::Body* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [Body]> null\n", "", depth);
+            return;
+        }
+        depth++;
+        for (auto type : node->types) {
+            type->accept(*this);
+        }
+        for (auto variableDecl : node->variables) {
+            variableDecl->accept(*this);
+        }
+        for (auto statement : node->statements) {
+            statement->accept(*this);
+        }
+        depth--;
     };
-    void visit(ast::Statement* node) override{
-
-    };
-    void visit(ast::Assignment* node) override{
-
+    void visit(ast::Statement* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [Statement]> null\n", "", depth);
+            return;
+        }
+        fmt::print("{:|>{}}- [Statement]>\n", "", depth);
+        };
+    void visit(ast::Assignment* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [Assignment]> null\n", "", depth);
+            return;
+        }
+        depth++;
+        node->lhs->accept(*this);
+        node->rhs->accept(*this);
+        depth--;
     };
     void visit(ast::WhileLoop* node) override {
         if (node == nullptr) {
@@ -140,8 +193,12 @@ public:
             depth--;
         }
     };
-    void visit(ast::Expression* node) override{
-
+    void visit(ast::Expression* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [Expression]> null\n", "", depth);
+            return;
+        }
+        fmt::print("{:|>{}}- [Expression]>\n", "", depth);
     };
     void visit(ast::UnaryExpression* node) override {
         if (node == nullptr) {
@@ -180,7 +237,7 @@ public:
             fmt::print("{:|>{}}- [RoutineCall]> {}\n", "", depth,
                        node->routine.lit);
             depth++;
-            for (int i = 0; i < node->args.size(); i++) {
+            for (size_t i = 0; i < node->args.size(); i++) {
                 node->args[i]->accept(*this);
             }
             depth--;
