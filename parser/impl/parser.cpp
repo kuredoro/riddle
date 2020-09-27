@@ -107,7 +107,6 @@ sPtr<ast::RoutineDecl> Parser::parseRoutineDecl() {
         return nullptr;
     }
     if (currentToken.type == TokenType::Colon) {
-        currentToken = skipWhile(isNewLine);
         routineNode.returnType = parseType();
     }
     currentToken = skipWhile(isNewLine);
