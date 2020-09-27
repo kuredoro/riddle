@@ -22,6 +22,7 @@ public:
     sPtr<ast::Program> parseProgram();
     sPtr<ast::RoutineDecl> parseRoutineDecl();
     sPtr<ast::Parameter> parseParameter();
+    sPtr<ast::TypeDecl> parseTypeDecl();
     sPtr<ast::Type> parseType();
     sPtr<ast::PrimitiveType> parsePrimitiveType();
     sPtr<ast::ArrayType> parseArrayType();

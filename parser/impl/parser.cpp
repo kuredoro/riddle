@@ -26,7 +26,7 @@ sPtr<ast::Program> Parser::parseProgram() {
             programNode.variables.push_back(parseVariableDecl());
             break;
         case TokenType::Type:
-            programNode.types.push_back(parseType());
+            programNode.types.push_back(parseTypeDecl());
             break;
         case TokenType::NewLine:
             currentToken = m_lexer.Next();
@@ -173,6 +173,48 @@ sPtr<ast::Parameter> Parser::parseParameter() {
     return std::make_shared<ast::Parameter>(parameterNode);
 }
 
+sPtr<ast::TypeDecl> Parser::parseTypeDecl() {
+    ast::TypeDecl typeDeclNode;
+    Token currentToken = m_lexer.Next();
+    typeDeclNode.begin = currentToken.pos;
+    if (currentToken.type != TokenType::Type) {
+        m_errors.push_back(Error{
+            .pos = currentToken.pos,
+            .message = "Expected to find \"type\" keyword.",
+        });
+        return nullptr;
+    }
+    currentToken = m_lexer.Next();
+    if (currentToken.type != TokenType::Identifier) {
+        m_errors.push_back(Error{
+            .pos = currentToken.pos,
+            .message = "Expected to find an identifier.",
+        });
+        return nullptr;
+    }
+    typeDeclNode.name = currentToken.lit;
+    currentToken = m_lexer.Next();
+    if (currentToken.type != TokenType::Is) {
+        m_errors.push_back(Error{
+            .pos = currentToken.pos,
+            .message = "Expected to find \"is\" keyword.",
+        });
+        return nullptr;
+    }
+    typeDeclNode.type = parseType();
+    currentToken = m_lexer.Next();
+    if (currentToken.type != TokenType::Semicolon &&
+        currentToken.type != TokenType::NewLine) {
+        m_errors.push_back(Error{
+            .pos = currentToken.pos,
+            .message = "Expected a new line or ';'.",
+        });
+        return nullptr;
+    }
+    typeDeclNode.end = currentToken.pos;
+    return std::make_shared<ast::TypeDecl>(typeDeclNode);
+}
+
 sPtr<ast::Type> Parser::parseType() {
     Token currentToken = m_lexer.Peek();
     if (TokenType* type = std::find(std::begin(primitives),
@@ -316,7 +358,7 @@ sPtr<ast::Body> Parser::parseBody() {
             bodyNode.variables.push_back(parseVariableDecl());
             break;
         case TokenType::Type:
-            bodyNode.types.push_back(parseType());
+            bodyNode.types.push_back(parseTypeDecl());
             break;
         case TokenType::NewLine:
             m_lexer.Next();

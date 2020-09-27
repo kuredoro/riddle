@@ -119,6 +119,17 @@ public:
         }
         depth--;
     }
+    void visit(ast::TypeDecl* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [TypeDecl]> null\n", "", depth);
+        }
+        fmt::print("{:|>{}}- [TypeDecl]> {}\n", "", depth, node->name);
+        depth++;
+        if (node->type != nullptr) {
+            node->type->accept(*this);
+        }
+        depth--;
+    }
     void visit(ast::Body* node) override {
         if (node == nullptr) {
             fmt::print("{:|>{}}- [Body]> null\n", "", depth);
