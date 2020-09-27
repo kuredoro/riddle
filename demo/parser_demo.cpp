@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 #include "fmt/color.h"
 #include "fmt/core.h"
@@ -253,13 +254,37 @@ int main(int argc, char* argv[]) {
         std::ifstream f(argv[1]);
         std::string code((std::istreambuf_iterator<char>(f)),
                          (std::istreambuf_iterator<char>()));
-        fmt::print("Code:\n{}\n\n", code);
+        fmt::print("Code:\n");
+        fmt::print(fg(fmt::color::aqua), "{}\n\n", code);
         lexer::Lexer lx{code};
         parser::Parser parser(lx);
-        auto ast = parser.parseProgram();
-        PrintVisitor v;
-        ast->accept(v);
 
+        auto ast = parser.parseProgram();
+        auto errors = parser.getErrors();
+        if (errors.empty()) {
+            PrintVisitor v;
+            ast->accept(v);
+        } else {
+            // get individual lines
+            std::vector<std::string> lines;
+            std::string line;
+            std::istringstream codeStream(code);
+            while (std::getline(codeStream, line, '\n')) {
+                lines.push_back(line);
+            }
+
+            fmt::print(fg(fmt::color::indian_red) | fmt::emphasis::bold,
+                       "Parsing Errors:\n");
+            for (auto error : errors) {
+                fmt::print("*\t{}\n", lines[error.pos.line - 1]);
+                fmt::print("\t{:->{}}^{:-<{}}\n", "", error.pos.column, "",
+                           lines[error.pos.line - 1].length() -
+                               error.pos.column - 1 - 1);
+                fmt::print(fg(fmt::color::indian_red),
+                           "\t[line: {}, column: {}]: {}\n\n", error.pos.line,
+                           error.pos.column, error.message);
+            }
+        }
         return 0;
     }
 
