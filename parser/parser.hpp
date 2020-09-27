@@ -33,6 +33,7 @@ public:
     sPtr<ast::WhileLoop> parseWhileLoop();
     sPtr<ast::ForLoop> parseForLoop();
     sPtr<ast::IfStatement> parseIfStatement();
+    sPtr<ast::ReturnStatement> parseReturnStatement();
     sPtr<ast::Expression> parseExpression();
     sPtr<ast::Expression> parseUnaryExpression();
     sPtr<ast::Expression> parseBinaryExpression(int prec1 = 0);

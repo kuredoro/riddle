@@ -29,17 +29,22 @@ sPtr<ast::Program> Parser::parseProgram() {
             programNode.types.push_back(parseType());
             break;
         case TokenType::NewLine:
-            m_lexer.Next();
+            currentToken = m_lexer.Next();
+            break;
+        case TokenType::Eof:
             break;
         default:
             m_errors.push_back(Error{
                 .pos = currentToken.pos,
                 .message = "Unexpected token",
             });
-            while (m_lexer.Peek().type != TokenType::NewLine)
+            while (m_lexer.Peek().type != TokenType::NewLine &&
+                   m_lexer.Peek().type != TokenType::Eof)
                 m_lexer.Next();
         }
-        currentToken = m_lexer.Peek();
+        if (currentToken.type != TokenType::Eof) {
+            currentToken = m_lexer.Peek();
+        }
     }
     programNode.end = currentToken.pos;
     return std::make_shared<ast::Program>(programNode);
@@ -124,18 +129,10 @@ sPtr<ast::RoutineDecl> Parser::parseRoutineDecl() {
     while (m_lexer.Peek().type != TokenType::NewLine)
         m_lexer.Next();
     routineNode.body = parseBody();
-    currentToken = skipWhile(isNewLine);
-    if (currentToken.type != TokenType::End) {
-        m_errors.push_back(Error{
-            .pos = currentToken.pos,
-            .message = "Expected to find keyword 'end'",
-        });
-        // skip till "end" keyword
-        while (m_lexer.Next().type != TokenType::End)
-            ;
-        return nullptr;
+    // "end" keyword consumed by parseBody
+    if (routineNode.body != nullptr) {
+        routineNode.end = routineNode.body->end;
     }
-    routineNode.end = currentToken.pos;
     return std::make_shared<ast::RoutineDecl>(routineNode);
 }
 
@@ -351,6 +348,8 @@ sPtr<ast::Statement> Parser::parseStatement() {
         return parseForLoop();
     case TokenType::If:
         return parseIfStatement();
+    case TokenType::Return:
+        return parseReturnStatement();
     default:
         m_errors.push_back(Error{
             .pos = currentToken.pos,
@@ -569,6 +568,24 @@ sPtr<ast::IfStatement> Parser::parseIfStatement() {
     return std::make_shared<ast::IfStatement>(ifNode);
 }
 
+sPtr<ast::ReturnStatement> Parser::parseReturnStatement() {
+    ast::ReturnStatement returnNode;
+    Token currentToken = skipWhile(isNewLine);
+    returnNode.begin = currentToken.pos;
+    if (currentToken.type != TokenType::Return) {
+        m_errors.push_back(Error{
+            .pos = currentToken.pos,
+            .message = "Expected \"return\" keyword but didn't find it.",
+        });
+        return nullptr;
+    }
+    returnNode.expression = parseExpression();
+    if (returnNode.expression != nullptr) {
+        returnNode.end = returnNode.expression->end;
+    }
+    return std::make_shared<ast::ReturnStatement>(returnNode);
+}
+
 sPtr<ast::Expression> Parser::parseExpression() {
     return parseBinaryExpression();
 }
@@ -711,10 +728,11 @@ bool Parser::isNewLine(Token tok) { return tok.type == TokenType::NewLine; }
  * token that doesn't
  */
 Token Parser::skipWhile(std::function<bool(Token)> pred) {
-    while (pred(m_lexer.Peek())) {
-        m_lexer.Next();
+    Token tok = m_lexer.Peek();
+    while (pred(tok) && m_lexer.Peek().type != TokenType::Eof) {
+        tok = m_lexer.Next();
     }
-    return m_lexer.Next();
+    return tok.type == TokenType::Eof ? tok : m_lexer.Next();
 }
 
 int Parser::opPrec(TokenType token) {

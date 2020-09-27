@@ -41,7 +41,7 @@ public:
         node->body->accept(*this);
         node->returnType->accept(*this);
         depth--;
-    };
+    }
     void visit(ast::Parameter* node) override {
         if (node == nullptr) {
             fmt::print("{:|>{}}- [Parameter]> null\n", "", depth);
@@ -51,7 +51,7 @@ public:
             node->type->accept(*this);
             depth--;
         }
-    };
+    }
     void visit(ast::Type* node) override {
         if (ast::PrimitiveType* specific =
                 dynamic_cast<ast::PrimitiveType*>(node);
@@ -73,7 +73,7 @@ public:
         } else {
             fmt::print("{:|>{}}- [Type]> (unknown type)\n", "", depth);
         }
-    };
+    }
     void visit(ast::PrimitiveType* node) override {
         if (node == nullptr) {
             fmt::print("{:|>{}}- [PrimitiveType]> null\n", "", depth);
@@ -81,7 +81,7 @@ public:
             fmt::print("{:|>{}}- [PrimitiveType]> {}\n", "", depth,
                        node->type.lit);
         }
-    };
+    }
     void visit(ast::ArrayType* node) override {
         if (node == nullptr) {
             fmt::print("{:|>{}}- [ArrayType]> null\n", "", depth);
@@ -96,7 +96,7 @@ public:
             }
             depth--;
         }
-    };
+    }
     void visit(ast::RecordType* node) override {
         if (node == nullptr) {
             fmt::print("{:|>{}}- [RecordType]> null\n", "", depth);
@@ -108,7 +108,7 @@ public:
             }
             depth--;
         }
-    };
+    }
     void visit(ast::VariableDecl* node) override {
         if (node == nullptr) {
             fmt::print("{:|>{}}- [VariableDecl]> null\n", "", depth);
@@ -121,12 +121,13 @@ public:
             }
             depth--;
         }
-    };
+    }
     void visit(ast::Body* node) override {
         if (node == nullptr) {
             fmt::print("{:|>{}}- [Body]> null\n", "", depth);
             return;
         }
+        fmt::print("{:|>{}}- [Body]>\n", "", depth);
         depth++;
         for (auto type : node->types) {
             type->accept(*this);
@@ -138,14 +139,26 @@ public:
             statement->accept(*this);
         }
         depth--;
-    };
+    }
     void visit(ast::Statement* node) override {
         if (node == nullptr) {
             fmt::print("{:|>{}}- [Statement]> null\n", "", depth);
             return;
         }
-        fmt::print("{:|>{}}- [Statement]>\n", "", depth);
-        };
+        fmt::print("{:|>{}}- [Statement]> Unknown\n", "", depth);
+    }
+    void visit(ast::ReturnStatement* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [Return]> null\n", "", depth);
+            return;
+        }
+        fmt::print("{:|>{}}- [Return]>\n", "", depth);
+        depth++;
+        if (node->expression != nullptr) {
+            node->expression->accept(*this);
+        }
+        depth--;
+    }
     void visit(ast::Assignment* node) override {
         if (node == nullptr) {
             fmt::print("{:|>{}}- [Assignment]> null\n", "", depth);
@@ -155,7 +168,7 @@ public:
         node->lhs->accept(*this);
         node->rhs->accept(*this);
         depth--;
-    };
+    }
     void visit(ast::WhileLoop* node) override {
         if (node == nullptr) {
             fmt::print("{:|>{}}- [WhileLoop]> null\n", "", depth);
@@ -166,7 +179,7 @@ public:
             node->body->accept(*this);
             depth--;
         }
-    };
+    }
     void visit(ast::ForLoop* node) override {
         if (node == nullptr) {
             fmt::print("{:|>{}}- [ForLoop]> null\n", "", depth);
@@ -179,7 +192,7 @@ public:
             node->body->accept(*this);
             depth--;
         }
-    };
+    }
     void visit(ast::IfStatement* node) override {
         if (node == nullptr) {
             fmt::print("{:|>{}}- [IfStatement]> null\n", "", depth);
@@ -193,14 +206,14 @@ public:
             }
             depth--;
         }
-    };
+    }
     void visit(ast::Expression* node) override {
         if (node == nullptr) {
             fmt::print("{:|>{}}- [Expression]> null\n", "", depth);
             return;
         }
         fmt::print("{:|>{}}- [Expression]>\n", "", depth);
-    };
+    }
     void visit(ast::UnaryExpression* node) override {
         if (node == nullptr) {
             fmt::print("{:|>{}}- [UnaryExpression]> null\n", "", depth);
@@ -211,7 +224,7 @@ public:
             node->operand->accept(*this);
             depth--;
         }
-    };
+    }
     void visit(ast::BinaryExpression* node) override {
         if (node == nullptr) {
             fmt::print("{:|>{}}- [BinaryExpression]> null\n", "", depth);
@@ -223,14 +236,14 @@ public:
             node->operand2->accept(*this);
             depth--;
         }
-    };
+    }
     void visit(ast::Primary* node) override {
         if (node == nullptr) {
             fmt::print("{:|>{}}- [Primary]> null\n", "", depth);
         } else {
             fmt::print("{:|>{}}- [Primary]> {}\n", "", depth, node->value.lit);
         }
-    };
+    }
     void visit(ast::RoutineCall* node) override {
         if (node == nullptr) {
             fmt::print("{:|>{}}- [RoutineCall]> null\n", "", depth);
@@ -243,7 +256,7 @@ public:
             }
             depth--;
         }
-    };
+    }
 
 private:
     size_t depth;

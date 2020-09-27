@@ -35,6 +35,7 @@ common::Trie<TokenType> g_keywordTrie{
     {"and", TokenType::And},
     {"or", TokenType::Or},
     {"xor", TokenType::Xor},
+    {"return", TokenType::Return},
 };
 
 common::Trie<TokenType> g_operatorTrie{

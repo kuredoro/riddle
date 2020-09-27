@@ -4,7 +4,7 @@
 
 namespace lexer {
 
-enum class TokenType{
+enum class TokenType {
     Illegal,
     Eof,
     Comment,
@@ -28,17 +28,17 @@ enum class TokenType{
     Div, // /
     Mod, // %
 
-    OpenParen,  // (
-    OpenBrack,  // [
-    Comma,   // ,
-    Dot,     // .
-    TwoDots, // ..
+    OpenParen, // (
+    OpenBrack, // [
+    Comma,     // ,
+    Dot,       // .
+    TwoDots,   // ..
 
-    CloseParen,    // )
-    CloseBrack,    // ]
-    Semicolon, // ;
-    Colon,     // :
-    NewLine,   // \n
+    CloseParen, // )
+    CloseBrack, // ]
+    Semicolon,  // ;
+    Colon,      // :
+    NewLine,    // \n
 
     // Keywords
     Var,
@@ -56,23 +56,23 @@ enum class TokenType{
     For,
     Loop,
     End,
-    Reverse, 
-    In, 
+    Reverse,
+    In,
     If,
-    Then, 
+    Then,
     Else,
     Not,
     And,
     Or,
     Xor,
+    Return,
 };
 
 struct Token {
 
-    struct Position
-    {
-        size_t line;       // starting at 1
-        size_t column;     // starting at 1, in bytes
+    struct Position {
+        size_t line;   // starting at 1
+        size_t column; // starting at 1, in bytes
         bool operator==(const Position& other) const {
             return line == other.line && column == other.column;
         }
@@ -83,17 +83,10 @@ struct Token {
     std::string lit;
 
     friend bool operator==(const Token& a, const Token& b) {
-        return a.type == b.type && 
-               a.pos == b.pos &&
-               a.lit == b.lit;
+        return a.type == b.type && a.pos == b.pos && a.lit == b.lit;
     }
 
-    friend bool operator!=(const Token& a, const Token& b) {
-        return !(a == b);
-    }
-
+    friend bool operator!=(const Token& a, const Token& b) { return !(a == b); }
 };
 
-
-
-}
+} // namespace lexer
