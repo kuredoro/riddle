@@ -10,7 +10,7 @@ class PrintVisitor : public ast::Visitor {
 public:
     PrintVisitor(size_t depth = 0) : depth(depth) {}
     void visit(ast::Program* node) override {}
-    void visit(ast::Routine* node) override{
+    void visit(ast::RoutineDecl* node) override{
 
     };
     void visit(ast::Parameter* node) override {
@@ -80,7 +80,7 @@ public:
             depth--;
         }
     };
-    void visit(ast::Variable* node) override {
+    void visit(ast::VariableDecl* node) override {
         if (node == nullptr) {
             fmt::print("{:|>{}}- [VariableDecl]> null\n", "", depth);
         } else {
