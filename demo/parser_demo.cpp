@@ -39,7 +39,9 @@ public:
             parameter->accept(*this);
         }
         node->body->accept(*this);
-        node->returnType->accept(*this);
+        if (node->returnType != nullptr) {
+            node->returnType->accept(*this);
+        }
         depth--;
     }
     void visit(ast::Parameter* node) override {
@@ -175,6 +177,7 @@ public:
             fmt::print("{:|>{}}- [Assignment]> null\n", "", depth);
             return;
         }
+        fmt::print("{:|>{}}- [Assignment]>\n", "", depth);
         depth++;
         node->lhs->accept(*this);
         node->rhs->accept(*this);
