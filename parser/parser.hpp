@@ -8,13 +8,10 @@ namespace parser {
 
 template <typename T> using sPtr = std::shared_ptr<T>;
 
-// TODO: define function to use this struct, that also advances
 struct Error {
     lexer::Token::Position pos;
     std::string message;
 };
-
-// TODO: define a type for the "context"
 
 class Parser {
 public:
@@ -44,8 +41,12 @@ public:
 private:
     lexer::Lexer m_lexer;
     std::vector<Error> m_errors;
-    lexer::Token skipWhile(std::function<bool(lexer::Token)>);
-    static bool isNewLine(lexer::Token);
+    lexer::Token expect(std::vector<lexer::TokenType>,
+                        std::string = "Unexpected Token.");
+    lexer::Token expect(lexer::TokenType, std::string = "Unexpected Token.");
+    void skipWhitespace();
+    void advance(std::vector<lexer::TokenType>);
+    void advance(lexer::TokenType);
     bool isPrimary(lexer::TokenType);
     int opPrec(lexer::TokenType);
 };
