@@ -321,7 +321,6 @@ int main(int argc, char* argv[]) {
         fmt::print("(4) statement\n");
         fmt::print("Enter a number> ");
         std::cin >> choice;
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         switch (choice) {
         case 0:
             return 0;
@@ -344,7 +343,7 @@ int main(int argc, char* argv[]) {
 
         fmt::print("riddle> ");
         std::string line;
-        std::getline(std::cin, line);
+        std::getline(std::cin >> std::ws, line);
 
         lexer::Lexer lx{line};
         parser::Parser parser(lx);
