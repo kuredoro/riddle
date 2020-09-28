@@ -117,6 +117,9 @@ public:
         if (node->type != nullptr) {
             node->type->accept(*this);
         }
+        if (node->expression != nullptr) {
+            node->expression->accept(*this);
+        }
         depth--;
     }
     void visit(ast::TypeDecl* node) override {
