@@ -298,9 +298,9 @@ int main(int argc, char* argv[]) {
                        "Parsing Errors:\n");
             for (auto error : errors) {
                 fmt::print("*\t{}\n", lines[error.pos.line - 1]);
-                fmt::print("\t{:->{}}^{:-<{}}\n", "", error.pos.column, "",
+                fmt::print("\t{:->{}}^{:-<{}}\n", "", error.pos.column - 1, "",
                            lines[error.pos.line - 1].length() -
-                               error.pos.column - 1 - 1);
+                               error.pos.column - 1);
                 fmt::print(fg(fmt::color::indian_red),
                            "\t[line: {}, column: {}]: {}\n\n", error.pos.line,
                            error.pos.column, error.message);
