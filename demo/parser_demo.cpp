@@ -311,6 +311,7 @@ int main(int argc, char* argv[]) {
                            "\t[line: {}, column: {}]: {}\n\n", error.pos.line,
                            error.pos.column, error.message);
             }
+            return 1;
         }
         return 0;
     }
