@@ -32,6 +32,10 @@ struct Expression;
 struct UnaryExpression;
 struct BinaryExpression;
 struct Primary;
+struct IntegerLiteral;
+struct RealLiteral;
+struct BooleanLiteral;
+struct Identifier;
 struct RoutineCall;
 
 class Visitor {
@@ -58,6 +62,10 @@ public:
     virtual void visit(IfStatement* node) = 0;
     virtual void visit(Expression* node) = 0;
     virtual void visit(Primary* node) = 0;
+    virtual void visit(IntegerLiteral* node) = 0;
+    virtual void visit(RealLiteral* node) = 0;
+    virtual void visit(BooleanLiteral* node) = 0;
+    virtual void visit(Identifier* node) = 0;
     virtual void visit(RoutineCall* node) = 0;
     virtual void visit(UnaryExpression* node) = 0;
     virtual void visit(BinaryExpression* node) = 0;
@@ -140,12 +148,15 @@ struct PrimitiveType : Type {
     }
     virtual void accept(Visitor& v) override { v.visit(this); }
 };
+
 struct IntegerType : PrimitiveType {
     void accept(Visitor& v) override { v.visit(this); }
 };
+
 struct RealType : PrimitiveType {
     void accept(Visitor& v) override { v.visit(this); }
 };
+
 struct BooleanType : PrimitiveType {
     void accept(Visitor& v) override { v.visit(this); }
 };
@@ -269,9 +280,48 @@ struct BinaryExpression : Expression {
 };
 
 struct Primary : Expression, Statement {
-    lexer::TokenType value;
     bool operator==(const Primary& other) const {
-        return Node::operator==(other) && value == other.value;
+        return Node::operator==(other);
+    }
+    virtual void accept(Visitor& v) override { v.visit(this); }
+};
+
+struct IntegerLiteral : Primary {
+    long long value;
+    IntegerLiteral(long long value) : value(value) {}
+    bool operator==(const IntegerLiteral& other) const {
+        return Primary::operator==(other) && value == other.value;
+    }
+    void accept(Visitor& v) override { v.visit(this); }
+};
+
+struct RealLiteral : Primary {
+    double value;
+    RealLiteral(double value) : value(value) {}
+    bool operator==(const RealLiteral& other) const {
+        return Primary::operator==(other) && value == other.value;
+    }
+    void accept(Visitor& v) override { v.visit(this); }
+};
+
+struct BooleanLiteral : Primary {
+    bool value;
+    BooleanLiteral(bool value) : value(value) {}
+    bool operator==(const BooleanLiteral& other) const {
+        return Primary::operator==(other) && value == other.value;
+    }
+    void accept(Visitor& v) override { v.visit(this); }
+};
+
+// Used for holding variables. Can temporary hold unparenthesized routine calls
+//  until resolved.
+struct Identifier : Primary {
+    std::string name;
+    sPtr<VariableDecl> variable;
+    Identifier(std::string name) : name(name) {}
+    bool operator==(const Identifier& other) const {
+        return Primary::operator==(other) && name == other.name &&
+               variable == other.variable;
     }
     void accept(Visitor& v) override { v.visit(this); }
 };

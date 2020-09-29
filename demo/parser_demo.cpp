@@ -290,7 +290,35 @@ public:
             fmt::print("{:|>{}}- [Primary]> null\n", "", depth);
             return;
         }
-        fmt::print("{:|>{}}- [Primary]> {}\n", "", depth, node->value);
+        fmt::print("{:|>{}}- [Primary]> unknown\n", "", depth);
+    }
+    void visit(ast::IntegerLiteral* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [IntegerLiteral]> null\n", "", depth);
+            return;
+        }
+        fmt::print("{:|>{}}- [IntegerLiteral]> {}\n", "", depth, node->value);
+    }
+    void visit(ast::RealLiteral* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [RealLiteral]> null\n", "", depth);
+            return;
+        }
+        fmt::print("{:|>{}}- [RealLiteral]> {}\n", "", depth, node->value);
+    }
+    void visit(ast::BooleanLiteral* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [BooleanLiteral]> null\n", "", depth);
+            return;
+        }
+        fmt::print("{:|>{}}- [BooleanLiteral]> {}\n", "", depth, node->value);
+    }
+    void visit(ast::Identifier* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [Identifier]> null\n", "", depth);
+            return;
+        }
+        fmt::print("{:|>{}}- [Identifier]> {}\n", "", depth, node->name);
     }
     void visit(ast::RoutineCall* node) override {
         if (node == nullptr) {
