@@ -223,7 +223,7 @@ struct ForLoop : Statement {
     std::string loopVar;
     sPtr<Expression> rangeFrom;
     sPtr<Expression> rangeTo;
-    bool reverse;
+    bool reverse = false;
     sPtr<Body> body;
     bool operator==(const ForLoop& other) const {
         return Node::operator==(other) && loopVar == other.loopVar &&
@@ -253,7 +253,7 @@ struct ReturnStatement : Statement {
 };
 
 struct Expression : virtual Node {
-    bool constant; // tells if this expression is a compile-time constant
+    bool constant = false; // tells if this expression is compile-time constant
     Type type;
     void accept(Visitor& v) override { v.visit(this); }
 };

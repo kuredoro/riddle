@@ -83,12 +83,10 @@ char Lexer::peek(size_t offset) {
  * Returns the next token without consuming it.
  */
 Token Lexer::Peek() {
-    if (currentToken == nullptr) {
-        currentToken = std::make_shared<Token>(scanNext());
-    } else if (currentToken->type == TokenType::Eof) {
-        throw "End-of-file already reached";
+    if (consumedEof) {
+        throw std::overflow_error("End-of-file already consumed");
     }
-    return *currentToken;
+    return currentToken;
 }
 
 /**
@@ -96,8 +94,10 @@ Token Lexer::Peek() {
  */
 Token Lexer::Next() {
     Token ret = Peek();
-    if (ret.type != TokenType::Eof) {
-        currentToken = nullptr;
+    if (ret.type == TokenType::Eof) {
+        consumedEof = true;
+    } else {
+        currentToken = scanNext();
     }
     return ret;
 }
