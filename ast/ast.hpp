@@ -80,10 +80,6 @@ struct Node {
     virtual ~Node() = default;
 };
 
-struct Expression : virtual Node {
-    void accept(Visitor& v) override { v.visit(this); }
-};
-
 struct Program : Node {
     std::vector<sPtr<RoutineDecl>> routines;
     std::vector<sPtr<VariableDecl>> variables;
@@ -256,6 +252,12 @@ struct ReturnStatement : Statement {
     void accept(Visitor& v) override { v.visit(this); }
 };
 
+struct Expression : virtual Node {
+    bool constant; // tells if this expression is a compile-time constant
+    Type type;
+    void accept(Visitor& v) override { v.visit(this); }
+};
+
 struct UnaryExpression : Expression {
     sPtr<Expression> operand;
     lexer::TokenType operation;
@@ -288,7 +290,10 @@ struct Primary : Expression, Statement {
 
 struct IntegerLiteral : Primary {
     long long value;
-    IntegerLiteral(long long value) : value(value) {}
+    IntegerLiteral(long long value) : value(value) {
+        this->constant = true;
+        this->type = IntegerType();
+    }
     bool operator==(const IntegerLiteral& other) const {
         return Primary::operator==(other) && value == other.value;
     }
@@ -297,7 +302,10 @@ struct IntegerLiteral : Primary {
 
 struct RealLiteral : Primary {
     double value;
-    RealLiteral(double value) : value(value) {}
+    RealLiteral(double value) : value(value) {
+        this->constant = true;
+        this->type = RealType();
+    }
     bool operator==(const RealLiteral& other) const {
         return Primary::operator==(other) && value == other.value;
     }
@@ -306,7 +314,10 @@ struct RealLiteral : Primary {
 
 struct BooleanLiteral : Primary {
     bool value;
-    BooleanLiteral(bool value) : value(value) {}
+    BooleanLiteral(bool value) : value(value) {
+        this->constant = true;
+        this->type = BooleanType();
+    }
     bool operator==(const BooleanLiteral& other) const {
         return Primary::operator==(other) && value == other.value;
     }
