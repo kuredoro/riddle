@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <functional>
 
 #include "fmt/color.h"
 #include "fmt/core.h"
@@ -318,8 +319,7 @@ int main(int argc, char* argv[]) {
 
     for (;;) {
         int choice;
-        typedef parser::sPtr<ast::Node> (parser::Parser::*ParserFunc)();
-        ParserFunc parseFunc;
+        std::function<std::shared_ptr<ast::Node>(parser::Parser&)> parseFunc;
         fmt::print("What do you want to parse?\n");
         fmt::print("(0) Exit\n");
         fmt::print("(1) routine\n");
@@ -332,16 +332,16 @@ int main(int argc, char* argv[]) {
         case 0:
             return 0;
         case 1:
-            parseFunc = (ParserFunc)(&parser::Parser::parseRoutineDecl);
+            parseFunc = [](parser::Parser& p) { return p.parseRoutineDecl(); };
             break;
         case 2:
-            parseFunc = (ParserFunc)(&parser::Parser::parseExpression);
+            parseFunc = [](parser::Parser& p) { return p.parseExpression(); };
             break;
         case 3:
-            parseFunc = (ParserFunc)(&parser::Parser::parseTypeDecl);
+            parseFunc = [](parser::Parser& p) { return p.parseTypeDecl(); };
             break;
         case 4:
-            parseFunc = (ParserFunc)(&parser::Parser::parseStatement);
+            parseFunc = [](parser::Parser& p) { return p.parseStatement(); };
             break;
         default:
             fmt::print("Invalid option\n");
@@ -355,7 +355,7 @@ int main(int argc, char* argv[]) {
         lexer::Lexer lx{line};
         parser::Parser parser(lx);
 
-        auto ast = (parser.*parseFunc)();
+        auto ast = parseFunc(parser);
         auto errors = parser.getErrors();
         if (errors.empty()) {
             PrintVisitor v;
