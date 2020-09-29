@@ -331,14 +331,31 @@ sPtr<ast::Body> Parser::parseBody() {
 sPtr<ast::Statement> Parser::parseStatement() {
     skipWhitespace();
     auto currentToken = m_lexer.Peek();
-    sPtr<ast::Expression> expression;
     switch (currentToken.type) {
-    case TokenType::Identifier:
-        expression = parseExpression();
+    case TokenType::Identifier: {
+        sPtr<ast::Expression> expression = parseExpression();
         if (m_lexer.Peek().type == TokenType::Assign) {
             return parseAssignment(expression);
         }
-        return std::dynamic_pointer_cast<ast::RoutineCall>(expression);
+        // If a line starts with an identifier, it must be a routine call.
+        // It is cast to a Primary because it cannot yet be determined if it is
+        //  a routine call or a variable name.
+        sPtr<ast::Primary> primaryNode =
+            std::dynamic_pointer_cast<ast::Primary>(expression);
+        if (primaryNode == nullptr) {
+            m_errors.push_back(Error{
+                .pos = currentToken.pos,
+                .message = "Invalid token. Expected routine call",
+            });
+            return nullptr;
+        }
+        currentToken = expect({TokenType::NewLine, TokenType::Semicolon});
+        if (currentToken.type == TokenType::Illegal) {
+            advance({TokenType::NewLine, TokenType::Semicolon});
+            return nullptr;
+        }
+        return primaryNode;
+    }
     case TokenType::While:
         return parseWhileLoop();
     case TokenType::For:
