@@ -15,6 +15,9 @@ struct TypeDecl;
 struct Type;
 struct AliasedType;
 struct PrimitiveType;
+struct IntegerType;
+struct RealType;
+struct BooleanType;
 struct ArrayType;
 struct RecordType;
 struct VariableDecl;
@@ -40,6 +43,9 @@ public:
     virtual void visit(Type* node) = 0;
     virtual void visit(TypeDecl* node) = 0;
     virtual void visit(PrimitiveType* node) = 0;
+    virtual void visit(IntegerType* node) = 0;
+    virtual void visit(RealType* node) = 0;
+    virtual void visit(BooleanType* node) = 0;
     virtual void visit(ArrayType* node) = 0;
     virtual void visit(RecordType* node) = 0;
     virtual void visit(VariableDecl* node) = 0;
@@ -129,10 +135,18 @@ struct AliasedType : Type {
 };
 
 struct PrimitiveType : Type {
-    lexer::TokenType type;
     bool operator==(const PrimitiveType& other) const {
-        return Node::operator==(other) && type == other.type;
+        return Node::operator==(other);
     }
+    virtual void accept(Visitor& v) override { v.visit(this); }
+};
+struct IntegerType : PrimitiveType {
+    void accept(Visitor& v) override { v.visit(this); }
+};
+struct RealType : PrimitiveType {
+    void accept(Visitor& v) override { v.visit(this); }
+};
+struct BooleanType : PrimitiveType {
     void accept(Visitor& v) override { v.visit(this); }
 };
 
