@@ -82,7 +82,7 @@ struct Program : Node {
 };
 
 struct RoutineDecl : Node {
-    lexer::Token name;
+    std::string name;
     std::vector<sPtr<Parameter>> parameters;
     sPtr<Type> returnType;
     sPtr<Body> body;
@@ -95,7 +95,7 @@ struct RoutineDecl : Node {
 };
 
 struct Parameter : Node {
-    lexer::Token name;
+    std::string name;
     sPtr<Type> type;
     bool operator==(const Parameter& other) const {
         return Node::operator==(other) && name == other.name &&
@@ -121,7 +121,7 @@ struct Type : Node {
  * To handle the "Identifier" kind of type
  */
 struct AliasedType : Type {
-    lexer::Token name;
+    std::string name;
     bool operator==(const AliasedType& other) const {
         return Node::operator==(other) && name == other.name;
     }
@@ -129,7 +129,7 @@ struct AliasedType : Type {
 };
 
 struct PrimitiveType : Type {
-    lexer::Token type;
+    lexer::TokenType type;
     bool operator==(const PrimitiveType& other) const {
         return Node::operator==(other) && type == other.type;
     }
@@ -155,7 +155,7 @@ struct RecordType : Type {
 };
 
 struct VariableDecl : Node {
-    lexer::Token name;
+    std::string name;
     sPtr<Type> type;
     sPtr<Expression> expression;
     bool operator==(const VariableDecl& other) const {
@@ -199,7 +199,7 @@ struct WhileLoop : Statement {
 };
 
 struct ForLoop : Statement {
-    lexer::Token loopVar;
+    std::string loopVar;
     sPtr<Expression> rangeFrom;
     sPtr<Expression> rangeTo;
     bool reverse;
@@ -233,7 +233,7 @@ struct ReturnStatement : Statement {
 
 struct UnaryExpression : Expression {
     sPtr<Expression> operand;
-    lexer::Token operation;
+    lexer::TokenType operation;
 
     bool operator==(const UnaryExpression& other) const {
         return Node::operator==(other) && operand == other.operand &&
@@ -245,7 +245,7 @@ struct UnaryExpression : Expression {
 struct BinaryExpression : Expression {
     sPtr<Expression> operand1;
     sPtr<Expression> operand2;
-    lexer::Token operation;
+    lexer::TokenType operation;
 
     bool operator==(const BinaryExpression& other) const {
         return Node::operator==(other) && operand1 == other.operand1 &&
@@ -255,7 +255,7 @@ struct BinaryExpression : Expression {
 };
 
 struct Primary : Expression, Statement {
-    lexer::Token value;
+    lexer::TokenType value;
     bool operator==(const Primary& other) const {
         return Node::operator==(other) && value == other.value;
     }
@@ -263,7 +263,8 @@ struct Primary : Expression, Statement {
 };
 
 struct RoutineCall : Primary {
-    lexer::Token routine;
+    sPtr<RoutineDecl> routine;
+    std::string routineName;
     std::vector<sPtr<Expression>> args;
 
     bool operator==(const RoutineCall& other) const {

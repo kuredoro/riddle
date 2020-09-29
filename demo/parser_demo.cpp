@@ -1,7 +1,7 @@
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <sstream>
-#include <functional>
 
 #include "fmt/color.h"
 #include "fmt/core.h"
@@ -34,7 +34,7 @@ public:
             fmt::print("{:|>{}}- [RoutineDecl]> null\n", "", depth);
             return;
         }
-        fmt::print("{:|>{}}- [RoutineDecl]> {}\n", "", depth, node->name.lit);
+        fmt::print("{:|>{}}- [RoutineDecl]> {}\n", "", depth, node->name);
         depth++;
         for (auto parameter : node->parameters) {
             parameter->accept(*this);
@@ -50,7 +50,7 @@ public:
             fmt::print("{:|>{}}- [Parameter]> null\n", "", depth);
             return;
         }
-        fmt::print("{:|>{}}- [Parameter]> {}\n", "", depth, node->name.lit);
+        fmt::print("{:|>{}}- [Parameter]> {}\n", "", depth, node->name);
         depth++;
         node->type->accept(*this);
         depth--;
@@ -72,7 +72,7 @@ public:
                        dynamic_cast<ast::AliasedType*>(node);
                    specific != nullptr) {
             fmt::print("{:|>{}}- [Type Identifier]> {}\n", "", depth,
-                       specific->name.lit);
+                       specific->name);
         } else {
             fmt::print("{:|>{}}- [Type]> (unknown type)\n", "", depth);
         }
@@ -82,7 +82,7 @@ public:
             fmt::print("{:|>{}}- [PrimitiveType]> null\n", "", depth);
             return;
         }
-        fmt::print("{:|>{}}- [PrimitiveType]> {}\n", "", depth, node->type.lit);
+        fmt::print("{:|>{}}- [PrimitiveType]> {}\n", "", depth, node->type);
     }
     void visit(ast::ArrayType* node) override {
         if (node == nullptr) {
@@ -115,7 +115,7 @@ public:
         if (node == nullptr) {
             fmt::print("{:|>{}}- [VariableDecl]> null\n", "", depth);
         }
-        fmt::print("{:|>{}}- [VariableDecl]> {}\n", "", depth, node->name.lit);
+        fmt::print("{:|>{}}- [VariableDecl]> {}\n", "", depth, node->name);
         depth++;
         if (node->type != nullptr) {
             node->type->accept(*this);
@@ -235,7 +235,7 @@ public:
             return;
         }
         fmt::print("{:|>{}}- [UnaryExpression]> {}\n", "", depth,
-                   node->operation.lit);
+                   node->operation);
         depth++;
         node->operand->accept(*this);
         depth--;
@@ -246,7 +246,7 @@ public:
             return;
         }
         fmt::print("{:|>{}}- [BinaryExpression]> {}\n", "", depth,
-                   node->operation.lit);
+                   node->operation);
         depth++;
         node->operand1->accept(*this);
         node->operand2->accept(*this);
@@ -257,7 +257,7 @@ public:
             fmt::print("{:|>{}}- [Primary]> null\n", "", depth);
             return;
         }
-        fmt::print("{:|>{}}- [Primary]> {}\n", "", depth, node->value.lit);
+        fmt::print("{:|>{}}- [Primary]> {}\n", "", depth, node->value);
     }
     void visit(ast::RoutineCall* node) override {
         if (node == nullptr) {
@@ -265,7 +265,7 @@ public:
             return;
         }
         fmt::print("{:|>{}}- [RoutineCall]> {}\n", "", depth,
-                   node->routine.lit);
+                   node->routineName);
         depth++;
         for (size_t i = 0; i < node->args.size(); i++) {
             node->args[i]->accept(*this);
