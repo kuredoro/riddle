@@ -164,10 +164,10 @@ SCENARIO("Parser builds a tree from tokens") {
             };
 
             ast::Parameter expected;
-            expected.name = lx[0];
+            expected.name = lx[0].lit;
             ast::ArrayType expectedType;
             ast::PrimitiveType integer;
-            integer.type = lx[3];
+            integer.type = lx[3].type;
             expectedType.elementType =
                 std::make_shared<ast::PrimitiveType>(integer);
             expected.type = std::make_shared<ast::ArrayType>(expectedType);
