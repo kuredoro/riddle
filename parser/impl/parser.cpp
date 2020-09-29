@@ -623,8 +623,7 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
         }
     } else if (isPrimary(currentToken.type)) {
         // if is pure primary
-        ast::Primary primNode;
-        primNode.begin = currentToken.pos;
+        sPtr<ast::Primary> primNode;
         currentToken = m_lexer.Next();
         // check if parametrized routine call
         if (currentToken.type == TokenType::Identifier &&
@@ -632,10 +631,35 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
             return parseRoutineCall(currentToken);
             // TODO: if ambiguous, make an identifier
         }
-        // return Primary only
-        primNode.value = currentToken.type;
-        primNode.end = currentToken.pos;
-        return std::make_shared<ast::Primary>(primNode);
+
+        switch (currentToken.type) {
+        case TokenType::Int:
+            primNode = std::make_shared<ast::IntegerLiteral>(
+                std::stoll(currentToken.lit));
+            break;
+        case TokenType::Real:
+            primNode =
+                std::make_shared<ast::RealLiteral>(std::stod(currentToken.lit));
+            break;
+        case TokenType::True:
+            primNode = std::make_shared<ast::BooleanLiteral>(true);
+            break;
+        case TokenType::False:
+            primNode = std::make_shared<ast::BooleanLiteral>(false);
+            break;
+        case TokenType::Identifier:
+            primNode = std::make_shared<ast::Identifier>(currentToken.lit);
+            break;
+        default:
+            m_errors.push_back(Error{
+                .pos = currentToken.pos,
+                .message = "Unknown Primary expression",
+            });
+            return nullptr;
+        }
+        primNode->begin = currentToken.pos;
+        primNode->end = currentToken.pos;
+        return primNode;
     }
     return nullptr;
 }
