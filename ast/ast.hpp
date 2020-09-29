@@ -254,7 +254,7 @@ struct BinaryExpression : Expression {
     void accept(Visitor& v) override { v.visit(this); }
 };
 
-struct Primary : Expression {
+struct Primary : Expression, Statement {
     lexer::Token value;
     bool operator==(const Primary& other) const {
         return Node::operator==(other) && value == other.value;
@@ -262,12 +262,13 @@ struct Primary : Expression {
     void accept(Visitor& v) override { v.visit(this); }
 };
 
-struct RoutineCall : Expression, Statement {
+struct RoutineCall : Primary {
     lexer::Token routine;
     std::vector<sPtr<Expression>> args;
 
     bool operator==(const RoutineCall& other) const {
-        return args == other.args && routine == other.routine;
+        return Node::operator==(other) && args == other.args &&
+               routine == other.routine;
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
