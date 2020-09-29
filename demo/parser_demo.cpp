@@ -8,6 +8,18 @@
 #include "lexer.hpp"
 #include "parser.hpp"
 
+std::unordered_map<lexer::TokenType, std::string> op_to_string{
+    {lexer::TokenType::Add, "+"},     {lexer::TokenType::Sub, "-"},
+    {lexer::TokenType::Mul, "*"},     {lexer::TokenType::Div, "/"},
+    {lexer::TokenType::Mod, "%"},     {lexer::TokenType::Or, "or"},
+    {lexer::TokenType::Xor, "xor"},   {lexer::TokenType::And, "and"},
+    {lexer::TokenType::Eq, "="},      {lexer::TokenType::Neq, "/="},
+    {lexer::TokenType::Less, "<"},    {lexer::TokenType::Leq, "<="},
+    {lexer::TokenType::Greater, ">"}, {lexer::TokenType::Geq, ">="},
+    {lexer::TokenType::Not, "not"},   {lexer::TokenType::OpenParen, "()"},
+    {lexer::TokenType::Dot, "."},     {lexer::TokenType::OpenBrack, "[]"},
+};
+
 class PrintVisitor : public ast::Visitor {
 public:
     PrintVisitor(size_t depth = 0) : depth(depth) {}
@@ -82,7 +94,28 @@ public:
             fmt::print("{:|>{}}- [PrimitiveType]> null\n", "", depth);
             return;
         }
-        fmt::print("{:|>{}}- [PrimitiveType]> {}\n", "", depth, node->type);
+        fmt::print("{:|>{}}- [PrimitiveType]> unknown\n", "", depth);
+    }
+    void visit(ast::IntegerType* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [IntegerType]> null\n", "", depth);
+            return;
+        }
+        fmt::print("{:|>{}}- [IntegerType]\n", "", depth);
+    }
+    void visit(ast::RealType* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [RealType]> null\n", "", depth);
+            return;
+        }
+        fmt::print("{:|>{}}- [RealType]\n", "", depth);
+    }
+    void visit(ast::BooleanType* node) override {
+        if (node == nullptr) {
+            fmt::print("{:|>{}}- [BooleanType]> null\n", "", depth);
+            return;
+        }
+        fmt::print("{:|>{}}- [BooleanType]\n", "", depth);
     }
     void visit(ast::ArrayType* node) override {
         if (node == nullptr) {
@@ -235,7 +268,7 @@ public:
             return;
         }
         fmt::print("{:|>{}}- [UnaryExpression]> {}\n", "", depth,
-                   node->operation);
+                   op_to_string[node->operation]);
         depth++;
         node->operand->accept(*this);
         depth--;
@@ -246,7 +279,7 @@ public:
             return;
         }
         fmt::print("{:|>{}}- [BinaryExpression]> {}\n", "", depth,
-                   node->operation);
+                   op_to_string[node->operation]);
         depth++;
         node->operand1->accept(*this);
         node->operand2->accept(*this);

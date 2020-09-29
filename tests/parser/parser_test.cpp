@@ -166,10 +166,9 @@ SCENARIO("Parser builds a tree from tokens") {
             ast::Parameter expected;
             expected.name = lx[0].lit;
             ast::ArrayType expectedType;
-            ast::PrimitiveType integer;
-            integer.type = lx[3].type;
+            ast::IntegerType integer;
             expectedType.elementType =
-                std::make_shared<ast::PrimitiveType>(integer);
+                std::make_shared<ast::IntegerType>(integer);
             expected.type = std::make_shared<ast::ArrayType>(expectedType);
 
             THEN("It is parsed correctly") {

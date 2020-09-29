@@ -184,12 +184,28 @@ sPtr<ast::Type> Parser::parseType() {
     if (TokenType* type = std::find(std::begin(primitives),
                                     std::end(primitives), currentToken.type);
         type != std::end(primitives)) {
-        ast::PrimitiveType typeNode;
-        typeNode.begin = currentToken.pos;
-        typeNode.type = currentToken.type;
+        sPtr<ast::PrimitiveType> typeNode;
+        switch (currentToken.type) {
+        case TokenType::IntegerType:
+            typeNode = std::make_shared<ast::IntegerType>();
+            break;
+        case TokenType::RealType:
+            typeNode = std::make_shared<ast::RealType>();
+            break;
+        case TokenType::Boolean:
+            typeNode = std::make_shared<ast::BooleanType>();
+            break;
+        default:
+            m_errors.push_back(Error{
+                .pos = currentToken.pos,
+                .message = "Unknown primitive type",
+            });
+            return nullptr;
+        }
+        typeNode->begin = currentToken.pos;
         currentToken = m_lexer.Next();
-        typeNode.end = currentToken.pos;
-        return std::make_shared<ast::PrimitiveType>(typeNode);
+        typeNode->end = currentToken.pos;
+        return typeNode;
     } else if (currentToken.type == TokenType::Array) {
         return parseArrayType();
     } else if (currentToken.type == TokenType::Record) {
