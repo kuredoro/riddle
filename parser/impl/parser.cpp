@@ -704,7 +704,7 @@ sPtr<ast::RoutineCall> Parser::parseRoutineCall(Token routineName) {
     return std::make_shared<ast::RoutineCall>(rountineCallNode);
 }
 
-int Parser::opPrec(TokenType token) {
+int Parser::opPrec(const TokenType& token) {
     switch (token) {
     case TokenType::Or:  // or
     case TokenType::Xor: // xor
@@ -737,7 +737,7 @@ int Parser::opPrec(TokenType token) {
     }
 }
 
-bool Parser::isPrimary(TokenType token) {
+bool Parser::isPrimary(const TokenType& token) {
     return token == TokenType::Identifier || token == TokenType::Int ||
            token == TokenType::Real || token == TokenType::True ||
            token == TokenType::False;
@@ -749,7 +749,8 @@ bool Parser::isPrimary(TokenType token) {
  * token. The next token is consumed (along with any whitespace before it)
  * regardless of whether or not it was a desired token.
  */
-Token Parser::expect(std::vector<TokenType> types, std::string err_msg) {
+Token Parser::expect(const std::vector<TokenType>& types,
+                     const std::string& err_msg) {
     // if "new line" is not one of the characters we are looking for, then skip
     // any occurence of it
     if (std::find(types.begin(), types.end(), TokenType::NewLine) ==
@@ -771,7 +772,7 @@ Token Parser::expect(std::vector<TokenType> types, std::string err_msg) {
  * An overload of `expect` that allows passing just one type for ease of use.
  * Wraps that token type in a vector
  */
-Token Parser::expect(TokenType type, std::string err_msg) {
+Token Parser::expect(const TokenType& type, const std::string& err_msg) {
     return expect(std::vector{type}, err_msg);
 }
 
@@ -785,7 +786,7 @@ void Parser::skipWhitespace() {
  * Keeps consuming tokens until it finds one of the desired token types, and
  *  consumes that one as well.
  */
-void Parser::advance(std::vector<TokenType> types) {
+void Parser::advance(const std::vector<TokenType>& types) {
     Token next = m_lexer.Next();
     while (next.type != TokenType::Eof &&
            std::find(types.begin(), types.end(), next.type) == types.end()) {
@@ -797,7 +798,9 @@ void Parser::advance(std::vector<TokenType> types) {
  * An overload of `advance` that allows passing just one type for ease of use.
  * Wraps that token type in a vector.
  */
-void Parser::advance(TokenType type) { return advance(std::vector{type}); }
+void Parser::advance(const TokenType& type) {
+    return advance(std::vector{type});
+}
 
 std::vector<parser::Error> Parser::getErrors() { return m_errors; }
 

@@ -41,14 +41,15 @@ public:
 private:
     lexer::Lexer m_lexer;
     std::vector<Error> m_errors;
-    lexer::Token expect(std::vector<lexer::TokenType>,
-                        std::string = "Unexpected Token.");
-    lexer::Token expect(lexer::TokenType, std::string = "Unexpected Token.");
+    lexer::Token expect(const std::vector<lexer::TokenType>&,
+                        const std::string& = "Unexpected Token.");
+    lexer::Token expect(const lexer::TokenType&,
+                        const std::string& = "Unexpected Token.");
     void skipWhitespace();
-    void advance(std::vector<lexer::TokenType>);
-    void advance(lexer::TokenType);
-    bool isPrimary(lexer::TokenType);
-    int opPrec(lexer::TokenType);
+    void advance(const std::vector<lexer::TokenType>&);
+    void advance(const lexer::TokenType&);
+    bool isPrimary(const lexer::TokenType&);
+    int opPrec(const lexer::TokenType&);
 };
 
 } // namespace parser
