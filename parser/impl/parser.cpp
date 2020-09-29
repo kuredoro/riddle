@@ -64,7 +64,7 @@ sPtr<ast::RoutineDecl> Parser::parseRoutineDecl() {
         advance(TokenType::End);
         return nullptr;
     }
-    routineNode.name = currentToken;
+    routineNode.name = currentToken.lit;
 
     if (expect(TokenType::OpenParen, "Expected to find '('.").type ==
         TokenType::Illegal) {
@@ -128,7 +128,7 @@ sPtr<ast::Parameter> Parser::parseParameter() {
         return nullptr;
     }
     parameterNode.begin = currentToken.pos;
-    parameterNode.name = currentToken;
+    parameterNode.name = currentToken.lit;
 
     currentToken = expect(TokenType::Colon, "Expected to find a ':'.");
     if (currentToken.type == TokenType::Illegal) {
@@ -186,7 +186,7 @@ sPtr<ast::Type> Parser::parseType() {
         type != std::end(primitives)) {
         ast::PrimitiveType typeNode;
         typeNode.begin = currentToken.pos;
-        typeNode.type = currentToken;
+        typeNode.type = currentToken.type;
         currentToken = m_lexer.Next();
         typeNode.end = currentToken.pos;
         return std::make_shared<ast::PrimitiveType>(typeNode);
@@ -197,7 +197,7 @@ sPtr<ast::Type> Parser::parseType() {
     } else if (currentToken.type == TokenType::Identifier) {
         ast::AliasedType typeNode;
         typeNode.begin = currentToken.pos;
-        typeNode.name = currentToken;
+        typeNode.name = currentToken.lit;
         currentToken = m_lexer.Next();
         typeNode.end = currentToken.pos;
         return std::make_shared<ast::AliasedType>(typeNode);
@@ -273,7 +273,7 @@ sPtr<ast::VariableDecl> Parser::parseVariableDecl() {
         advance({TokenType::Semicolon, TokenType::NewLine});
         return nullptr;
     }
-    variableNode.name = currentToken;
+    variableNode.name = currentToken.lit;
 
     currentToken =
         expect({TokenType::Colon, TokenType::Is},
@@ -450,7 +450,7 @@ sPtr<ast::ForLoop> Parser::parseForLoop() {
         advance(TokenType::End);
         return nullptr;
     }
-    forNode.loopVar = currentToken;
+    forNode.loopVar = currentToken.lit;
 
     currentToken =
         expect(TokenType::In, "Expected \"in\" keyword but didn't find it.");
@@ -580,7 +580,7 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
             ast::UnaryExpression exprNode;
             exprNode.begin = currentToken.pos;
             currentToken = m_lexer.Next();
-            exprNode.operation = currentToken;
+            exprNode.operation = currentToken.type;
             exprNode.operand = parseUnaryExpression();
             if (exprNode.operand != nullptr) {
                 exprNode.end = exprNode.operand->end;
@@ -617,7 +617,7 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
             // TODO: if ambiguous, make an identifier
         }
         // return Primary only
-        primNode.value = currentToken;
+        primNode.value = currentToken.type;
         primNode.end = currentToken.pos;
         return std::make_shared<ast::Primary>(primNode);
     }
@@ -642,7 +642,7 @@ sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
             expr.begin = lhs->begin;
         }
         expr.operand1 = lhs;
-        expr.operation = op;
+        expr.operation = op.type;
 
         if (op.type == TokenType::OpenBrack) {
             expr.operand2 = parseBinaryExpression(0);
@@ -663,7 +663,7 @@ sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
 
 sPtr<ast::RoutineCall> Parser::parseRoutineCall(Token routineName) {
     ast::RoutineCall rountineCallNode;
-    rountineCallNode.routine = routineName; // save the function name
+    rountineCallNode.routineName = routineName.lit; // save the function name
     rountineCallNode.begin = routineName.pos;
 
     Token currentToken = m_lexer.Peek();
