@@ -38,9 +38,7 @@ sPtr<ast::Program> Parser::parseProgram() {
                 .pos = currentToken.pos,
                 .message = "Unexpected token.",
             });
-            while (m_lexer.Peek().type != TokenType::NewLine &&
-                   m_lexer.Peek().type != TokenType::Eof)
-                m_lexer.Next();
+            advance(TokenType::NewLine);
         }
         if (currentToken.type != TokenType::Eof) {
             currentToken = m_lexer.Peek();
