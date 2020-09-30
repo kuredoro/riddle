@@ -288,38 +288,38 @@ struct Primary : Expression, Statement {
     virtual void accept(Visitor& v) override { v.visit(this); }
 };
 
-struct IntegerLiteral : Primary {
+struct IntegerLiteral : Expression {
     long long value;
     IntegerLiteral(long long value) : value(value) {
         this->constant = true;
         this->type = IntegerType();
     }
     bool operator==(const IntegerLiteral& other) const {
-        return Primary::operator==(other) && value == other.value;
+        return Expression::operator==(other) && value == other.value;
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
 
-struct RealLiteral : Primary {
+struct RealLiteral : Expression {
     double value;
     RealLiteral(double value) : value(value) {
         this->constant = true;
         this->type = RealType();
     }
     bool operator==(const RealLiteral& other) const {
-        return Primary::operator==(other) && value == other.value;
+        return Expression::operator==(other) && value == other.value;
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
 
-struct BooleanLiteral : Primary {
+struct BooleanLiteral : Expression {
     bool value;
     BooleanLiteral(bool value) : value(value) {
         this->constant = true;
         this->type = BooleanType();
     }
     bool operator==(const BooleanLiteral& other) const {
-        return Primary::operator==(other) && value == other.value;
+        return Expression::operator==(other) && value == other.value;
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
