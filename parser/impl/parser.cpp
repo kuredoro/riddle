@@ -623,13 +623,12 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
         }
     } else if (isPrimary(currentToken.type)) {
         // if is pure primary
-        sPtr<ast::Primary> primNode;
+        sPtr<ast::Expression> primNode;
         currentToken = m_lexer.Next();
         // check if parametrized routine call
         if (currentToken.type == TokenType::Identifier &&
             m_lexer.Peek().type == TokenType::OpenParen) {
             return parseRoutineCall(currentToken);
-            // TODO: if ambiguous, make an identifier
         }
 
         switch (currentToken.type) {
@@ -647,7 +646,7 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
         case TokenType::False:
             primNode = std::make_shared<ast::BooleanLiteral>(false);
             break;
-        case TokenType::Identifier:
+        case TokenType::Identifier: // can possibly be a routine call
             primNode = std::make_shared<ast::Identifier>(currentToken.lit);
             break;
         default:
