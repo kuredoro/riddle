@@ -33,11 +33,11 @@ public:
         for (auto type : node->types) {
             type->accept(*this);
         }
-        for (auto routine : node->routines) {
-            routine->accept(*this);
-        }
         for (auto variableDecl : node->variables) {
             variableDecl->accept(*this);
+        }
+        for (auto routine : node->routines) {
+            routine->accept(*this);
         }
         depth--;
     }
