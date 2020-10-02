@@ -53,16 +53,14 @@ sPtr<ast::Program> Parser::parseProgram() {
         case TokenType::Eof:
             break;
         default:
-            m_errors.push_back(Error{
-                .pos = currentToken.pos,
-                .message = "Unexpected token.",
-            });
+            error(currentToken, "unexpected token");
             advance(TokenType::NewLine);
         }
         if (currentToken.type != TokenType::Eof) {
             currentToken = m_lexer.Peek();
         }
     }
+
     programNode.end = currentToken.pos;
     return std::make_shared<ast::Program>(programNode);
 }
@@ -212,10 +210,7 @@ sPtr<ast::Type> Parser::parseType() {
             typeNode = std::make_shared<ast::BooleanType>();
             break;
         default:
-            m_errors.push_back(Error{
-                .pos = currentToken.pos,
-                .message = "Unknown primitive type",
-            });
+            error(currentToken, "unknown primitive type");
             return nullptr;
         }
         typeNode->begin = currentToken.pos;
@@ -234,10 +229,7 @@ sPtr<ast::Type> Parser::parseType() {
         typeNode.end = currentToken.pos;
         return std::make_shared<ast::AliasedType>(typeNode);
     } else {
-        m_errors.push_back(Error{
-            .pos = currentToken.pos,
-            .message = "Unknown type.",
-        });
+        error(currentToken, "unknown type");
         m_lexer.Next();
         return nullptr;
     }
@@ -375,10 +367,7 @@ sPtr<ast::Statement> Parser::parseStatement() {
         sPtr<ast::Primary> primaryNode =
             std::dynamic_pointer_cast<ast::Primary>(expression);
         if (primaryNode == nullptr) {
-            m_errors.push_back(Error{
-                .pos = currentToken.pos,
-                .message = "Invalid token. Expected routine call",
-            });
+            error(currentToken, "invalid token, expected a routine call");
             return nullptr;
         }
         currentToken = expect({TokenType::NewLine, TokenType::Semicolon});
@@ -397,10 +386,7 @@ sPtr<ast::Statement> Parser::parseStatement() {
     case TokenType::Return:
         return parseReturnStatement();
     default:
-        m_errors.push_back(Error{
-            .pos = currentToken.pos,
-            .message = "Unexpected token.",
-        });
+        error(currentToken, "unexpected token");
         advance(TokenType::NewLine);
         return nullptr;
     }
@@ -631,10 +617,7 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
             }
             return exprNode;
         } else {
-            m_errors.push_back(Error{
-                .pos = currentToken.pos,
-                .message = "Expected to find unary operator.",
-            });
+            error(currentToken, "expected unary operator");
             return nullptr;
         }
     } else if (isPrimary(currentToken.type)) {
@@ -666,10 +649,7 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
             primNode = std::make_shared<ast::Identifier>(currentToken.lit);
             break;
         default:
-            m_errors.push_back(Error{
-                .pos = currentToken.pos,
-                .message = "Unknown Primary expression",
-            });
+            error(currentToken, "unknown primary expression");
             return nullptr;
         }
         primNode->begin = currentToken.pos;
@@ -789,7 +769,7 @@ bool Parser::isPrimary(const TokenType& token) {
  * regardless of whether or not it was a desired token.
  */
 Token Parser::expect(const std::vector<TokenType>& types,
-                     const std::string& err_msg) {
+                     const std::string& errMsg) {
     // if "new line" is not one of the characters we are looking for, then skip
     // any occurence of it
     if (!util::Contains(types, TokenType::NewLine)) {
@@ -798,10 +778,7 @@ Token Parser::expect(const std::vector<TokenType>& types,
 
     Token next = m_lexer.Next();
     if (!util::Contains(types, next.type)) {
-        m_errors.push_back(Error{
-            .pos = next.pos,
-            .message = err_msg,
-        });
+        error(next, errMsg);
         return Token{.type = TokenType::Illegal};
     }
 
@@ -839,6 +816,13 @@ void Parser::advance(const std::vector<TokenType>& types) {
  */
 void Parser::advance(const TokenType& type) {
     return advance(std::vector{type});
+}
+
+void Parser::error(const lexer::Token& tok, const std::string& msg) {
+    m_errors.push_back(Error{
+        .pos = tok.pos,
+        .message = msg,
+    });
 }
 
 std::vector<parser::Error> Parser::getErrors() { return m_errors; }
