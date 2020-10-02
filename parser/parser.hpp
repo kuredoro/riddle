@@ -40,9 +40,16 @@ public:
 
 private:
     lexer::Lexer m_lexer;
+    lexer::Token m_current;
+
     std::vector<Error> m_errors;
-    lexer::Token expect(const std::vector<lexer::TokenType>&, std::string = "");
-    lexer::Token expect(const lexer::TokenType&, std::string = "");
+
+
+    void expect(const std::vector<lexer::TokenType>&, std::string = "");
+    void expect(const lexer::TokenType&, std::string = "");
+    void next();
+    void peek();
+
     void skipWhitespace();
     void advance(const std::vector<lexer::TokenType>&);
     void advance(const lexer::TokenType&);
