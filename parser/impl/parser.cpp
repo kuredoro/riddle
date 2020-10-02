@@ -1,17 +1,29 @@
-#include "parser.hpp"
-#include "token.hpp"
+#include <algorithm>
 #include <memory>
+#include "token.hpp"
+
+#include "parser.hpp"
 
 namespace parser {
 
 using lexer::Token;
 using lexer::TokenType;
 
-static std::array<TokenType, 3> primitives{
+static const std::array<TokenType, 3> primitives{
     TokenType::IntegerType,
     TokenType::RealType,
     TokenType::Boolean,
 };
+
+namespace util {
+
+
+inline bool IsPrimitiveType(TokenType type) {
+    return std::count(primitives.begin(), primitives.end(), type) != 0;
+}
+
+
+}
 
 sPtr<ast::Program> Parser::parseProgram() {
     ast::Program programNode;
@@ -179,9 +191,8 @@ sPtr<ast::TypeDecl> Parser::parseTypeDecl() {
 
 sPtr<ast::Type> Parser::parseType() {
     Token currentToken = m_lexer.Peek();
-    if (TokenType* type = std::find(std::begin(primitives),
-                                    std::end(primitives), currentToken.type);
-        type != std::end(primitives)) {
+
+    if (util::IsPrimitiveType(currentToken.type)) {
         sPtr<ast::PrimitiveType> typeNode;
         switch (currentToken.type) {
         case TokenType::IntegerType:
