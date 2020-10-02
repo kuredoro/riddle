@@ -22,6 +22,13 @@ inline bool IsPrimitiveType(TokenType type) {
     return std::count(primitives.begin(), primitives.end(), type) != 0;
 }
 
+template <typename Container, typename T>
+inline auto Contains(const Container& data,
+                     const T& value)
+                    -> decltype(std::end(data), true) {
+    return std::end(data) != std::find(std::begin(data), std::end(data), value);
+}
+
 
 }
 
@@ -785,18 +792,19 @@ Token Parser::expect(const std::vector<TokenType>& types,
                      const std::string& err_msg) {
     // if "new line" is not one of the characters we are looking for, then skip
     // any occurence of it
-    if (std::find(types.begin(), types.end(), TokenType::NewLine) ==
-        types.end()) {
+    if (!util::Contains(types, TokenType::NewLine)) {
         skipWhitespace();
     }
+
     Token next = m_lexer.Next();
-    if (std::find(types.begin(), types.end(), next.type) == types.end()) {
+    if (!util::Contains(types, next.type)) {
         m_errors.push_back(Error{
             .pos = next.pos,
             .message = err_msg,
         });
         return Token{.type = TokenType::Illegal};
     }
+
     return next;
 }
 
@@ -820,8 +828,7 @@ void Parser::skipWhitespace() {
  */
 void Parser::advance(const std::vector<TokenType>& types) {
     Token next = m_lexer.Next();
-    while (next.type != TokenType::Eof &&
-           std::find(types.begin(), types.end(), next.type) == types.end()) {
+    while (next.type != TokenType::Eof && !util::Contains(types, next.type)) {
         next = m_lexer.Next();
     }
 }
