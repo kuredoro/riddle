@@ -78,7 +78,7 @@ sPtr<ast::Program> Parser::parseProgram() {
         case TokenType::Eof:
             break;
         default:
-            error(m_current, "unexpected token");
+            error("unexpected token");
             advance(TokenType::NewLine);
         }
         if (m_current.type != TokenType::Eof) {
@@ -206,7 +206,7 @@ sPtr<ast::Type> Parser::parseType() {
             typeNode = std::make_shared<ast::BooleanType>();
             break;
         default:
-            error(m_current, "unknown primitive type");
+            error("unknown primitive type");
             return nullptr;
         }
         typeNode->begin = m_current.pos;
@@ -225,7 +225,7 @@ sPtr<ast::Type> Parser::parseType() {
         typeNode.end = m_current.pos;
         return std::make_shared<ast::AliasedType>(typeNode);
     } else {
-        error(m_current, "unknown type");
+        error("unknown type");
         m_lexer.Next();
         return nullptr;
     }
@@ -352,7 +352,7 @@ sPtr<ast::Statement> Parser::parseStatement() {
         //  a routine call or a variable name.
         auto primaryNode = std::dynamic_pointer_cast<ast::Primary>(expression);
         if (primaryNode == nullptr) {
-            error(m_current, "invalid token, expected a routine call");
+            error("invalid token, expected a routine call");
             return nullptr;
         }
 
@@ -370,7 +370,7 @@ sPtr<ast::Statement> Parser::parseStatement() {
     case TokenType::Return:
         return parseReturnStatement();
     default:
-        error(m_current, "unexpected token");
+        error("unexpected token");
         advance(TokenType::NewLine);
         return nullptr;
     }
@@ -560,7 +560,7 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
             return exprNode;
         }
 
-        error(m_current, "expected unary operator");
+        error("expected unary operator");
         return nullptr;
 
     } else if (isPrimary(m_current.type)) {
@@ -593,7 +593,7 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
             primNode = std::make_shared<ast::Identifier>(m_current.lit);
             break;
         default:
-            error(m_current, "unknown primary expression");
+            error("unknown primary expression");
             return nullptr;
         }
 
@@ -775,6 +775,13 @@ void Parser::advance(const std::vector<TokenType>& types) {
  */
 void Parser::advance(const TokenType& type) {
     return advance(std::vector{type});
+}
+
+void Parser::error(const std::string& msg) {
+    m_errors.push_back(Error{
+        .pos = m_current.pos,
+        .message = msg,
+    });
 }
 
 void Parser::error(const lexer::Token& tok, const std::string& msg) {
