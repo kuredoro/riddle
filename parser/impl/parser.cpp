@@ -29,6 +29,28 @@ inline auto Contains(const Container& data,
     return std::end(data) != std::find(std::begin(data), std::end(data), value);
 }
 
+std::string GenExpectMessage(const std::vector<TokenType>& types) {
+    if (types.size() == 0) {
+        return "expected nothing";
+    }
+
+    if (types.size() == 1) {
+        return fmt::format("expected {}", lexer::to_string(types[0]));
+    }
+
+    if (types.size() == 2) {
+        return fmt::format("expected {} or {}", 
+                        lexer::to_string(types[0]), lexer::to_string(types[1]));
+    }
+
+    std::string msg = "expected ";
+    for (int i = 0; i < types.size() - 1; i++) {
+        msg += lexer::to_string(types[i]) + ", ";
+    }
+
+    return msg + ", or " + lexer::to_string(types.back());
+}
+
 
 }
 
@@ -66,23 +88,25 @@ sPtr<ast::Program> Parser::parseProgram() {
 }
 
 sPtr<ast::RoutineDecl> Parser::parseRoutineDecl() {
-    ast::RoutineDecl routineNode;
-    Token currentToken = expect(
-        TokenType::Routine, "Expected 'routine' keyword but did not find one.");
+    Token currentToken = expect(TokenType::Routine);
+
     if (currentToken.type == TokenType::Illegal) {
         return nullptr;
     }
+
+    ast::RoutineDecl routineNode;
     routineNode.begin = currentToken.pos;
-    currentToken = expect(TokenType::Identifier,
-                          "Expected an identifier but did not find one.");
+
+    currentToken = expect(TokenType::Identifier);
+
     if (currentToken.type == TokenType::Illegal) {
         advance(TokenType::End);
         return nullptr;
     }
+
     routineNode.name = currentToken.lit;
 
-    if (expect(TokenType::OpenParen, "Expected to find '('.").type ==
-        TokenType::Illegal) {
+    if (expect(TokenType::OpenParen).type == TokenType::Illegal) {
         advance(TokenType::End);
         return nullptr;
     }
@@ -91,9 +115,11 @@ sPtr<ast::RoutineDecl> Parser::parseRoutineDecl() {
 
     // handle the case of no parameters
     currentToken = m_lexer.Peek();
+
     if (currentToken.type == TokenType::CloseParen) {
         m_lexer.Next();
     }
+
     while (currentToken.type != TokenType::CloseParen) {
         routineNode.parameters.push_back(parseParameter());
         currentToken = expect({TokenType::Comma, TokenType::CloseParen});
@@ -105,6 +131,7 @@ sPtr<ast::RoutineDecl> Parser::parseRoutineDecl() {
     }
 
     currentToken = expect({TokenType::Colon, TokenType::Is});
+
     if (currentToken.type == TokenType::Illegal) {
         advance(TokenType::End);
         return nullptr;
@@ -113,8 +140,7 @@ sPtr<ast::RoutineDecl> Parser::parseRoutineDecl() {
     if (currentToken.type == TokenType::Colon) {
         skipWhitespace();
         routineNode.returnType = parseType();
-        currentToken =
-            expect(TokenType::Is, "Expected to find \"is\" keyword.");
+        currentToken = expect(TokenType::Is);
     }
 
     if (currentToken.type == TokenType::Illegal) {
@@ -125,27 +151,32 @@ sPtr<ast::RoutineDecl> Parser::parseRoutineDecl() {
     skipWhitespace();
 
     routineNode.body = parseBody();
-    currentToken = expect(TokenType::End, "Expected \"end\" keyword.");
+
+    currentToken = expect(TokenType::End);
+
     if (currentToken.type == TokenType::Illegal) {
         advance(TokenType::End);
         return nullptr;
     }
+
     routineNode.end = currentToken.pos;
     return std::make_shared<ast::RoutineDecl>(routineNode);
 }
 
 sPtr<ast::Parameter> Parser::parseParameter() {
-    ast::Parameter parameterNode;
-    Token currentToken =
-        expect(TokenType::Identifier, "Expected to find an identifier.");
+    Token currentToken = expect(TokenType::Identifier);
+
     if (currentToken.type == TokenType::Illegal) {
         advance({TokenType::CloseParen, TokenType::Comma, TokenType::NewLine});
         return nullptr;
     }
+
+    ast::Parameter parameterNode;
     parameterNode.begin = currentToken.pos;
     parameterNode.name = currentToken.lit;
 
-    currentToken = expect(TokenType::Colon, "Expected to find a ':'.");
+    currentToken = expect(TokenType::Colon);
+
     if (currentToken.type == TokenType::Illegal) {
         // Note: the following is not correct as it will consume the ) or ,
         //  token expected by `parseRoutineDecl`. A better alternative is needed
@@ -154,28 +185,35 @@ sPtr<ast::Parameter> Parser::parseParameter() {
     }
 
     parameterNode.type = parseType();
+
     if (parameterNode.type != nullptr) {
         parameterNode.end = parameterNode.type->end;
     }
+
     return std::make_shared<ast::Parameter>(parameterNode);
 }
 
 sPtr<ast::TypeDecl> Parser::parseTypeDecl() {
-    ast::TypeDecl typeDeclNode;
-    Token currentToken =
-        expect(TokenType::Type, "Expected to find \"type\" keyword.");
+    Token currentToken = expect(TokenType::Type);
+
     if (currentToken.type == TokenType::Illegal) {
         return nullptr;
     }
+
+    ast::TypeDecl typeDeclNode;
     typeDeclNode.begin = currentToken.pos;
-    currentToken =
-        expect(TokenType::Identifier, "Expected to find an identifier.");
+
+    currentToken = expect(TokenType::Identifier);
+
     if (currentToken.type == TokenType::Illegal) {
         advance({TokenType::Semicolon, TokenType::NewLine});
         return nullptr;
     }
+
     typeDeclNode.name = currentToken.lit;
-    currentToken = expect(TokenType::Is, "Expected to find \"is\" keyword.");
+
+    currentToken = expect(TokenType::Is);
+
     if (currentToken.type == TokenType::Illegal) {
         advance({TokenType::Semicolon, TokenType::NewLine});
         return nullptr;
@@ -184,12 +222,13 @@ sPtr<ast::TypeDecl> Parser::parseTypeDecl() {
     skipWhitespace();
     typeDeclNode.type = parseType();
 
-    currentToken = expect({TokenType::Semicolon, TokenType::NewLine},
-                          "Expected a ';' or a new line.");
+    currentToken = expect({TokenType::Semicolon, TokenType::NewLine});
+
     if (currentToken.type == TokenType::Illegal) {
         advance({TokenType::Semicolon, TokenType::NewLine});
         return nullptr;
     }
+
     typeDeclNode.end = currentToken.pos;
     return std::make_shared<ast::TypeDecl>(typeDeclNode);
 }
@@ -236,12 +275,13 @@ sPtr<ast::Type> Parser::parseType() {
 }
 
 sPtr<ast::ArrayType> Parser::parseArrayType() {
-    ast::ArrayType arrayNode;
-    Token currentToken = expect(
-        TokenType::Array, "Expected 'array' keyword but did not find it.");
+    Token currentToken = expect(TokenType::Array);
+
     if (currentToken.type == TokenType::Illegal) {
         return nullptr;
     }
+
+    ast::ArrayType arrayNode;
     arrayNode.begin = currentToken.pos;
 
     skipWhitespace();
@@ -257,18 +297,21 @@ sPtr<ast::ArrayType> Parser::parseArrayType() {
 
     skipWhitespace();
     arrayNode.elementType = parseType();
+
     if (arrayNode.elementType != nullptr) {
         arrayNode.end = arrayNode.elementType->end;
     }
+
     return std::make_shared<ast::ArrayType>(arrayNode);
 }
 
 sPtr<ast::RecordType> Parser::parseRecordType() {
-    Token currentToken = expect(
-        TokenType::Record, "Expected 'record' keyword but did not find it");
+    Token currentToken = expect(TokenType::Record);
+
     if (currentToken.type == TokenType::Illegal) {
         return nullptr;
     }
+
     ast::RecordType recordNode;
     recordNode.begin = currentToken.pos;
 
@@ -277,22 +320,22 @@ sPtr<ast::RecordType> Parser::parseRecordType() {
         recordNode.fields.push_back(parseVariableDecl());
         skipWhitespace();
     }
+
     currentToken = m_lexer.Next(); // consume "end"
+
     recordNode.end = currentToken.pos;
     return std::make_shared<ast::RecordType>(recordNode);
 }
 
 sPtr<ast::VariableDecl> Parser::parseVariableDecl() {
     ast::VariableDecl variableNode;
-    Token currentToken =
-        expect(TokenType::Var, "Expected \"var\" keyword but didn't find it.");
+    Token currentToken = expect(TokenType::Var);
     if (currentToken.type == TokenType::Illegal) {
         return nullptr;
     }
     variableNode.begin = currentToken.pos;
 
-    currentToken = expect(TokenType::Identifier,
-                          "Expected an identifier after \"var\" keyword.");
+    currentToken = expect(TokenType::Identifier);  // ... after 'var'"
     if (currentToken.type == TokenType::Illegal) {
         advance({TokenType::Semicolon, TokenType::NewLine});
         return nullptr;
@@ -300,8 +343,7 @@ sPtr<ast::VariableDecl> Parser::parseVariableDecl() {
     variableNode.name = currentToken.lit;
 
     currentToken =
-        expect({TokenType::Colon, TokenType::Is},
-               "Expected an 'is' keyword or ':' after the identifier.");
+        expect({TokenType::Colon, TokenType::Is}); // ... after identifier"
     if (currentToken.type == TokenType::Illegal) {
         advance({TokenType::Semicolon, TokenType::NewLine});
         return nullptr;
@@ -316,8 +358,7 @@ sPtr<ast::VariableDecl> Parser::parseVariableDecl() {
         variableNode.expression = parseExpression();
     }
 
-    currentToken = expect({TokenType::Semicolon, TokenType::NewLine},
-                          "Expected a ';' or a new line.");
+    currentToken = expect({TokenType::Semicolon, TokenType::NewLine});
     if (currentToken.type == TokenType::Illegal) {
         advance({TokenType::Semicolon, TokenType::NewLine});
         return nullptr;
@@ -393,8 +434,7 @@ sPtr<ast::Statement> Parser::parseStatement() {
 }
 
 sPtr<ast::Assignment> Parser::parseAssignment(sPtr<ast::Expression> left) {
-    Token currentToken =
-        expect(TokenType::Assign, "Expected ':=' but didn't find it.");
+    Token currentToken = expect(TokenType::Assign);
     if (currentToken.type == TokenType::Illegal) {
         return nullptr;
     }
@@ -407,8 +447,7 @@ sPtr<ast::Assignment> Parser::parseAssignment(sPtr<ast::Expression> left) {
     if (assignmentNode.rhs != nullptr) {
         assignmentNode.end = assignmentNode.rhs->end;
     }
-    expect({TokenType::NewLine, TokenType::Semicolon},
-           "Expected a ';' or a new line.");
+    expect({TokenType::NewLine, TokenType::Semicolon});
     return std::make_shared<ast::Assignment>(assignmentNode);
 }
 
@@ -417,8 +456,7 @@ sPtr<ast::WhileLoop> Parser::parseWhileLoop() {
     // body: Body
     // WhileLoop : while Expression loop Body end
     ast::WhileLoop whileNode;
-    Token currentToken = expect(
-        TokenType::While, "Expected \"while\" keyword but didn't find it.");
+    Token currentToken = expect(TokenType::While);
     if (currentToken.type == TokenType::Illegal) {
         return nullptr;
     }
@@ -426,8 +464,7 @@ sPtr<ast::WhileLoop> Parser::parseWhileLoop() {
 
     whileNode.condition = parseExpression();
 
-    currentToken = expect(TokenType::Loop,
-                          "Expected \"loop\" keyword but didn't find it.");
+    currentToken = expect(TokenType::Loop);
     if (currentToken.type == TokenType::Illegal) {
         advance(TokenType::End);
         return nullptr;
@@ -437,8 +474,7 @@ sPtr<ast::WhileLoop> Parser::parseWhileLoop() {
 
     whileNode.body = parseBody();
 
-    currentToken =
-        expect(TokenType::End, "Expected \"end\" keyword but didn't find it.");
+    currentToken = expect(TokenType::End);
     if (currentToken.type == TokenType::Illegal) {
         advance(TokenType::End);
         return nullptr;
@@ -455,23 +491,20 @@ sPtr<ast::ForLoop> Parser::parseForLoop() {
      */
 
     ast::ForLoop forNode;
-    Token currentToken =
-        expect(TokenType::For, "Expected \"for\" keyword but didn't find it.");
+    Token currentToken = expect(TokenType::For);
     if (currentToken.type == TokenType::Illegal) {
         return nullptr;
     }
     forNode.begin = currentToken.pos;
 
-    currentToken = expect(TokenType::Identifier,
-                          "Expected an identifier but did not find one.");
+    currentToken = expect(TokenType::Identifier);
     if (currentToken.type == TokenType::Illegal) {
         advance(TokenType::End);
         return nullptr;
     }
     forNode.loopVar = currentToken.lit;
 
-    currentToken =
-        expect(TokenType::In, "Expected \"in\" keyword but didn't find it.");
+    currentToken = expect(TokenType::In);
     if (currentToken.type == TokenType::Illegal) {
         advance(TokenType::End);
         return nullptr;
@@ -487,8 +520,7 @@ sPtr<ast::ForLoop> Parser::parseForLoop() {
 
     forNode.rangeFrom = parseExpression();
 
-    currentToken =
-        expect(TokenType::TwoDots, "Expected \"..\" token but didn't find it.");
+    currentToken = expect(TokenType::TwoDots);
     if (currentToken.type == TokenType::Illegal) {
         advance(TokenType::End);
         return nullptr;
@@ -496,8 +528,7 @@ sPtr<ast::ForLoop> Parser::parseForLoop() {
 
     forNode.rangeTo = parseExpression();
 
-    currentToken = expect(TokenType::Loop,
-                          "Expected \"loop\" keyword but didn't find it.");
+    currentToken = expect(TokenType::Loop);
     if (currentToken.type == TokenType::Illegal) {
         advance(TokenType::End);
         return nullptr;
@@ -506,8 +537,7 @@ sPtr<ast::ForLoop> Parser::parseForLoop() {
     skipWhitespace();
     forNode.body = parseBody();
 
-    currentToken =
-        expect(TokenType::End, "Expected \"end\" keyword but didn't find it.");
+    currentToken = expect(TokenType::End);
     if (currentToken.type == TokenType::Illegal) {
         advance(TokenType::End);
         return nullptr;
@@ -521,8 +551,7 @@ sPtr<ast::IfStatement> Parser::parseIfStatement() {
      * if Expression then Body [ else Body ] end
      */
     ast::IfStatement ifNode;
-    Token currentToken =
-        expect(TokenType::If, "Expected \"if\" keyword but didn't find it.");
+    Token currentToken = expect(TokenType::If);
     if (currentToken.type == TokenType::Illegal) {
         return nullptr;
     }
@@ -531,8 +560,7 @@ sPtr<ast::IfStatement> Parser::parseIfStatement() {
     skipWhitespace();
     ifNode.condition = parseExpression();
 
-    currentToken = expect(TokenType::Then,
-                          "Expected \"then\" keyword but didn't find it.");
+    currentToken = expect(TokenType::Then);
     if (currentToken.type == TokenType::Illegal) {
         advance(TokenType::End);
         return nullptr;
@@ -541,15 +569,14 @@ sPtr<ast::IfStatement> Parser::parseIfStatement() {
     skipWhitespace();
     ifNode.ifBody = parseBody();
 
-    currentToken = expect({TokenType::Else, TokenType::End},
-                          "Expected either \"else\" or \"end\" keyword.");
+    currentToken = expect({TokenType::Else, TokenType::End});
     if (currentToken.type == TokenType::Illegal) {
         advance(TokenType::End);
         return nullptr;
     }
     if (currentToken.type == TokenType::Else) {
         ifNode.elseBody = parseBody();
-        currentToken = expect(TokenType::End, "Expected \"end\" keyword.");
+        currentToken = expect(TokenType::End);
     }
     if (currentToken.type == TokenType::Illegal) {
         advance(TokenType::End);
@@ -561,8 +588,7 @@ sPtr<ast::IfStatement> Parser::parseIfStatement() {
 
 sPtr<ast::ReturnStatement> Parser::parseReturnStatement() {
     ast::ReturnStatement returnNode;
-    Token currentToken = expect(
-        TokenType::Return, "Expected \"return\" keyword but didn't find it.");
+    Token currentToken = expect(TokenType::Return);
     if (currentToken.type == TokenType::Illegal) {
         return nullptr;
     }
@@ -571,8 +597,7 @@ sPtr<ast::ReturnStatement> Parser::parseReturnStatement() {
     skipWhitespace();
     returnNode.expression = parseExpression();
 
-    currentToken = expect({TokenType::NewLine, TokenType::Semicolon},
-                          "Expected a ';' or a new line.");
+    currentToken = expect({TokenType::NewLine, TokenType::Semicolon});
     if (currentToken.type == TokenType::Illegal) {
         advance({TokenType::NewLine, TokenType::Semicolon});
         return nullptr;
@@ -610,7 +635,7 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
             currentToken = m_lexer.Next();
             sPtr<ast::Expression> exprNode = parseBinaryExpression();
             currentToken =
-                expect(TokenType::CloseParen, "Expected to find ')'.");
+                expect(TokenType::CloseParen);
             if (currentToken.type == TokenType::Illegal) {
                 advance(TokenType::CloseParen);
                 return nullptr;
@@ -682,8 +707,7 @@ sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
         if (op.type == TokenType::OpenBrack) {
             expr.operand2 = parseBinaryExpression(0);
 
-            Token currentToken =
-                expect(TokenType::CloseBrack, "Expected to find a ']'.");
+            Token currentToken = expect(TokenType::CloseBrack);
             if (currentToken.type == TokenType::Illegal) {
                 advance(TokenType::CloseBrack);
                 return nullptr;
@@ -769,7 +793,7 @@ bool Parser::isPrimary(const TokenType& token) {
  * regardless of whether or not it was a desired token.
  */
 Token Parser::expect(const std::vector<TokenType>& types,
-                     const std::string& errMsg) {
+                     std::string errMsg) {
     // if "new line" is not one of the characters we are looking for, then skip
     // any occurence of it
     if (!util::Contains(types, TokenType::NewLine)) {
@@ -778,6 +802,11 @@ Token Parser::expect(const std::vector<TokenType>& types,
 
     Token next = m_lexer.Next();
     if (!util::Contains(types, next.type)) {
+        if (errMsg.empty()) {
+            errMsg = util::GenExpectMessage(types)
+                   + ", got " 
+                   + lexer::to_string(next.type);
+        }
         error(next, errMsg);
         return Token{.type = TokenType::Illegal};
     }
@@ -789,8 +818,8 @@ Token Parser::expect(const std::vector<TokenType>& types,
  * An overload of `expect` that allows passing just one type for ease of use.
  * Wraps that token type in a vector
  */
-Token Parser::expect(const TokenType& type, const std::string& err_msg) {
-    return expect(std::vector{type}, err_msg);
+Token Parser::expect(const TokenType& type, std::string errMsg) {
+    return expect(std::vector{type}, errMsg);
 }
 
 void Parser::skipWhitespace() {
