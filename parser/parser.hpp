@@ -48,6 +48,7 @@ private:
     void skipWhitespace();
     void advance(const std::vector<lexer::TokenType>&);
     void advance(const lexer::TokenType&);
+    void error(const lexer::Token& pos, const std::string& msg);
     bool isPrimary(const lexer::TokenType&);
     int opPrec(const lexer::TokenType&);
 };
