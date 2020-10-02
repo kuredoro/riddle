@@ -41,10 +41,8 @@ public:
 private:
     lexer::Lexer m_lexer;
     std::vector<Error> m_errors;
-    lexer::Token expect(const std::vector<lexer::TokenType>&,
-                        const std::string& = "Unexpected Token.");
-    lexer::Token expect(const lexer::TokenType&,
-                        const std::string& = "Unexpected Token.");
+    lexer::Token expect(const std::vector<lexer::TokenType>&, std::string = "");
+    lexer::Token expect(const lexer::TokenType&, std::string = "");
     void skipWhitespace();
     void advance(const std::vector<lexer::TokenType>&);
     void advance(const lexer::TokenType&);

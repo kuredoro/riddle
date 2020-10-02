@@ -89,4 +89,6 @@ struct Token {
     friend bool operator!=(const Token& a, const Token& b) { return !(a == b); }
 };
 
+std::string to_string(TokenType type);
+
 } // namespace lexer

@@ -7,28 +7,11 @@
 #include <iostream>
 #include <iterator>
 
-std::vector<std::string> g_TokTypeStr{
-    "Illegal",   "Eof",   "Comment",     "Identifier", "Int",
-    "Real",      "Less",  "Greater",     "Eq",         "Leq",
-    "Geq",       "Neq",   "Assign",      "Add",        "Sub",
-    "Mul",       "Div",   "Mod",         "OpenParen",  "OpenBrack",
-    "Comma",     "Dot",   "TwoDots",     "CloseParen", "CloseBrack",
-    "Semicolon", "Colon", "NewLine",     "Var",        "Type",
-    "Routine",   "Is",    "IntegerType", "RealType",   "Boolean",
-    "Record",    "Array", "True",        "False",      "While",
-    "For",       "Loop",  "End",         "Reverse,",   "In,",
-    "If",        "Then",  "Else",        "Not",        "And",
-    "Or",        "Xor",   "Return",
-};
-
-std::string to_string(lexer::TokenType type) {
-    return g_TokTypeStr[static_cast<int>(type)];
-}
 
 void printTokens(const std::vector<lexer::Token>& toks) {
     for (auto& tok : toks) {
         auto str = common::replaceAll(tok.lit, "\n", "\\n");
-        fmt::print("{} ({}) ", str, to_string(tok.type));
+        fmt::print("{} ({}) ", str, lexer::to_string(tok.type));
     }
     fmt::print("\n\n");
 }
