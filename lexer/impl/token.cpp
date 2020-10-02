@@ -5,7 +5,7 @@ namespace lexer {
 std::string to_string(TokenType type) {
     switch (type) {
     case TokenType::Illegal:
-        return "illagal token";
+        return "illegal token";
     case TokenType::Eof:
         return "end of file";
     case TokenType::Comment:
