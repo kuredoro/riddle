@@ -18,8 +18,8 @@ static const std::array<TokenType, 3> primitives{
 namespace util {
 
 
-inline bool IsPrimitiveType(TokenType type) {
-    return std::count(primitives.begin(), primitives.end(), type) != 0;
+inline bool HasPrimitiveType(Token tok) {
+    return std::count(primitives.begin(), primitives.end(), tok.type) != 0;
 }
 
 template <typename Container, typename T>
@@ -236,7 +236,7 @@ sPtr<ast::TypeDecl> Parser::parseTypeDecl() {
 sPtr<ast::Type> Parser::parseType() {
     Token currentToken = m_lexer.Peek();
 
-    if (util::IsPrimitiveType(currentToken.type)) {
+    if (util::HasPrimitiveType(currentToken)) {
         sPtr<ast::PrimitiveType> typeNode;
         switch (currentToken.type) {
         case TokenType::IntegerType:
