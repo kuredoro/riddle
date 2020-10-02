@@ -47,7 +47,7 @@ std::string GenExpectMessage(const std::vector<TokenType>& types) {
     }
 
     std::string msg = "expected ";
-    for (int i = 0; i < types.size() - 1; i++) {
+    for (int i = 0; i < (int)types.size() - 1; i++) {
         msg += lexer::to_string(types[i]) + ", ";
     }
 
@@ -546,6 +546,7 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
             }
 
             return std::make_shared<ast::UnaryExpression>(exprNode);
+
         } else if (m_current.type == TokenType::OpenParen) {
             skipWhitespace();
             // parenthesis -> more priority
@@ -557,10 +558,11 @@ sPtr<ast::Expression> Parser::parseUnaryExpression() {
             ADVANCE_ON_FAIL(TokenType::CloseParen);
 
             return exprNode;
-        } else {
-            error(m_current, "expected unary operator");
-            return nullptr;
         }
+
+        error(m_current, "expected unary operator");
+        return nullptr;
+
     } else if (isPrimary(m_current.type)) {
         // if is pure primary
         next();
@@ -653,6 +655,7 @@ sPtr<ast::RoutineCall> Parser::parseRoutineCall(Token routineName) {
         if (m_current.type == TokenType::CloseParen) {
             m_lexer.Next(); // consume the ')'
         }
+
         while (m_current.type != TokenType::CloseParen) {
             rountineCallNode.args.push_back(parseExpression());
 
