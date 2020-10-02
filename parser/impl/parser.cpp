@@ -145,24 +145,16 @@ sPtr<ast::RoutineDecl> Parser::parseRoutineDecl() {
 
 sPtr<ast::Parameter> Parser::parseParameter() {
     expect(TokenType::Identifier);
-
-    if (m_current.type == TokenType::Illegal) {
-        advance({TokenType::CloseParen, TokenType::Comma, TokenType::NewLine});
-        return nullptr;
-    }
+    ADVANCE_ON_FAIL({TokenType::CloseParen, TokenType::Comma, TokenType::NewLine});
 
     ast::Parameter parameterNode;
     parameterNode.begin = m_current.pos;
     parameterNode.name = m_current.lit;
 
     expect(TokenType::Colon);
-
-    if (m_current.type == TokenType::Illegal) {
-        // Note: the following is not correct as it will consume the ) or ,
-        //  token expected by `parseRoutineDecl`. A better alternative is needed
-        advance({TokenType::CloseParen, TokenType::Comma, TokenType::NewLine});
-        return nullptr;
-    }
+    // Note: the following is not correct as it will consume the ) or ,
+    //  token expected by `parseRoutineDecl`. A better alternative is needed
+    ADVANCE_ON_FAIL({TokenType::CloseParen, TokenType::Comma, TokenType::NewLine});
 
     parameterNode.type = parseType();
 
@@ -251,10 +243,7 @@ sPtr<ast::ArrayType> Parser::parseArrayType() {
         m_lexer.Next();
         arrayNode.length = parseExpression();
         expect(TokenType::CloseBrack);
-        if (m_current.type == TokenType::Illegal) {
-            advance(TokenType::CloseBrack);
-            return nullptr;
-        }
+        ADVANCE_ON_FAIL(TokenType::CloseBrack);
     }
 
     skipWhitespace();
