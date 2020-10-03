@@ -77,6 +77,16 @@ void PrintVisitor::visit(Type* node) {
         fmt::print("{:|>{}}- [Type]> (unknown type)\n", "", depth);
     }
 }
+void PrintVisitor::visit(AliasedType* node) {
+    if (node == nullptr) {
+        fmt::print("{:|>{}}- [Type Identifier]> null\n", "", depth);
+        return;
+    }
+    fmt::print("{:|>{}}- [Type Identifier]> {}\n", "", depth, node->name);
+    depth++;
+    node->actualType->accept(*this);
+    depth--;
+}
 void PrintVisitor::visit(PrimitiveType* node) {
     if (node == nullptr) {
         fmt::print("{:|>{}}- [PrimitiveType]> null\n", "", depth);

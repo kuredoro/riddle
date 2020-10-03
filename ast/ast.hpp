@@ -50,6 +50,7 @@ public:
     virtual void visit(RoutineDecl* node) = 0;
     virtual void visit(Parameter* node) = 0;
     virtual void visit(Type* node) = 0;
+    virtual void visit(AliasedType* node) = 0;
     virtual void visit(TypeDecl* node) = 0;
     virtual void visit(PrimitiveType* node) = 0;
     virtual void visit(IntegerType* node) = 0;
