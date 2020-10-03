@@ -12,12 +12,15 @@ ast_dep = declare_dependency(include_directories : '.',
 
 
 libvisitors = static_library('visitors', 
-                         sources : ['impl/print_visitor.cpp'], 
-                         cpp_args : riddle_cpp_args,
-                         c_args : riddle_c_args,
-                         link_args : riddle_link_args,
-                         dependencies : [ ast_dep, lexer_dep, fmt_dep, common_dep ],
-                         install : true)
+                             sources : [
+                                 'impl/print_visitor.cpp',
+                                 'impl/identifier_resolver.cpp'
+                             ],
+                             cpp_args : riddle_cpp_args,
+                             c_args : riddle_c_args,
+                             link_args : riddle_link_args,
+                             dependencies : [ ast_dep, lexer_dep, fmt_dep, common_dep ],
+                             install : true)
 
 visitors_dep = declare_dependency(include_directories : '.',
                                link_with : libvisitors)
