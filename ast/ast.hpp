@@ -7,6 +7,11 @@ namespace ast {
 
 template <typename T> using sPtr = std::shared_ptr<T>;
 
+struct Error {
+    lexer::Token::Position pos;
+    std::string message;
+};
+
 struct Node;
 struct Program;
 struct RoutineDecl;
