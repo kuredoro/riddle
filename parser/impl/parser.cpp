@@ -1,11 +1,22 @@
+#include "token.hpp"
 #include <algorithm>
 #include <memory>
-#include "token.hpp"
 
 #include "parser.hpp"
 
-#define RETURN_ON_FAIL() { if (m_current.type == lexer::TokenType::Illegal) { return nullptr; } }
-#define ADVANCE_ON_FAIL(...) { if (m_current.type == lexer::TokenType::Illegal) { advance(__VA_ARGS__); return nullptr; } }
+#define RETURN_ON_FAIL()                                                       \
+    {                                                                          \
+        if (m_current.type == lexer::TokenType::Illegal) {                     \
+            return nullptr;                                                    \
+        }                                                                      \
+    }
+#define ADVANCE_ON_FAIL(...)                                                   \
+    {                                                                          \
+        if (m_current.type == lexer::TokenType::Illegal) {                     \
+            advance(__VA_ARGS__);                                              \
+            return nullptr;                                                    \
+        }                                                                      \
+    }
 
 namespace parser {
 
@@ -20,15 +31,13 @@ static const std::array<TokenType, 3> primitives{
 
 namespace util {
 
-
 inline bool HasPrimitiveType(Token tok) {
     return std::count(primitives.begin(), primitives.end(), tok.type) != 0;
 }
 
 template <typename Container, typename T>
-inline auto Contains(const Container& data,
-                     const T& value)
-                    -> decltype(std::end(data), true) {
+inline auto Contains(const Container& data, const T& value)
+    -> decltype(std::end(data), true) {
     return std::end(data) != std::find(std::begin(data), std::end(data), value);
 }
 
@@ -42,8 +51,8 @@ std::string GenExpectMessage(const std::vector<TokenType>& types) {
     }
 
     if (types.size() == 2) {
-        return fmt::format("expected {} or {}", 
-                        lexer::to_string(types[0]), lexer::to_string(types[1]));
+        return fmt::format("expected {} or {}", lexer::to_string(types[0]),
+                           lexer::to_string(types[1]));
     }
 
     std::string msg = "expected ";
@@ -54,8 +63,7 @@ std::string GenExpectMessage(const std::vector<TokenType>& types) {
     return msg + ", or " + lexer::to_string(types.back());
 }
 
-
-}
+} // namespace util
 
 sPtr<ast::Program> Parser::parseProgram() {
     ast::Program programNode;
@@ -124,7 +132,7 @@ sPtr<ast::RoutineDecl> Parser::parseRoutineDecl() {
 
     expect({TokenType::Colon, TokenType::Is});
     ADVANCE_ON_FAIL(TokenType::End);
-        
+
     if (m_current.type == TokenType::Colon) {
         skipWhitespace();
         routineNode.returnType = parseType();
@@ -145,7 +153,8 @@ sPtr<ast::RoutineDecl> Parser::parseRoutineDecl() {
 
 sPtr<ast::Parameter> Parser::parseParameter() {
     expect(TokenType::Identifier);
-    ADVANCE_ON_FAIL({TokenType::CloseParen, TokenType::Comma, TokenType::NewLine});
+    ADVANCE_ON_FAIL(
+        {TokenType::CloseParen, TokenType::Comma, TokenType::NewLine});
 
     ast::Parameter parameterNode;
     parameterNode.begin = m_current.pos;
@@ -154,7 +163,8 @@ sPtr<ast::Parameter> Parser::parseParameter() {
     expect(TokenType::Colon);
     // Note: the following is not correct as it will consume the ) or ,
     //  token expected by `parseRoutineDecl`. A better alternative is needed
-    ADVANCE_ON_FAIL({TokenType::CloseParen, TokenType::Comma, TokenType::NewLine});
+    ADVANCE_ON_FAIL(
+        {TokenType::CloseParen, TokenType::Comma, TokenType::NewLine});
 
     parameterNode.type = parseType();
 
@@ -178,7 +188,7 @@ sPtr<ast::TypeDecl> Parser::parseTypeDecl() {
     typeDeclNode.name = m_current.lit;
 
     expect(TokenType::Is);
-    ADVANCE_ON_FAIL({TokenType::Semicolon, TokenType::NewLine}); 
+    ADVANCE_ON_FAIL({TokenType::Semicolon, TokenType::NewLine});
 
     skipWhitespace();
     typeDeclNode.type = parseType();
@@ -282,7 +292,7 @@ sPtr<ast::VariableDecl> Parser::parseVariableDecl() {
     ast::VariableDecl variableNode;
     variableNode.begin = m_current.pos;
 
-    expect(TokenType::Identifier);  // ... after 'var'"
+    expect(TokenType::Identifier); // ... after 'var'"
     ADVANCE_ON_FAIL({TokenType::Semicolon, TokenType::NewLine});
 
     variableNode.name = m_current.lit;
@@ -713,8 +723,7 @@ bool Parser::isPrimary(const TokenType& token) {
  * token. The next token is consumed (along with any whitespace before it)
  * regardless of whether or not it was a desired token.
  */
-void Parser::expect(const std::vector<TokenType>& types,
-                     std::string errMsg) {
+void Parser::expect(const std::vector<TokenType>& types, std::string errMsg) {
     // if "new line" is not one of the characters we are looking for, then skip
     // any occurence of it
     if (!util::Contains(types, TokenType::NewLine)) {
@@ -724,16 +733,14 @@ void Parser::expect(const std::vector<TokenType>& types,
     auto next = m_lexer.Next();
     if (!util::Contains(types, next.type)) {
         if (errMsg.empty()) {
-            errMsg = util::GenExpectMessage(types)
-                   + ", got " 
-                   + lexer::to_string(next.type);
+            errMsg = util::GenExpectMessage(types) + ", got " +
+                     lexer::to_string(next.type);
         }
         error(next, errMsg);
         next = Token{.type = TokenType::Illegal};
     }
 
     m_current = next;
-    //return m_current;
 }
 
 /**
@@ -744,13 +751,9 @@ void Parser::expect(const TokenType& type, std::string errMsg) {
     return expect(std::vector{type}, errMsg);
 }
 
-void Parser::next() {
-    m_current = m_lexer.Next();
-}
+void Parser::next() { m_current = m_lexer.Next(); }
 
-void Parser::peek() {
-    m_current = m_lexer.Peek();
-}
+void Parser::peek() { m_current = m_lexer.Peek(); }
 
 void Parser::skipWhitespace() {
     while (m_lexer.Peek().type == TokenType::NewLine) {
@@ -778,19 +781,19 @@ void Parser::advance(const TokenType& type) {
 }
 
 void Parser::error(const std::string& msg) {
-    m_errors.push_back(Error{
+    m_errors.push_back(ast::Error{
         .pos = m_current.pos,
         .message = msg,
     });
 }
 
 void Parser::error(const lexer::Token& tok, const std::string& msg) {
-    m_errors.push_back(Error{
+    m_errors.push_back(ast::Error{
         .pos = tok.pos,
         .message = msg,
     });
 }
 
-std::vector<parser::Error> Parser::getErrors() { return m_errors; }
+std::vector<ast::Error> Parser::getErrors() { return m_errors; }
 
 } // namespace parser

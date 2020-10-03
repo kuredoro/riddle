@@ -1,5 +1,7 @@
 #include "ast.hpp"
 
+namespace visitors {
+
 using namespace ast;
 
 class PrintVisitor : public Visitor {
@@ -37,3 +39,5 @@ public:
 private:
     size_t depth;
 };
+
+} // namespace visitors
