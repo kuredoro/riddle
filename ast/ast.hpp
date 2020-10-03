@@ -75,6 +75,11 @@ public:
     virtual void visit(RoutineCall* node) = 0;
     virtual void visit(UnaryExpression* node) = 0;
     virtual void visit(BinaryExpression* node) = 0;
+
+    std::vector<Error> getErrors() { return std::vector<Error>(m_errors); }
+
+protected:
+    std::vector<Error> m_errors;
 };
 
 struct Node {
