@@ -448,7 +448,11 @@ sPtr<ast::ForLoop> Parser::parseForLoop() {
     expect(TokenType::Identifier);
     ADVANCE_ON_FAIL(TokenType::End);
 
-    forNode.loopVar = m_current.lit;
+    forNode.loopVar = std::make_shared<ast::VariableDecl>();
+    forNode.loopVar->begin = m_current.pos;
+    forNode.loopVar->name = m_current.lit;
+    forNode.loopVar->type = std::make_shared<ast::IntegerType>();
+    forNode.loopVar->end = m_current.pos;
 
     expect(TokenType::In);
     ADVANCE_ON_FAIL(TokenType::End);

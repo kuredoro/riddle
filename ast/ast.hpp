@@ -225,7 +225,7 @@ struct WhileLoop : Statement {
 };
 
 struct ForLoop : Statement {
-    std::string loopVar;
+    sPtr<VariableDecl> loopVar;
     sPtr<Expression> rangeFrom;
     sPtr<Expression> rangeTo;
     bool reverse = false;
