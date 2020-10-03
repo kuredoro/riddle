@@ -138,6 +138,7 @@ struct Type : Node {
  */
 struct AliasedType : Type {
     std::string name;
+    sPtr<Type> actualType;
     bool operator==(const AliasedType& other) const {
         return Node::operator==(other) && name == other.name;
     }
