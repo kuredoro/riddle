@@ -11,6 +11,7 @@ public:
     void visit(RoutineDecl* node) override;
     void visit(Parameter* node) override;
     void visit(Type* node) override;
+    void visit(AliasedType* node) override;
     void visit(PrimitiveType* node) override;
     void visit(IntegerType* node) override;
     void visit(RealType* node) override;
