@@ -8,11 +8,6 @@ namespace parser {
 
 template <typename T> using sPtr = std::shared_ptr<T>;
 
-struct Error {
-    lexer::Token::Position pos;
-    std::string message;
-};
-
 class Parser {
 public:
     Parser(lexer::Lexer lexer) : m_lexer(lexer) {}
@@ -36,14 +31,13 @@ public:
     sPtr<ast::Expression> parseUnaryExpression();
     sPtr<ast::Expression> parseBinaryExpression(int prec1 = 0);
     sPtr<ast::RoutineCall> parseRoutineCall(lexer::Token);
-    std::vector<Error> getErrors();
+    std::vector<ast::Error> getErrors();
 
 private:
     lexer::Lexer m_lexer;
     lexer::Token m_current;
 
-    std::vector<Error> m_errors;
-
+    std::vector<ast::Error> m_errors;
 
     void expect(const std::vector<lexer::TokenType>&, std::string = "");
     void expect(const lexer::TokenType&, std::string = "");
