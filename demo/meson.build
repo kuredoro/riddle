@@ -4,4 +4,4 @@ executable('lexer_demo', 'lexer_demo.cpp',
 
 executable('parser_demo', 'parser_demo.cpp',
           cpp_args : riddle_cpp_args,
-          dependencies : [parser_dep, ast_dep, lexer_dep, common_dep, fmt_dep])
+          dependencies : [visitors_dep, parser_dep, ast_dep, lexer_dep, common_dep, fmt_dep])

@@ -5,6 +5,15 @@ libast = static_library('ast',
                         dependencies: [ lexer_dep ],
                         install : true)
 
-
 ast_dep = declare_dependency(include_directories : '.',
                              link_with : libast)
+
+
+libvisitors = static_library('visitors', 
+                         sources : ['impl/print_visitor.cpp'], 
+                         cpp_args : riddle_cpp_args,
+                         dependencies : [ ast_dep, lexer_dep, fmt_dep, common_dep ],
+                         install : true)
+
+visitors_dep = declare_dependency(include_directories : '.',
+                               link_with : libvisitors)
