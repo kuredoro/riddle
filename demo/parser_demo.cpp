@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
         auto ast = parser.parseProgram();
         auto errors = parser.getErrors();
         if (errors.empty()) {
-            PrintVisitor v;
+            visitors::PrintVisitor v;
             ast->accept(v);
         } else {
             // get individual lines
@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
         auto ast = parseFunc(parser);
         auto errors = parser.getErrors();
         if (errors.empty()) {
-            PrintVisitor v;
+            visitors::PrintVisitor v;
             ast->accept(v);
         } else {
             fmt::print(fg(fmt::color::indian_red) | fmt::emphasis::bold,

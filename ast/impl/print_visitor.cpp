@@ -12,6 +12,8 @@ std::unordered_map<lexer::TokenType, std::string> op_to_string{
     {lexer::TokenType::Dot, "."},     {lexer::TokenType::OpenBrack, "[]"},
 };
 
+namespace visitors {
+
 void PrintVisitor::visit(Program* node) {
     if (node == nullptr) {
         fmt::print("{:|>{}}- [Program]> null\n", "", depth);
@@ -318,3 +320,5 @@ void PrintVisitor::visit(RoutineCall* node) {
     }
     depth--;
 }
+
+} // namespace visitors
