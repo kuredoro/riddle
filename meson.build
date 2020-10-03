@@ -11,6 +11,15 @@ riddle_cpp_args = [
   '-Wno-missing-braces',
   '-Wno-missing-field-initializers',
   '-Wno-sign-conversion',
+  '-fsanitize=address',
+]
+
+riddle_c_args = [
+  '-fsanitize=address',
+]
+
+riddle_link_args = [
+  '-fsanitize=address',
 ]
 
 fmt_dep = dependency('fmt', fallback : ['fmt', 'fmt_dep'])
