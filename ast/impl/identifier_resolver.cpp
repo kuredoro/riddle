@@ -191,8 +191,71 @@ void IdentifierResolver::visit(UnaryExpression* node) {
 void IdentifierResolver::visit(BinaryExpression* node) {
     node->operand1->accept(*this);
     checkReplacement(node->operand1);
-    node->operand2->accept(*this);
-    checkReplacement(node->operand2);
+    if (node->operation == lexer::TokenType::Dot) {
+        auto operand1 = std::dynamic_pointer_cast<Identifier>(node->operand1);
+        if (operand1 == nullptr) {
+            m_errors.push_back(Error{
+                .pos = node->operand1->begin,
+                .message = "Expected variable identifier before '.'",
+            });
+            return;
+        }
+
+        auto operand2 = std::dynamic_pointer_cast<Identifier>(node->operand2);
+        if (operand2 == nullptr) {
+            m_errors.push_back(Error{
+                .pos = node->operand2->begin,
+                .message = "Expected identifier after '.'",
+            });
+            return;
+        }
+
+        auto recordDecl = dynamic_cast<RecordType*>(&operand1->type);
+        if (recordDecl == nullptr) {
+            m_errors.push_back(Error{
+                .pos = node->operand2->begin,
+                .message = "Can only access member of records",
+            });
+            return;
+        }
+        for (auto field : recordDecl->fields) {
+            if (field->name == operand2->name) {
+                operand2->variable = field;
+                operand2->type = *field->type;
+                break;
+            }
+        }
+        if (operand2->variable == nullptr) {
+            m_errors.push_back(Error{
+                .pos = operand2->begin,
+                .message = fmt::format("{} is not a member of {}",
+                                       operand2->name, operand1->name),
+            });
+            return;
+        }
+    } else if (node->operation == lexer::TokenType::OpenBrack) {
+        auto operand1 = std::dynamic_pointer_cast<Identifier>(node->operand1);
+        if (operand1 == nullptr) {
+            m_errors.push_back(Error{
+                .pos = node->operand1->begin,
+                .message = "Expected variable identifier before '['",
+            });
+            return;
+        }
+        auto arrayDecl = dynamic_cast<ArrayType*>(&operand1->type);
+        if (arrayDecl == nullptr) {
+            m_errors.push_back(Error{
+                .pos = node->operand1->begin,
+                .message = "Cannot index in a variable of non-array type",
+            });
+            return;
+        }
+        node->operand2->accept(*this);
+        checkReplacement(node->operand2);
+    } else {
+        node->operand2->accept(*this);
+        checkReplacement(node->operand2);
+    }
 }
 
 void IdentifierResolver::visit(Primary*) {}
