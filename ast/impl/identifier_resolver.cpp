@@ -1,4 +1,6 @@
 #include "visitors.hpp"
+#include <memory>
+#include <set>
 
 namespace visitors {
 
@@ -75,6 +77,7 @@ void IdentifierResolver::visit(RoutineDecl* node) {
 void IdentifierResolver::visit(Type*) {}
 
 void IdentifierResolver::visit(AliasedType* node) {
+    // TODO: fix to also go from bottom to top of the vector
     for (auto typeDecl : types) {
         if (typeDecl->name == node->name) {
             node->actualType = typeDecl->type;
@@ -104,6 +107,19 @@ void IdentifierResolver::visit(ArrayType* node) {
 }
 
 void IdentifierResolver::visit(RecordType* node) {
+    // ensure that no two fields have the same name
+    std::set<std::string> field_names;
+    for (auto field : node->fields) {
+        if (field_names.find(field->name) != field_names.end()) {
+            m_errors.push_back(Error{
+                .pos = field->begin,
+                .message = "Field name already in use",
+            });
+            return;
+        }
+        field_names.insert(field->name);
+    }
+
     for (auto field : node->fields) {
         field->accept(*this);
     }
@@ -124,6 +140,7 @@ void IdentifierResolver::visit(Body* node) {
     auto oldTypesSize = types.size();
 
     for (auto& variable : node->variables) {
+        // TODO: check for name collisions
         variables.push_back(variable);
         if (variable->initialValue != nullptr) {
             variable->initialValue->accept(*this);
@@ -132,6 +149,7 @@ void IdentifierResolver::visit(Body* node) {
     }
     for (auto type : node->types) {
         type->accept(*this);
+        // TODO: check for name collisions
         types.push_back(type);
     }
     for (auto statement : node->statements) {
