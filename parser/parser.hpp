@@ -13,7 +13,7 @@ public:
     Parser(lexer::Lexer lexer) : m_lexer(lexer) {}
     sPtr<ast::Program> parseProgram();
     sPtr<ast::RoutineDecl> parseRoutineDecl();
-    sPtr<ast::Parameter> parseParameter();
+    sPtr<ast::VariableDecl> parseParameter();
     sPtr<ast::TypeDecl> parseTypeDecl();
     sPtr<ast::Type> parseType();
     sPtr<ast::PrimitiveType> parsePrimitiveType();

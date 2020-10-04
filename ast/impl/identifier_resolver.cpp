@@ -60,22 +60,13 @@ void IdentifierResolver::visit(RoutineDecl* node) {
     auto oldSize = variables.size();
 
     for (auto parameter : node->parameters) {
-        // TODO: decide if we should just remove the Parameter type and use
-        //  VariableDecl instead
-        // UPD: yes. do it.
-        auto param = std::make_shared<VariableDecl>();
-        param->name = parameter->name;
-        param->type = parameter->type;
-        param->begin = parameter->begin;
-        param->end = parameter->end;
-        variables.push_back(param);
+        variables.push_back(parameter);
     }
+
     node->body->accept(*this);
 
     variables.resize(oldSize);
 }
-
-void IdentifierResolver::visit(Parameter* node) { node->type->accept(*this); }
 
 void IdentifierResolver::visit(Type*) {}
 

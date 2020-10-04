@@ -48,16 +48,6 @@ void PrintVisitor::visit(RoutineDecl* node) {
     }
     depth--;
 }
-void PrintVisitor::visit(Parameter* node) {
-    if (node == nullptr) {
-        fmt::print("{:|>{}}- [Parameter]> null\n", "", depth);
-        return;
-    }
-    fmt::print("{:|>{}}- [Parameter]> {}\n", "", depth, node->name);
-    depth++;
-    node->type->accept(*this);
-    depth--;
-}
 void PrintVisitor::visit(Type* node) {
     if (ast::PrimitiveType* specific = dynamic_cast<ast::PrimitiveType*>(node);
         specific != nullptr) {
