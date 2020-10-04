@@ -141,8 +141,8 @@ void PrintVisitor::visit(VariableDecl* node) {
     if (node->type != nullptr) {
         node->type->accept(*this);
     }
-    if (node->expression != nullptr) {
-        node->expression->accept(*this);
+    if (node->initialValue != nullptr) {
+        node->initialValue->accept(*this);
     }
     depth--;
 }

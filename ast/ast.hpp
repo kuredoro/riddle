@@ -178,10 +178,10 @@ struct RecordType : Type {
 struct VariableDecl : Node {
     std::string name;
     sPtr<Type> type;
-    sPtr<Expression> expression;
+    sPtr<Expression> initialValue;
     bool operator==(const VariableDecl& other) const {
         return Node::operator==(other) && name == other.name &&
-               type == other.type && expression == other.expression;
+               type == other.type && initialValue == other.initialValue;
     }
     void accept(Visitor& v) override { v.visit(this); }
 };

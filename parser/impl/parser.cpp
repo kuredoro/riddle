@@ -305,10 +305,10 @@ sPtr<ast::VariableDecl> Parser::parseVariableDecl() {
 
         if (m_lexer.Peek().type == TokenType::Is) {
             m_lexer.Next(); // consume the "is"
-            variableNode.expression = parseExpression();
+            variableNode.initialValue = parseExpression();
         }
     } else if (m_current.type == TokenType::Is) {
-        variableNode.expression = parseExpression();
+        variableNode.initialValue = parseExpression();
     }
 
     expect({TokenType::Semicolon, TokenType::NewLine});
