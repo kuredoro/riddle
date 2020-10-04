@@ -163,7 +163,7 @@ SCENARIO("Parser builds a tree from tokens") {
                 },
             };
 
-            ast::Parameter expected;
+            ast::VariableDecl expected;
             expected.name = lx[0].lit;
             ast::ArrayType expectedType;
             ast::IntegerType integer;

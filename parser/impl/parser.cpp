@@ -151,12 +151,12 @@ sPtr<ast::RoutineDecl> Parser::parseRoutineDecl() {
     return std::make_shared<ast::RoutineDecl>(routineNode);
 }
 
-sPtr<ast::Parameter> Parser::parseParameter() {
+sPtr<ast::VariableDecl> Parser::parseParameter() {
     expect(TokenType::Identifier);
     ADVANCE_ON_FAIL(
         {TokenType::CloseParen, TokenType::Comma, TokenType::NewLine});
 
-    ast::Parameter parameterNode;
+    ast::VariableDecl parameterNode;
     parameterNode.begin = m_current.pos;
     parameterNode.name = m_current.lit;
 
@@ -172,7 +172,7 @@ sPtr<ast::Parameter> Parser::parseParameter() {
         parameterNode.end = parameterNode.type->end;
     }
 
-    return std::make_shared<ast::Parameter>(parameterNode);
+    return std::make_shared<ast::VariableDecl>(parameterNode);
 }
 
 sPtr<ast::TypeDecl> Parser::parseTypeDecl() {

@@ -15,7 +15,6 @@ struct Error {
 struct Node;
 struct Program;
 struct RoutineDecl;
-struct Parameter;
 struct TypeDecl;
 struct Type;
 struct AliasedType;
@@ -48,7 +47,6 @@ public:
     virtual ~Visitor() = default;
     virtual void visit(Program* node) = 0;
     virtual void visit(RoutineDecl* node) = 0;
-    virtual void visit(Parameter* node) = 0;
     virtual void visit(Type* node) = 0;
     virtual void visit(AliasedType* node) = 0;
     virtual void visit(TypeDecl* node) = 0;
@@ -104,23 +102,13 @@ struct Program : Node {
 
 struct RoutineDecl : Node {
     std::string name;
-    std::vector<sPtr<Parameter>> parameters;
+    std::vector<sPtr<VariableDecl>> parameters;
     sPtr<Type> returnType;
     sPtr<Body> body;
     bool operator==(const RoutineDecl& other) const {
         return Node::operator==(other) && name == other.name &&
                returnType == other.returnType && body == other.body &&
                parameters == other.parameters;
-    }
-    void accept(Visitor& v) override { v.visit(this); }
-};
-
-struct Parameter : Node {
-    std::string name;
-    sPtr<Type> type;
-    bool operator==(const Parameter& other) const {
-        return Node::operator==(other) && name == other.name &&
-               type == other.type;
     }
     void accept(Visitor& v) override { v.visit(this); }
 };
