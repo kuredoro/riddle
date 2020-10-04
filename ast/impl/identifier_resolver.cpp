@@ -39,7 +39,9 @@ void IdentifierResolver::visit(Program* node) {
         variables.push_back(variable);
     }
 
-    // TODO: do the same for types (since they can be given aliases)
+    for (auto typeDecl : node->types) {
+        types.push_back(typeDecl);
+    }
 
     // Finally, visit all routine declaration
     for (auto routine : node->routines) {
@@ -48,6 +50,7 @@ void IdentifierResolver::visit(Program* node) {
 
     variables.clear();
     routines.clear();
+    types.clear();
 }
 
 void IdentifierResolver::visit(RoutineDecl* node) {
@@ -61,6 +64,7 @@ void IdentifierResolver::visit(RoutineDecl* node) {
 
     for (auto parameter : node->parameters) {
         variables.push_back(parameter);
+        parameter->type->accept(*this);
     }
 
     node->body->accept(*this);
@@ -71,7 +75,16 @@ void IdentifierResolver::visit(RoutineDecl* node) {
 void IdentifierResolver::visit(Type*) {}
 
 void IdentifierResolver::visit(AliasedType* node) {
-    // TODO: find the type declaration that has the same name and link/replace
+    for (auto typeDecl : types) {
+        if (typeDecl->name == node->name) {
+            node->actualType = typeDecl->type;
+            return;
+        }
+    }
+    m_errors.push_back(Error{
+        .pos = node->begin,
+        .message = fmt::format("{} does not name a type", node->name),
+    });
 }
 
 void IdentifierResolver::visit(PrimitiveType*) {}
@@ -107,7 +120,8 @@ void IdentifierResolver::visit(VariableDecl* node) {
 void IdentifierResolver::visit(TypeDecl* node) { node->type->accept(*this); }
 
 void IdentifierResolver::visit(Body* node) {
-    auto oldSize = variables.size();
+    auto oldVarsSize = variables.size();
+    auto oldTypesSize = types.size();
 
     for (auto& variable : node->variables) {
         variables.push_back(variable);
@@ -118,12 +132,14 @@ void IdentifierResolver::visit(Body* node) {
     }
     for (auto type : node->types) {
         type->accept(*this);
+        types.push_back(type);
     }
     for (auto statement : node->statements) {
         statement->accept(*this);
     }
 
-    variables.resize(oldSize);
+    variables.resize(oldVarsSize);
+    types.resize(oldTypesSize);
 }
 
 void IdentifierResolver::visit(Statement*) {}

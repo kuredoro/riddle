@@ -84,6 +84,8 @@ private:
     std::map<std::string, sPtr<RoutineDecl>> routines;
     // `variables` is a vector to allow repetition (in different scopes)
     std::vector<sPtr<VariableDecl>> variables;
+    // Just like `variables`, but for types
+    std::vector<sPtr<TypeDecl>> types;
 
     sPtr<RoutineCall> toReplace = nullptr;
 
