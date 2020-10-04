@@ -255,7 +255,7 @@ struct ReturnStatement : Statement {
 struct Expression : virtual Node {
     bool constant = false; // tells if this expression is compile-time constant
     Type type;
-    void accept(Visitor& v) override { v.visit(this); }
+    virtual void accept(Visitor& v) override { v.visit(this); }
 };
 
 struct UnaryExpression : Expression {
@@ -266,7 +266,7 @@ struct UnaryExpression : Expression {
         return Node::operator==(other) && operand == other.operand &&
                operation == other.operation;
     }
-    void accept(Visitor& v) override { v.visit(this); }
+    virtual void accept(Visitor& v) override { v.visit(this); }
 };
 
 struct BinaryExpression : Expression {
@@ -278,7 +278,7 @@ struct BinaryExpression : Expression {
         return Node::operator==(other) && operand1 == other.operand1 &&
                operand2 == other.operand2 && operation == other.operation;
     }
-    void accept(Visitor& v) override { v.visit(this); }
+    virtual void accept(Visitor& v) override { v.visit(this); }
 };
 
 struct Primary : Expression, Statement {
