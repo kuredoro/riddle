@@ -84,6 +84,10 @@ private:
     std::map<std::string, sPtr<RoutineDecl>> routines;
     // `variables` is a vector to allow repetition (in different scopes)
     std::vector<sPtr<VariableDecl>> variables;
+
+    sPtr<RoutineCall> toReplace = nullptr;
+
+    void checkReplacement(sPtr<Expression>&);
 };
 
 } // namespace visitors
