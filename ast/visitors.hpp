@@ -87,6 +87,8 @@ private:
 
     sPtr<RoutineCall> toReplace = nullptr;
 
+    sPtr<VariableDecl> findVarDecl(std::string);
+
     void checkReplacement(sPtr<Expression>&);
 };
 
