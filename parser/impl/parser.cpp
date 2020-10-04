@@ -650,7 +650,7 @@ sPtr<ast::Expression> Parser::parseBinaryExpression(int prec1) {
             expr.operand2 = parseBinaryExpression(prec + 1);
         }
 
-        expr.end = op.pos;
+        expr.end = expr.operand2->end;
         lhs = std::make_shared<ast::BinaryExpression>(expr);
     }
 }
