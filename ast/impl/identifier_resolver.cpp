@@ -98,9 +98,9 @@ void IdentifierResolver::visit(RecordType* node) {
 
 void IdentifierResolver::visit(VariableDecl* node) {
     node->type->accept(*this);
-    if (node->expression != nullptr) {
-        node->expression->accept(*this);
-        checkReplacement(node->expression);
+    if (node->initialValue != nullptr) {
+        node->initialValue->accept(*this);
+        checkReplacement(node->initialValue);
     }
 }
 
@@ -111,9 +111,9 @@ void IdentifierResolver::visit(Body* node) {
 
     for (auto& variable : node->variables) {
         variables.push_back(variable);
-        if (variable->expression != nullptr) {
-            variable->expression->accept(*this);
-            checkReplacement(variable->expression);
+        if (variable->initialValue != nullptr) {
+            variable->initialValue->accept(*this);
+            checkReplacement(variable->initialValue);
         }
     }
     for (auto type : node->types) {
