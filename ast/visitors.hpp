@@ -94,6 +94,9 @@ private:
 
     void checkReplacementVar(sPtr<Expression>&);
     void checkReplacementType(sPtr<Type>&);
+
+    sPtr<VariableDecl> duplicateVarExists(std::vector<sPtr<VariableDecl>>);
+    sPtr<TypeDecl> duplicateTypeExists(std::vector<sPtr<TypeDecl>>);
 };
 
 } // namespace visitors
