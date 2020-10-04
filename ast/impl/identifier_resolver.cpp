@@ -77,8 +77,8 @@ void IdentifierResolver::visit(RoutineDecl* node) {
 void IdentifierResolver::visit(Type*) {}
 
 void IdentifierResolver::visit(AliasedType* node) {
-    // TODO: fix to also go from bottom to top of the vector
-    for (auto typeDecl : types) {
+    for (auto it = types.rbegin(); it != types.rend(); it++) {
+        auto typeDecl = *it;
         if (typeDecl->name == node->name) {
             toReplaceType = typeDecl->type;
             return;
@@ -140,8 +140,17 @@ void IdentifierResolver::visit(Body* node) {
     auto oldVarsSize = variables.size();
     auto oldTypesSize = types.size();
 
+    if (auto collision = duplicateVarExists(node->variables);
+        collision != nullptr) {
+        m_errors.push_back(Error{
+            .pos = collision->begin,
+            .message = "A variable with the same name already exists in the "
+                       "same scope",
+        });
+        return;
+    }
+
     for (auto& variable : node->variables) {
-        // TODO: check for name collisions
         variables.push_back(variable);
         if (variable->initialValue != nullptr) {
             variable->initialValue->accept(*this);
@@ -152,9 +161,18 @@ void IdentifierResolver::visit(Body* node) {
             checkReplacementType(variable->type);
         }
     }
+
+    if (auto collision = duplicateTypeExists(node->types);
+        collision != nullptr) {
+        m_errors.push_back(Error{
+            .pos = collision->begin,
+            .message =
+                "A type with the same name already exists in the same scope",
+        });
+        return;
+    }
     for (auto type : node->types) {
         type->accept(*this);
-        // TODO: check for name collisions
         types.push_back(type);
     }
     for (auto statement : node->statements) {
@@ -362,6 +380,29 @@ sPtr<VariableDecl> IdentifierResolver::findVarDecl(std::string name) {
         if (variable->name == name) {
             return variable;
         }
+    }
+    return nullptr;
+}
+
+sPtr<VariableDecl> IdentifierResolver::duplicateVarExists(
+    std::vector<sPtr<VariableDecl>> variables) {
+    std::set<std::string> names;
+    for (auto variable : variables) {
+        if (names.find(variable->name) != names.end()) {
+            return variable;
+        }
+        names.insert(variable->name);
+    }
+    return nullptr;
+}
+sPtr<TypeDecl>
+IdentifierResolver::duplicateTypeExists(std::vector<sPtr<TypeDecl>> types) {
+    std::set<std::string> names;
+    for (auto type : types) {
+        if (names.find(type->name) != names.end()) {
+            return type;
+        }
+        names.insert(type->name);
     }
     return nullptr;
 }
