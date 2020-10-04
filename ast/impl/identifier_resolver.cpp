@@ -257,18 +257,15 @@ void IdentifierResolver::visit(BinaryExpression* node) {
             return;
         }
     } else if (node->operation == lexer::TokenType::OpenBrack) {
-        auto operand1 = std::dynamic_pointer_cast<Identifier>(node->operand1);
-        if (operand1 == nullptr) {
-            m_errors.push_back(Error{
-                .pos = node->operand1->begin,
-                .message = "Expected variable identifier before '['",
-            });
-            return;
-        }
-        auto arrayDecl = std::dynamic_pointer_cast<ArrayType>(operand1->type);
+        // TODO: Need to implement expression type evaluation for this to work
+        //  for expressions like `a.b[5] := 5`
+        // Or perhaps this entire type checking does not belong to this visitor?
+
+        auto arrayDecl =
+            std::dynamic_pointer_cast<ArrayType>(node->operand1->type);
         if (arrayDecl == nullptr) {
             m_errors.push_back(Error{
-                .pos = node->operand1->begin,
+                .pos = node->operand1->end,
                 .message = "Cannot index in a variable of non-array type",
             });
             return;
