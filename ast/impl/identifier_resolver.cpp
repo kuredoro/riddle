@@ -191,16 +191,13 @@ void IdentifierResolver::visit(Identifier* node) {
     // Here comes the main work of figuring out which variable/routine this
     //  identifier refers to
 
-    // TODO: abstract away to a private function
-    for (auto it = variables.rbegin(); it != variables.rend(); it++) {
-        auto variable = *it;
-        if (variable->name == node->name) {
-            node->variable = variable;
-            if (variable->type != nullptr) {
-                node->type = *variable->type;
-            }
-            return;
+    auto variable = findVarDecl(node->name);
+    if (variable != nullptr) {
+        node->variable = variable;
+        if (variable->type != nullptr) {
+            node->type = *variable->type;
         }
+        return;
     }
 
     // If it did not match any variable, it must be a parameterless routine call
@@ -247,6 +244,16 @@ void IdentifierResolver::checkReplacement(sPtr<Expression>& expr) {
         expr = toReplace;
         toReplace = nullptr;
     }
+}
+
+sPtr<VariableDecl> IdentifierResolver::findVarDecl(std::string name) {
+    for (auto it = variables.rbegin(); it != variables.rend(); it++) {
+        auto variable = *it;
+        if (variable->name == name) {
+            return variable;
+        }
+    }
+    return nullptr;
 }
 
 } // namespace visitors
