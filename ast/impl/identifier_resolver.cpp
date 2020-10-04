@@ -80,7 +80,7 @@ void IdentifierResolver::visit(AliasedType* node) {
     // TODO: fix to also go from bottom to top of the vector
     for (auto typeDecl : types) {
         if (typeDecl->name == node->name) {
-            node->actualType = typeDecl->type;
+            toReplaceType = typeDecl->type;
             return;
         }
     }
@@ -101,7 +101,7 @@ void IdentifierResolver::visit(BooleanType*) {}
 void IdentifierResolver::visit(ArrayType* node) {
     if (node->length != nullptr) {
         node->length->accept(*this);
-        checkReplacement(node->length);
+        checkReplacementVar(node->length);
     }
     node->elementType->accept(*this);
 }
@@ -127,9 +127,10 @@ void IdentifierResolver::visit(RecordType* node) {
 
 void IdentifierResolver::visit(VariableDecl* node) {
     node->type->accept(*this);
+    checkReplacementType(node->type);
     if (node->initialValue != nullptr) {
         node->initialValue->accept(*this);
-        checkReplacement(node->initialValue);
+        checkReplacementVar(node->initialValue);
     }
 }
 
@@ -144,7 +145,11 @@ void IdentifierResolver::visit(Body* node) {
         variables.push_back(variable);
         if (variable->initialValue != nullptr) {
             variable->initialValue->accept(*this);
-            checkReplacement(variable->initialValue);
+            checkReplacementVar(variable->initialValue);
+        }
+        if (variable->type != nullptr) {
+            variable->type->accept(*this);
+            checkReplacementType(variable->type);
         }
     }
     for (auto type : node->types) {
@@ -164,19 +169,19 @@ void IdentifierResolver::visit(Statement*) {}
 
 void IdentifierResolver::visit(ReturnStatement* node) {
     node->expression->accept(*this);
-    checkReplacement(node->expression);
+    checkReplacementVar(node->expression);
 }
 
 void IdentifierResolver::visit(Assignment* node) {
     node->lhs->accept(*this);
-    checkReplacement(node->lhs);
+    checkReplacementVar(node->lhs);
     node->rhs->accept(*this);
-    checkReplacement(node->rhs);
+    checkReplacementVar(node->rhs);
 }
 
 void IdentifierResolver::visit(WhileLoop* node) {
     node->condition->accept(*this);
-    checkReplacement(node->condition);
+    checkReplacementVar(node->condition);
     node->body->accept(*this);
 }
 
@@ -192,7 +197,7 @@ void IdentifierResolver::visit(ForLoop* node) {
 
 void IdentifierResolver::visit(IfStatement* node) {
     node->condition->accept(*this);
-    checkReplacement(node->condition);
+    checkReplacementVar(node->condition);
     node->ifBody->accept(*this);
     if (node->elseBody != nullptr) {
         node->elseBody->accept(*this);
@@ -203,12 +208,12 @@ void IdentifierResolver::visit(Expression*) {}
 
 void IdentifierResolver::visit(UnaryExpression* node) {
     node->operand->accept(*this);
-    checkReplacement(node->operand);
+    checkReplacementVar(node->operand);
 }
 
 void IdentifierResolver::visit(BinaryExpression* node) {
     node->operand1->accept(*this);
-    checkReplacement(node->operand1);
+    checkReplacementVar(node->operand1);
     if (node->operation == lexer::TokenType::Dot) {
         auto operand1 = std::dynamic_pointer_cast<Identifier>(node->operand1);
         if (operand1 == nullptr) {
@@ -228,7 +233,7 @@ void IdentifierResolver::visit(BinaryExpression* node) {
             return;
         }
 
-        auto recordDecl = dynamic_cast<RecordType*>(&operand1->type);
+        auto recordDecl = std::dynamic_pointer_cast<RecordType>(operand1->type);
         if (recordDecl == nullptr) {
             m_errors.push_back(Error{
                 .pos = node->operand2->begin,
@@ -239,7 +244,7 @@ void IdentifierResolver::visit(BinaryExpression* node) {
         for (auto field : recordDecl->fields) {
             if (field->name == operand2->name) {
                 operand2->variable = field;
-                operand2->type = *field->type;
+                operand2->type = field->type;
                 break;
             }
         }
@@ -260,7 +265,7 @@ void IdentifierResolver::visit(BinaryExpression* node) {
             });
             return;
         }
-        auto arrayDecl = dynamic_cast<ArrayType*>(&operand1->type);
+        auto arrayDecl = std::dynamic_pointer_cast<ArrayType>(operand1->type);
         if (arrayDecl == nullptr) {
             m_errors.push_back(Error{
                 .pos = node->operand1->begin,
@@ -269,10 +274,10 @@ void IdentifierResolver::visit(BinaryExpression* node) {
             return;
         }
         node->operand2->accept(*this);
-        checkReplacement(node->operand2);
+        checkReplacementVar(node->operand2);
     } else {
         node->operand2->accept(*this);
-        checkReplacement(node->operand2);
+        checkReplacementVar(node->operand2);
     }
 }
 
@@ -292,7 +297,7 @@ void IdentifierResolver::visit(Identifier* node) {
     if (variable != nullptr) {
         node->variable = variable;
         if (variable->type != nullptr) {
-            node->type = *variable->type;
+            node->type = variable->type;
         }
         return;
     }
@@ -308,11 +313,11 @@ void IdentifierResolver::visit(Identifier* node) {
         return;
     }
 
-    toReplace = std::make_shared<RoutineCall>();
-    toReplace->begin = node->begin;
-    toReplace->routine = routineIt->second;
-    toReplace->routineName = node->name;
-    toReplace->end = node->end;
+    toReplaceVar = std::make_shared<RoutineCall>();
+    toReplaceVar->begin = node->begin;
+    toReplaceVar->routine = routineIt->second;
+    toReplaceVar->routineName = node->name;
+    toReplaceVar->end = node->end;
 }
 
 void IdentifierResolver::visit(RoutineCall* node) {
@@ -328,18 +333,29 @@ void IdentifierResolver::visit(RoutineCall* node) {
     for (auto& arg : node->args) {
 
         arg->accept(*this);
-        checkReplacement(arg);
+        checkReplacementVar(arg);
     }
 }
 
 /**
- * Checks if `toReplace` is set, and if so changes the passed parameter to point
- *  to it instead
+ * Checks if `toReplaceVar` is set, and if so changes the passed parameter to
+ *  point to it instead
  */
-void IdentifierResolver::checkReplacement(sPtr<Expression>& expr) {
-    if (toReplace != nullptr) {
-        expr = toReplace;
-        toReplace = nullptr;
+void IdentifierResolver::checkReplacementVar(sPtr<Expression>& expr) {
+    if (toReplaceVar != nullptr) {
+        expr = toReplaceVar;
+        toReplaceVar = nullptr;
+    }
+}
+
+/**
+ * Checks if `toReplaceType` is set, and if so changes the passed parameter to
+ *  point to it instead
+ */
+void IdentifierResolver::checkReplacementType(sPtr<Type>& type) {
+    if (toReplaceType != nullptr) {
+        type = toReplaceType;
+        toReplaceType = nullptr;
     }
 }
 

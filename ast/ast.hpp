@@ -254,7 +254,7 @@ struct ReturnStatement : Statement {
 
 struct Expression : virtual Node {
     bool constant = false; // tells if this expression is compile-time constant
-    Type type;
+    sPtr<Type> type;
     virtual void accept(Visitor& v) override { v.visit(this); }
 };
 
@@ -292,7 +292,7 @@ struct IntegerLiteral : Expression {
     long long value;
     IntegerLiteral(long long value) : value(value) {
         this->constant = true;
-        this->type = IntegerType();
+        this->type = std::make_shared<IntegerType>();
     }
     bool operator==(const IntegerLiteral& other) const {
         return Expression::operator==(other) && value == other.value;
@@ -304,7 +304,7 @@ struct RealLiteral : Expression {
     double value;
     RealLiteral(double value) : value(value) {
         this->constant = true;
-        this->type = RealType();
+        this->type = std::make_shared<RealType>();
     }
     bool operator==(const RealLiteral& other) const {
         return Expression::operator==(other) && value == other.value;
@@ -316,7 +316,7 @@ struct BooleanLiteral : Expression {
     bool value;
     BooleanLiteral(bool value) : value(value) {
         this->constant = true;
-        this->type = BooleanType();
+        this->type = std::make_shared<BooleanType>();
     }
     bool operator==(const BooleanLiteral& other) const {
         return Expression::operator==(other) && value == other.value;
