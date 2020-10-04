@@ -87,11 +87,13 @@ private:
     // Just like `variables`, but for types
     std::vector<sPtr<TypeDecl>> types;
 
-    sPtr<RoutineCall> toReplace = nullptr;
+    sPtr<RoutineCall> toReplaceVar = nullptr;
+    sPtr<Type> toReplaceType = nullptr;
 
     sPtr<VariableDecl> findVarDecl(std::string);
 
-    void checkReplacement(sPtr<Expression>&);
+    void checkReplacementVar(sPtr<Expression>&);
+    void checkReplacementType(sPtr<Type>&);
 };
 
 } // namespace visitors

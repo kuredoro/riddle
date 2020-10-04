@@ -23,6 +23,7 @@ std::vector<std::string> split_lines(std::string code) {
     while (std::getline(codeStream, line, '\n')) {
         lines.push_back(line);
     }
+    return lines;
 }
 
 void print_errors(std::string source_code, std::vector<ast::Error> errors) {
