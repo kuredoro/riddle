@@ -1,7 +1,9 @@
 #pragma once
-#include "lexer.hpp"
 #include <memory>
 #include <vector>
+#include "fmt/format.h"
+#include "lexer.hpp"
+
 
 namespace ast {
 
@@ -42,6 +44,7 @@ struct BooleanLiteral;
 struct Identifier;
 struct RoutineCall;
 
+
 class Visitor {
 public:
     virtual ~Visitor() = default;
@@ -78,7 +81,16 @@ public:
 
 protected:
     std::vector<Error> m_errors;
+
+    template <typename ...Args>
+    inline void error(lexer::Token::Position pos, const std::string& msg, Args... args) {
+        m_errors.push_back(Error{
+            .pos = pos,
+            .message = fmt::format(msg, args...),
+        });
+    }
 };
+
 
 struct Node {
     lexer::Token::Position begin, end;
