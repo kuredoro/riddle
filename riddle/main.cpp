@@ -1,12 +1,12 @@
 
+#include <fstream>
+#include <iostream>
+#include <sstream>
 #include "fmt/color.h"
 #include "fmt/core.h"
 #include "lexer.hpp"
 #include "parser.hpp"
 #include "visitors.hpp"
-#include <fstream>
-#include <iostream>
-#include <sstream>
 
 void print_error(std::string line, ast::Error error) {
     fmt::print("*\t{}\n", line);
@@ -34,6 +34,12 @@ void print_errors(std::string source_code, std::vector<ast::Error> errors) {
 }
 
 int main(int argc, char* argv[]) {
+    if (argc != 2) {
+        fmt::print(stderr, "riddle compiler\nUsage:\n"
+                              "\triddle path/to/source.file\n\n");
+        return 1;
+    }
+
     std::ifstream f(argv[1]);
     std::string code((std::istreambuf_iterator<char>(f)),
                      (std::istreambuf_iterator<char>()));
