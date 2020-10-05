@@ -1,7 +1,9 @@
 #pragma once
-#include "lexer.hpp"
 #include <memory>
 #include <vector>
+#include "fmt/format.h"
+#include "lexer.hpp"
+
 
 namespace ast {
 
@@ -78,6 +80,14 @@ public:
 
 protected:
     std::vector<Error> m_errors;
+
+    template <typename ...Args>
+    inline void error(lexer::Token::Position pos, const std::string& msg, Args... args) {
+        m_errors.push_back(Error{
+            .pos = pos,
+            .message = fmt::format(msg, args...),
+        });
+    }
 };
 
 struct Node {
