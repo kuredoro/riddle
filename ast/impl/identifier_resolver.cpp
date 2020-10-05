@@ -18,6 +18,13 @@ void IdentifierResolver::visit(Program* node) {
         routines.insert({routine->name, routine});
     }
 
+    // Then, add all type declarations while visiting them to replace aliases
+    for (auto& typeDecl : node->types) {
+        typeDecl->accept(*this);
+        checkReplacementType(typeDecl->type);
+        types.push_back(typeDecl);
+    }
+
     // Then, verify that global variables names are unique (from routines too)
     for (auto variable : node->variables) {
         // Any routine with the same name?
@@ -38,11 +45,11 @@ void IdentifierResolver::visit(Program* node) {
                 return;
             }
         }
+        if (variable->type != nullptr) {
+            variable->type->accept(*this);
+            checkReplacementType(variable->type);
+        }
         variables.push_back(variable);
-    }
-
-    for (auto typeDecl : node->types) {
-        types.push_back(typeDecl);
     }
 
     // Finally, visit all routine declaration
@@ -64,9 +71,15 @@ void IdentifierResolver::visit(RoutineDecl* node) {
 
     auto oldSize = variables.size();
 
-    for (auto parameter : node->parameters) {
-        variables.push_back(parameter);
+    for (auto& parameter : node->parameters) {
         parameter->type->accept(*this);
+        checkReplacementType(parameter->type);
+        variables.push_back(parameter);
+    }
+
+    if (node->returnType != nullptr) {
+        node->returnType->accept(*this);
+        checkReplacementType(node->returnType);
     }
 
     node->body->accept(*this);
@@ -104,6 +117,7 @@ void IdentifierResolver::visit(ArrayType* node) {
         checkReplacementVar(node->length);
     }
     node->elementType->accept(*this);
+    checkReplacementType(node->elementType);
 }
 
 void IdentifierResolver::visit(RecordType* node) {
@@ -126,15 +140,20 @@ void IdentifierResolver::visit(RecordType* node) {
 }
 
 void IdentifierResolver::visit(VariableDecl* node) {
-    node->type->accept(*this);
-    checkReplacementType(node->type);
+    if (node->type != nullptr) {
+        node->type->accept(*this);
+        checkReplacementType(node->type);
+    }
     if (node->initialValue != nullptr) {
         node->initialValue->accept(*this);
         checkReplacementVar(node->initialValue);
     }
 }
 
-void IdentifierResolver::visit(TypeDecl* node) { node->type->accept(*this); }
+void IdentifierResolver::visit(TypeDecl* node) {
+    node->type->accept(*this);
+    checkReplacementType(node->type);
+}
 
 void IdentifierResolver::visit(Body* node) {
     auto oldVarsSize = variables.size();
@@ -150,6 +169,11 @@ void IdentifierResolver::visit(Body* node) {
         return;
     }
 
+    for (auto& type : node->types) {
+        type->accept(*this);
+        checkReplacementType(type->type);
+        types.push_back(type);
+    }
     for (auto& variable : node->variables) {
         variables.push_back(variable);
         if (variable->initialValue != nullptr) {
@@ -170,10 +194,6 @@ void IdentifierResolver::visit(Body* node) {
                 "A type with the same name already exists in the same scope",
         });
         return;
-    }
-    for (auto type : node->types) {
-        type->accept(*this);
-        types.push_back(type);
     }
     for (auto statement : node->statements) {
         statement->accept(*this);
@@ -371,6 +391,7 @@ void IdentifierResolver::checkReplacementType(sPtr<Type>& type) {
     if (toReplaceType != nullptr) {
         type = toReplaceType;
         toReplaceType = nullptr;
+        // type->accept(*this); // To recursively replace nested structures
     }
 }
 
