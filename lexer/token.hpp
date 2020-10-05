@@ -76,6 +76,10 @@ struct Token {
         bool operator==(const Position& other) const {
             return line == other.line && column == other.column;
         }
+
+        bool operator<(const Position& other) const {
+            return line < other.line ? true : column < other.column;
+        }
     };
 
     TokenType type;
