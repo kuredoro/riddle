@@ -328,17 +328,11 @@ void IdentifierResolver::visit(Identifier* node) {
 
     // If it did not match any variable, it must be a parameterless routine call
 
-    auto routineIt = m_routines.find(node->name);
-    if (routineIt == m_routines.end()) {
-        error(node->begin, "undeclared identifier: {}", node->name);
-        return;
-    }
-
     m_toReplaceVar = std::make_shared<RoutineCall>();
     m_toReplaceVar->begin = node->begin;
-    m_toReplaceVar->routine = routineIt->second;
     m_toReplaceVar->routineName = node->name;
     m_toReplaceVar->end = node->end;
+    m_toReplaceVar->accept(*this);
 }
 
 void IdentifierResolver::visit(RoutineCall* node) {
@@ -349,7 +343,6 @@ void IdentifierResolver::visit(RoutineCall* node) {
     }
     node->routine = routineIt->second;
     for (auto& arg : node->args) {
-
         arg->accept(*this);
         checkReplacementVar(arg);
     }
