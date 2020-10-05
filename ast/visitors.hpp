@@ -5,7 +5,6 @@ namespace visitors {
 
 template <typename T> using sPtr = std::shared_ptr<T>;
 
-
 class PrintVisitor : public ast::Visitor {
 public:
     PrintVisitor(size_t depth = 0) : m_depth(depth) {}
@@ -97,17 +96,20 @@ private:
     void checkReplacementVar(sPtr<ast::Expression>&);
     void checkReplacementType(sPtr<ast::Type>&);
 
-    // Requires: `Container` to be an std container with of type `sPtr<DeclPtr>`.
+    // Requires: `Container` to be an std container with of type
+    //  `sPtr<DeclPtr>`.
     //           `DeclPtr` should be a pointer to an ast node.
     // Effects: returns true if there exists a declaration in the Container with
-    //          position prior to the provided declaration and with the same name.
+    //          position prior to the provided declaration and with the same
+    //          name.
     template <typename Container, typename DeclPtr>
-    bool hasRedecl(const Container& vec, DeclPtr decl, const std::string &typeStr) {
-        auto priorDecl = std::find_if(vec.begin(), vec.end(),
-                [&](const auto& declPtr) {
-                    return declPtr->name == decl->name &&
-                           declPtr->begin < decl->begin;
-                });
+    bool hasRedecl(const Container& vec, DeclPtr decl,
+                   const std::string& typeStr) {
+        auto priorDecl =
+            std::find_if(vec.begin(), vec.end(), [&](const auto& declPtr) {
+                return declPtr->name == decl->name &&
+                       declPtr->begin < decl->begin;
+            });
 
         if (priorDecl != vec.end()) {
             error(decl->begin, "redeclaration of {} '{}' declared at line {}",
