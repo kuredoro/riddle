@@ -80,15 +80,15 @@ public:
     void visit(RoutineCall* node) override;
 
 private:
-    // `routines` is a map since we cannot have 2 routines with the same name
-    std::map<std::string, sPtr<RoutineDecl>> routines;
-    // `variables` is a vector to allow repetition (in different scopes)
-    std::vector<sPtr<VariableDecl>> variables;
-    // Just like `variables`, but for types
-    std::vector<sPtr<TypeDecl>> types;
+    // A map since we cannot have 2 routines with the same name.
+    std::map<std::string, sPtr<RoutineDecl>> m_routines;
+    // Stack that holds available variables in current scope.
+    std::vector<sPtr<VariableDecl>> m_variables;
+    // Just like above but for types.
+    std::vector<sPtr<TypeDecl>> m_types;
 
-    sPtr<RoutineCall> toReplaceVar = nullptr;
-    sPtr<Type> toReplaceType = nullptr;
+    sPtr<RoutineCall> m_toReplaceVar = nullptr;
+    sPtr<Type> m_toReplaceType = nullptr;
 
     sPtr<VariableDecl> findVarDecl(std::string);
 
