@@ -1,14 +1,13 @@
-
-#include <fstream>
-#include <iostream>
-#include <sstream>
 #include "fmt/color.h"
 #include "fmt/core.h"
 #include "lexer.hpp"
 #include "parser.hpp"
 #include "visitors.hpp"
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
-void print_error(std::string line, ast::Error error) {
+void printError(std::string line, ast::Error error) {
     fmt::print("*\t{}\n", line);
     fmt::print("\t{:->{}}^{:-<{}}\n", "", error.pos.column - 1, "",
                line.length() - error.pos.column - 1);
@@ -16,7 +15,7 @@ void print_error(std::string line, ast::Error error) {
                error.pos.line, error.pos.column, error.message);
 }
 
-std::vector<std::string> split_lines(std::string code) {
+std::vector<std::string> splitLines(std::string code) {
     std::vector<std::string> lines;
     std::string line;
     std::istringstream codeStream(code);
@@ -26,17 +25,17 @@ std::vector<std::string> split_lines(std::string code) {
     return lines;
 }
 
-void print_errors(std::string source_code, std::vector<ast::Error> errors) {
-    auto lines = split_lines(source_code);
+void printErrors(std::string source_code, std::vector<ast::Error> errors) {
+    auto lines = splitLines(source_code);
     for (auto error : errors) {
-        print_error(lines[error.pos.line - 1], error);
+        printError(lines[error.pos.line - 1], error);
     }
 }
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
         fmt::print(stderr, "riddle compiler\nUsage:\n"
-                              "\triddle path/to/source.file\n\n");
+                           "\triddle path/to/source.file\n\n");
         return 1;
     }
 
@@ -57,7 +56,7 @@ int main(int argc, char* argv[]) {
     if (!errors.empty()) {
         fmt::print(fg(fmt::color::indian_red) | fmt::emphasis::bold,
                    "Parsing Errors:\n");
-        print_errors(code, errors);
+        printErrors(code, errors);
         return 1;
     }
     fmt::print("Parsing: ");
@@ -76,7 +75,7 @@ int main(int argc, char* argv[]) {
     if (!errors.empty()) {
         fmt::print(fg(fmt::color::indian_red) | fmt::emphasis::bold,
                    "Identifier resolution Errors:\n");
-        print_errors(code, errors);
+        printErrors(code, errors);
         return 1;
     }
 
