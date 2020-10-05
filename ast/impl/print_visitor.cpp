@@ -1,6 +1,6 @@
 #include "visitors.hpp"
 
-std::unordered_map<lexer::TokenType, std::string> op_to_string{
+std::map<lexer::TokenType, std::string> op_to_string{
     {lexer::TokenType::Add, "+"},     {lexer::TokenType::Sub, "-"},
     {lexer::TokenType::Mul, "*"},     {lexer::TokenType::Div, "/"},
     {lexer::TokenType::Mod, "%"},     {lexer::TokenType::Or, "or"},
