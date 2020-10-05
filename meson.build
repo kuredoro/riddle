@@ -11,16 +11,18 @@ riddle_cpp_args = [
   '-Wno-missing-braces',
   '-Wno-missing-field-initializers',
   '-Wno-sign-conversion',
-  '-fsanitize=address',
 ]
 
-riddle_c_args = [
-  '-fsanitize=address',
-]
+riddle_c_args = []
+riddle_link_args = []
 
-riddle_link_args = [
-  '-fsanitize=address',
-]
+if get_option('always-sanitize-address') or get_option('buildtype') == 'debug'
+  warning('Compiling with address sanitizer. Performance may be affected.')
+  flags = [ '-fsanitize=address' ]
+  riddle_cpp_args += flags
+  riddle_c_args += flags
+  riddle_link_args += flags
+endif
 
 fmt_dep = dependency('fmt', fallback : ['fmt', 'fmt_dep'])
 
@@ -37,8 +39,6 @@ if get_option('build-demos')
   subdir('demo')
 endif
 
-executable('riddle', [ './riddle.cpp' ],
-          cpp_args : riddle_cpp_args,
-          c_args : riddle_c_args,
-          link_args : riddle_link_args,
-          dependencies : [ visitors_dep, parser_dep, ast_dep, fmt_dep, lexer_dep, common_dep ])
+if get_option('build-compiler')
+  subdir('riddle')
+endif

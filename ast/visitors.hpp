@@ -1,43 +1,45 @@
 #include "ast.hpp"
+#include <memory>
 
 namespace visitors {
 
-using namespace ast;
+template <typename T> using sPtr = std::shared_ptr<T>;
 
-class PrintVisitor : public Visitor {
+
+class PrintVisitor : public ast::Visitor {
 public:
-    PrintVisitor(size_t depth = 0) : depth(depth) {}
-    void visit(Program* node) override;
-    void visit(RoutineDecl* node) override;
-    void visit(Type* node) override;
-    void visit(AliasedType* node) override;
-    void visit(PrimitiveType* node) override;
-    void visit(IntegerType* node) override;
-    void visit(RealType* node) override;
-    void visit(BooleanType* node) override;
-    void visit(ArrayType* node) override;
-    void visit(RecordType* node) override;
-    void visit(VariableDecl* node) override;
-    void visit(TypeDecl* node) override;
-    void visit(Body* node) override;
-    void visit(Statement* node) override;
-    void visit(ReturnStatement* node) override;
-    void visit(Assignment* node) override;
-    void visit(WhileLoop* node) override;
-    void visit(ForLoop* node) override;
-    void visit(IfStatement* node) override;
-    void visit(Expression* node) override;
-    void visit(UnaryExpression* node) override;
-    void visit(BinaryExpression* node) override;
-    void visit(Primary* node) override;
-    void visit(IntegerLiteral* node) override;
-    void visit(RealLiteral* node) override;
-    void visit(BooleanLiteral* node) override;
-    void visit(Identifier* node) override;
-    void visit(RoutineCall* node) override;
+    PrintVisitor(size_t depth = 0) : m_depth(depth) {}
+    void visit(ast::Program* node) override;
+    void visit(ast::RoutineDecl* node) override;
+    void visit(ast::Type* node) override;
+    void visit(ast::AliasedType* node) override;
+    void visit(ast::PrimitiveType* node) override;
+    void visit(ast::IntegerType* node) override;
+    void visit(ast::RealType* node) override;
+    void visit(ast::BooleanType* node) override;
+    void visit(ast::ArrayType* node) override;
+    void visit(ast::RecordType* node) override;
+    void visit(ast::VariableDecl* node) override;
+    void visit(ast::TypeDecl* node) override;
+    void visit(ast::Body* node) override;
+    void visit(ast::Statement* node) override;
+    void visit(ast::ReturnStatement* node) override;
+    void visit(ast::Assignment* node) override;
+    void visit(ast::WhileLoop* node) override;
+    void visit(ast::ForLoop* node) override;
+    void visit(ast::IfStatement* node) override;
+    void visit(ast::Expression* node) override;
+    void visit(ast::UnaryExpression* node) override;
+    void visit(ast::BinaryExpression* node) override;
+    void visit(ast::Primary* node) override;
+    void visit(ast::IntegerLiteral* node) override;
+    void visit(ast::RealLiteral* node) override;
+    void visit(ast::BooleanLiteral* node) override;
+    void visit(ast::Identifier* node) override;
+    void visit(ast::RoutineCall* node) override;
 
 private:
-    size_t depth;
+    size_t m_depth;
 };
 
 /**
@@ -48,55 +50,80 @@ private:
  *  declaration or replaced with a routine call referring to its routine
  *  declaration.
  */
-class IdentifierResolver : public Visitor {
+class IdentifierResolver : public ast::Visitor {
 public:
-    void visit(Program* node) override;
-    void visit(RoutineDecl* node) override;
-    void visit(Type* node) override;
-    void visit(AliasedType* node) override;
-    void visit(PrimitiveType* node) override;
-    void visit(IntegerType* node) override;
-    void visit(RealType* node) override;
-    void visit(BooleanType* node) override;
-    void visit(ArrayType* node) override;
-    void visit(RecordType* node) override;
-    void visit(VariableDecl* node) override;
-    void visit(TypeDecl* node) override;
-    void visit(Body* node) override;
-    void visit(Statement* node) override;
-    void visit(ReturnStatement* node) override;
-    void visit(Assignment* node) override;
-    void visit(WhileLoop* node) override;
-    void visit(ForLoop* node) override;
-    void visit(IfStatement* node) override;
-    void visit(Expression* node) override;
-    void visit(UnaryExpression* node) override;
-    void visit(BinaryExpression* node) override;
-    void visit(Primary* node) override;
-    void visit(IntegerLiteral* node) override;
-    void visit(RealLiteral* node) override;
-    void visit(BooleanLiteral* node) override;
-    void visit(Identifier* node) override;
-    void visit(RoutineCall* node) override;
+    void visit(ast::Program* node) override;
+    void visit(ast::RoutineDecl* node) override;
+    void visit(ast::Type* node) override;
+    void visit(ast::AliasedType* node) override;
+    void visit(ast::PrimitiveType* node) override;
+    void visit(ast::IntegerType* node) override;
+    void visit(ast::RealType* node) override;
+    void visit(ast::BooleanType* node) override;
+    void visit(ast::ArrayType* node) override;
+    void visit(ast::RecordType* node) override;
+    void visit(ast::VariableDecl* node) override;
+    void visit(ast::TypeDecl* node) override;
+    void visit(ast::Body* node) override;
+    void visit(ast::Statement* node) override;
+    void visit(ast::ReturnStatement* node) override;
+    void visit(ast::Assignment* node) override;
+    void visit(ast::WhileLoop* node) override;
+    void visit(ast::ForLoop* node) override;
+    void visit(ast::IfStatement* node) override;
+    void visit(ast::Expression* node) override;
+    void visit(ast::UnaryExpression* node) override;
+    void visit(ast::BinaryExpression* node) override;
+    void visit(ast::Primary* node) override;
+    void visit(ast::IntegerLiteral* node) override;
+    void visit(ast::RealLiteral* node) override;
+    void visit(ast::BooleanLiteral* node) override;
+    void visit(ast::Identifier* node) override;
+    void visit(ast::RoutineCall* node) override;
 
 private:
-    // `routines` is a map since we cannot have 2 routines with the same name
-    std::map<std::string, sPtr<RoutineDecl>> routines;
-    // `variables` is a vector to allow repetition (in different scopes)
-    std::vector<sPtr<VariableDecl>> variables;
-    // Just like `variables`, but for types
-    std::vector<sPtr<TypeDecl>> types;
+    // A map since we cannot have 2 routines with the same name.
+    std::map<std::string, sPtr<ast::RoutineDecl>> m_routines;
+    // Stack that holds available variables in current scope.
+    std::vector<sPtr<ast::VariableDecl>> m_variables;
+    // Just like above but for types.
+    std::vector<sPtr<ast::TypeDecl>> m_types;
 
-    sPtr<RoutineCall> toReplaceVar = nullptr;
-    sPtr<Type> toReplaceType = nullptr;
+    sPtr<ast::RoutineCall> m_toReplaceVar = nullptr;
+    sPtr<ast::Type> m_toReplaceType = nullptr;
 
-    sPtr<VariableDecl> findVarDecl(std::string);
+    sPtr<ast::VariableDecl> findVarDecl(std::string);
 
-    void checkReplacementVar(sPtr<Expression>&);
-    void checkReplacementType(sPtr<Type>&);
+    void checkReplacementVar(sPtr<ast::Expression>&);
+    void checkReplacementType(sPtr<ast::Type>&);
 
-    sPtr<VariableDecl> duplicateVarExists(std::vector<sPtr<VariableDecl>>);
-    sPtr<TypeDecl> duplicateTypeExists(std::vector<sPtr<TypeDecl>>);
+    // Requires: `Container` to be an std container with of type `sPtr<DeclPtr>`.
+    //           `DeclPtr` should be a pointer to an ast node.
+    // Effects: returns true if there exists a declaration in the Container with
+    //          position prior to the provided declaration and with the same name.
+    template <typename Container, typename DeclPtr>
+    bool hasRedecl(const Container& vec, DeclPtr decl, const std::string &typeStr) {
+        auto priorDecl = std::find_if(vec.begin(), vec.end(),
+                [&](const auto& declPtr) {
+                    return declPtr->name == decl->name &&
+                           declPtr->begin < decl->begin;
+                });
+
+        if (priorDecl != vec.end()) {
+            error(decl->begin, "redeclaration of {} '{}' declared at line {}",
+                  typeStr, (*priorDecl)->name, (*priorDecl)->begin.line);
+            return true;
+        }
+
+        return false;
+    }
+
+    template <typename DeclPtr>
+    bool isRedeclared(ast::Program const* node, DeclPtr decl) {
+        return hasRedecl(node->routines, decl, "routine") ||
+               hasRedecl(node->variables, decl, "variable") ||
+               hasRedecl(node->types, decl, "type");
+    }
 };
 
 } // namespace visitors
