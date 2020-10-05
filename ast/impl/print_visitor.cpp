@@ -1,5 +1,7 @@
 #include "visitors.hpp"
 
+using namespace ast;
+
 std::map<lexer::TokenType, std::string> op_to_string{
     {lexer::TokenType::Add, "+"},     {lexer::TokenType::Sub, "-"},
     {lexer::TokenType::Mul, "*"},     {lexer::TokenType::Div, "/"},
@@ -16,11 +18,11 @@ namespace visitors {
 
 void PrintVisitor::visit(Program* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [Program]> null\n", "", depth);
+        fmt::print("{:|>{}}- [Program]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [Program]>\n", "", depth);
-    depth++;
+    fmt::print("{:|>{}}- [Program]>\n", "", m_depth);
+    m_depth++;
     for (auto type : node->types) {
         type->accept(*this);
     }
@@ -30,15 +32,15 @@ void PrintVisitor::visit(Program* node) {
     for (auto routine : node->routines) {
         routine->accept(*this);
     }
-    depth--;
+    m_depth--;
 }
 void PrintVisitor::visit(RoutineDecl* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [RoutineDecl]> null\n", "", depth);
+        fmt::print("{:|>{}}- [RoutineDecl]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [RoutineDecl]> {}\n", "", depth, node->name);
-    depth++;
+    fmt::print("{:|>{}}- [RoutineDecl]> {}\n", "", m_depth, node->name);
+    m_depth++;
     for (auto parameter : node->parameters) {
         parameter->accept(*this);
     }
@@ -46,7 +48,7 @@ void PrintVisitor::visit(RoutineDecl* node) {
     if (node->returnType != nullptr) {
         node->returnType->accept(*this);
     }
-    depth--;
+    m_depth--;
 }
 void PrintVisitor::visit(Type* node) {
     if (ast::PrimitiveType* specific = dynamic_cast<ast::PrimitiveType*>(node);
@@ -61,111 +63,111 @@ void PrintVisitor::visit(Type* node) {
     } else if (ast::AliasedType* specific =
                    dynamic_cast<ast::AliasedType*>(node);
                specific != nullptr) {
-        fmt::print("{:|>{}}- [Type Identifier]> {}\n", "", depth,
+        fmt::print("{:|>{}}- [Type Identifier]> {}\n", "", m_depth,
                    specific->name);
     } else {
-        fmt::print("{:|>{}}- [Type]> (unknown type)\n", "", depth);
+        fmt::print("{:|>{}}- [Type]> (unknown type)\n", "", m_depth);
     }
 }
 void PrintVisitor::visit(AliasedType* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [Type Identifier]> null\n", "", depth);
+        fmt::print("{:|>{}}- [Type Identifier]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [Type Identifier]> {}\n", "", depth, node->name);
-    depth++;
+    fmt::print("{:|>{}}- [Type Identifier]> {}\n", "", m_depth, node->name);
+    m_depth++;
     if (node->actualType != nullptr) {
         node->actualType->accept(*this);
     }
-    depth--;
+    m_depth--;
 }
 void PrintVisitor::visit(PrimitiveType* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [PrimitiveType]> null\n", "", depth);
+        fmt::print("{:|>{}}- [PrimitiveType]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [PrimitiveType]> unknown\n", "", depth);
+    fmt::print("{:|>{}}- [PrimitiveType]> unknown\n", "", m_depth);
 }
 void PrintVisitor::visit(IntegerType* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [IntegerType]> null\n", "", depth);
+        fmt::print("{:|>{}}- [IntegerType]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [IntegerType]\n", "", depth);
+    fmt::print("{:|>{}}- [IntegerType]\n", "", m_depth);
 }
 void PrintVisitor::visit(RealType* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [RealType]> null\n", "", depth);
+        fmt::print("{:|>{}}- [RealType]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [RealType]\n", "", depth);
+    fmt::print("{:|>{}}- [RealType]\n", "", m_depth);
 }
 void PrintVisitor::visit(BooleanType* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [BooleanType]> null\n", "", depth);
+        fmt::print("{:|>{}}- [BooleanType]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [BooleanType]\n", "", depth);
+    fmt::print("{:|>{}}- [BooleanType]\n", "", m_depth);
 }
 void PrintVisitor::visit(ArrayType* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [ArrayType]> null\n", "", depth);
+        fmt::print("{:|>{}}- [ArrayType]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [ArrayType]>\n", "", depth);
-    depth++;
+    fmt::print("{:|>{}}- [ArrayType]>\n", "", m_depth);
+    m_depth++;
     if (node->length != nullptr) {
         node->length->accept(*this);
     }
     if (node->elementType != nullptr) {
         node->elementType->accept(*this);
     }
-    depth--;
+    m_depth--;
 }
 void PrintVisitor::visit(RecordType* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [RecordType]> null\n", "", depth);
+        fmt::print("{:|>{}}- [RecordType]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [RecordType]>\n", "", depth);
-    depth++;
+    fmt::print("{:|>{}}- [RecordType]>\n", "", m_depth);
+    m_depth++;
     for (auto field : node->fields) {
         field->accept(*this);
     }
-    depth--;
+    m_depth--;
 }
 void PrintVisitor::visit(VariableDecl* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [VariableDecl]> null\n", "", depth);
+        fmt::print("{:|>{}}- [VariableDecl]> null\n", "", m_depth);
     }
-    fmt::print("{:|>{}}- [VariableDecl]> {}\n", "", depth, node->name);
-    depth++;
+    fmt::print("{:|>{}}- [VariableDecl]> {}\n", "", m_depth, node->name);
+    m_depth++;
     if (node->type != nullptr) {
         node->type->accept(*this);
     }
     if (node->initialValue != nullptr) {
         node->initialValue->accept(*this);
     }
-    depth--;
+    m_depth--;
 }
 void PrintVisitor::visit(TypeDecl* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [TypeDecl]> null\n", "", depth);
+        fmt::print("{:|>{}}- [TypeDecl]> null\n", "", m_depth);
     }
-    fmt::print("{:|>{}}- [TypeDecl]> {}\n", "", depth, node->name);
-    depth++;
+    fmt::print("{:|>{}}- [TypeDecl]> {}\n", "", m_depth, node->name);
+    m_depth++;
     if (node->type != nullptr) {
         node->type->accept(*this);
     }
-    depth--;
+    m_depth--;
 }
 void PrintVisitor::visit(Body* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [Body]> null\n", "", depth);
+        fmt::print("{:|>{}}- [Body]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [Body]>\n", "", depth);
-    depth++;
+    fmt::print("{:|>{}}- [Body]>\n", "", m_depth);
+    m_depth++;
     for (auto type : node->types) {
         type->accept(*this);
     }
@@ -175,152 +177,152 @@ void PrintVisitor::visit(Body* node) {
     for (auto statement : node->statements) {
         statement->accept(*this);
     }
-    depth--;
+    m_depth--;
 }
 void PrintVisitor::visit(Statement* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [Statement]> null\n", "", depth);
+        fmt::print("{:|>{}}- [Statement]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [Statement]> Unknown\n", "", depth);
+    fmt::print("{:|>{}}- [Statement]> Unknown\n", "", m_depth);
 }
 void PrintVisitor::visit(ReturnStatement* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [Return]> null\n", "", depth);
+        fmt::print("{:|>{}}- [Return]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [Return]>\n", "", depth);
-    depth++;
+    fmt::print("{:|>{}}- [Return]>\n", "", m_depth);
+    m_depth++;
     if (node->expression != nullptr) {
         node->expression->accept(*this);
     }
-    depth--;
+    m_depth--;
 }
 void PrintVisitor::visit(Assignment* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [Assignment]> null\n", "", depth);
+        fmt::print("{:|>{}}- [Assignment]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [Assignment]>\n", "", depth);
-    depth++;
+    fmt::print("{:|>{}}- [Assignment]>\n", "", m_depth);
+    m_depth++;
     node->lhs->accept(*this);
     node->rhs->accept(*this);
-    depth--;
+    m_depth--;
 }
 void PrintVisitor::visit(WhileLoop* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [WhileLoop]> null\n", "", depth);
+        fmt::print("{:|>{}}- [WhileLoop]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [WhileLoop]>\n", "", depth);
-    depth++;
+    fmt::print("{:|>{}}- [WhileLoop]>\n", "", m_depth);
+    m_depth++;
     node->condition->accept(*this);
     node->body->accept(*this);
-    depth--;
+    m_depth--;
 }
 void PrintVisitor::visit(ForLoop* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [ForLoop]> null\n", "", depth);
+        fmt::print("{:|>{}}- [ForLoop]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [ForLoop]>\n", "", depth);
-    depth++;
+    fmt::print("{:|>{}}- [ForLoop]>\n", "", m_depth);
+    m_depth++;
     // node->loopVar->accept(*this);
     node->rangeFrom->accept(*this);
     node->rangeTo->accept(*this);
     node->body->accept(*this);
-    depth--;
+    m_depth--;
 }
 void PrintVisitor::visit(IfStatement* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [IfStatement]> null\n", "", depth);
+        fmt::print("{:|>{}}- [IfStatement]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [IfStatement]>\n", "", depth);
-    depth++;
+    fmt::print("{:|>{}}- [IfStatement]>\n", "", m_depth);
+    m_depth++;
     node->condition->accept(*this);
     node->ifBody->accept(*this);
     if (node->elseBody) {
         node->elseBody->accept(*this);
     }
-    depth--;
+    m_depth--;
 }
 void PrintVisitor::visit(Expression* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [Expression]> null\n", "", depth);
+        fmt::print("{:|>{}}- [Expression]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [Expression]>\n", "", depth);
+    fmt::print("{:|>{}}- [Expression]>\n", "", m_depth);
 }
 void PrintVisitor::visit(UnaryExpression* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [UnaryExpression]> null\n", "", depth);
+        fmt::print("{:|>{}}- [UnaryExpression]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [UnaryExpression]> {}\n", "", depth,
+    fmt::print("{:|>{}}- [UnaryExpression]> {}\n", "", m_depth,
                op_to_string[node->operation]);
-    depth++;
+    m_depth++;
     node->operand->accept(*this);
-    depth--;
+    m_depth--;
 }
 void PrintVisitor::visit(BinaryExpression* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [BinaryExpression]> null\n", "", depth);
+        fmt::print("{:|>{}}- [BinaryExpression]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [BinaryExpression]> {}\n", "", depth,
+    fmt::print("{:|>{}}- [BinaryExpression]> {}\n", "", m_depth,
                op_to_string[node->operation]);
-    depth++;
+    m_depth++;
     node->operand1->accept(*this);
     node->operand2->accept(*this);
-    depth--;
+    m_depth--;
 }
 void PrintVisitor::visit(Primary* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [Primary]> null\n", "", depth);
+        fmt::print("{:|>{}}- [Primary]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [Primary]> unknown\n", "", depth);
+    fmt::print("{:|>{}}- [Primary]> unknown\n", "", m_depth);
 }
 void PrintVisitor::visit(IntegerLiteral* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [IntegerLiteral]> null\n", "", depth);
+        fmt::print("{:|>{}}- [IntegerLiteral]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [IntegerLiteral]> {}\n", "", depth, node->value);
+    fmt::print("{:|>{}}- [IntegerLiteral]> {}\n", "", m_depth, node->value);
 }
 void PrintVisitor::visit(RealLiteral* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [RealLiteral]> null\n", "", depth);
+        fmt::print("{:|>{}}- [RealLiteral]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [RealLiteral]> {}\n", "", depth, node->value);
+    fmt::print("{:|>{}}- [RealLiteral]> {}\n", "", m_depth, node->value);
 }
 void PrintVisitor::visit(BooleanLiteral* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [BooleanLiteral]> null\n", "", depth);
+        fmt::print("{:|>{}}- [BooleanLiteral]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [BooleanLiteral]> {}\n", "", depth, node->value);
+    fmt::print("{:|>{}}- [BooleanLiteral]> {}\n", "", m_depth, node->value);
 }
 void PrintVisitor::visit(Identifier* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [Identifier]> null\n", "", depth);
+        fmt::print("{:|>{}}- [Identifier]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [Identifier]> {}\n", "", depth, node->name);
+    fmt::print("{:|>{}}- [Identifier]> {}\n", "", m_depth, node->name);
 }
 void PrintVisitor::visit(RoutineCall* node) {
     if (node == nullptr) {
-        fmt::print("{:|>{}}- [RoutineCall]> null\n", "", depth);
+        fmt::print("{:|>{}}- [RoutineCall]> null\n", "", m_depth);
         return;
     }
-    fmt::print("{:|>{}}- [RoutineCall]> {}\n", "", depth, node->routineName);
-    depth++;
+    fmt::print("{:|>{}}- [RoutineCall]> {}\n", "", m_depth, node->routineName);
+    m_depth++;
     for (size_t i = 0; i < node->args.size(); i++) {
         node->args[i]->accept(*this);
     }
-    depth--;
+    m_depth--;
 }
 
 } // namespace visitors

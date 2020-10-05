@@ -44,6 +44,7 @@ struct BooleanLiteral;
 struct Identifier;
 struct RoutineCall;
 
+
 class Visitor {
 public:
     virtual ~Visitor() = default;
@@ -89,6 +90,7 @@ protected:
         });
     }
 };
+
 
 struct Node {
     lexer::Token::Position begin, end;
