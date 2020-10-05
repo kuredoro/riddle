@@ -4,44 +4,23 @@
 
 namespace visitors {
 
+using namespace ast;
+
 void IdentifierResolver::visit(Program* node) {
     // Check if anything is declared twice in global scope and visit
     // all routines.
 
-    auto hasRedecl = [this](auto& vec, auto decl, std::string declType) {
-        auto priorDecl = std::find_if(vec.begin(), vec.end(),
-                [&](const auto& declPtr) {
-                    return declPtr->name == decl->name &&
-                           declPtr->begin < decl->begin;
-                });
-
-        if (priorDecl != vec.end()) {
-            error(decl->begin, 
-                    "redeclaration of {} '{}' declared at line {}",
-                    declType, (*priorDecl)->name, (*priorDecl)->begin.line);
-            return true;
-        }
-
-        return false;
-    };
-
-    auto isRedeclared = [node, &hasRedecl](auto decl) {
-        return hasRedecl(node->routines, decl, "routine") ||
-               hasRedecl(node->variables, decl, "variable") ||
-               hasRedecl(node->types, decl, "type");
-    };
-
     bool ok = true;
 
     for (auto routine : node->routines) {
-        if (isRedeclared(routine)) {
+        if (isRedeclared(node, routine)) {
             ok = false;
         }
         m_routines.insert({routine->name, routine});
     }
 
     for (auto var : node->variables) {
-        if (isRedeclared(var)) {
+        if (isRedeclared(node, var)) {
             ok = false;
         }
 
@@ -49,7 +28,7 @@ void IdentifierResolver::visit(Program* node) {
     }
 
     for (auto type : node->types) {
-        if (isRedeclared(type)) {
+        if (isRedeclared(node, type)) {
             ok = false;
         }
         m_types.push_back(type);
@@ -90,6 +69,7 @@ void IdentifierResolver::visit(RoutineDecl* node) {
 void IdentifierResolver::visit(Type*) {}
 
 void IdentifierResolver::visit(AliasedType* node) {
+    // TODO: Routines can define types inside them.
     for (auto it = m_types.rbegin(); it != m_types.rend(); it++) {
         auto typeDecl = *it;
         if (typeDecl->name == node->name) {
@@ -97,10 +77,7 @@ void IdentifierResolver::visit(AliasedType* node) {
             return;
         }
     }
-    m_errors.push_back(Error{
-        .pos = node->begin,
-        .message = fmt::format("{} does not name a type", node->name),
-    });
+    error(node->begin, "{} does not name a type", node->name);
 }
 
 void IdentifierResolver::visit(PrimitiveType*) {}
@@ -121,16 +98,14 @@ void IdentifierResolver::visit(ArrayType* node) {
 
 void IdentifierResolver::visit(RecordType* node) {
     // ensure that no two fields have the same name
-    std::set<std::string> field_names;
+    std::set<std::string> fieldNames;
     for (auto field : node->fields) {
-        if (field_names.find(field->name) != field_names.end()) {
-            m_errors.push_back(Error{
-                .pos = field->begin,
-                .message = "Field name already in use",
-            });
+        //auto priorDecl = 
+        if (fieldNames.find(field->name) != fieldNames.end()) {
+            error(field->begin, "field name is already in use");
             return;
         }
-        field_names.insert(field->name);
+        fieldNames.insert(field->name);
     }
 
     for (auto field : node->fields) {
@@ -150,18 +125,30 @@ void IdentifierResolver::visit(VariableDecl* node) {
 void IdentifierResolver::visit(TypeDecl* node) { node->type->accept(*this); }
 
 void IdentifierResolver::visit(Body* node) {
-    auto oldVarsSize = m_variables.size();
-    auto oldm_typesSize = m_types.size();
+    // Check for duplicates.
 
-    if (auto collision = duplicateVarExists(node->variables);
-        collision != nullptr) {
-        m_errors.push_back(Error{
-            .pos = collision->begin,
-            .message = "A variable with the same name already exists in the "
-                       "same scope",
-        });
+    bool ok = true;
+
+    for (auto var : node->variables) {
+        if (hasRedecl(node->variables, var, "variable")) {
+            ok = false;
+        }
+    }
+
+    for (auto type : node->types) {
+        if (hasRedecl(node->types, type, "type")) {
+            ok = false;
+        }
+    }
+
+    if (!ok) {
         return;
     }
+
+    // Traverse
+
+    auto oldVarsSize = m_variables.size();
+    auto oldTypesSize = m_types.size();
 
     for (auto& variable : node->variables) {
         m_variables.push_back(variable);
@@ -175,16 +162,6 @@ void IdentifierResolver::visit(Body* node) {
         }
     }
 
-    if (auto collision = duplicateTypeExists(node->types);
-        collision != nullptr) {
-        m_errors.push_back(Error{
-            .pos = collision->begin,
-            .message =
-                "A type with the same name already exists in the same scope",
-        });
-        return;
-    }
-
     for (auto type : node->types) {
         type->accept(*this);
         m_types.push_back(type);
@@ -195,7 +172,7 @@ void IdentifierResolver::visit(Body* node) {
     }
 
     m_variables.resize(oldVarsSize);
-    m_types.resize(oldm_typesSize);
+    m_types.resize(oldTypesSize);
 }
 
 void IdentifierResolver::visit(Statement*) {}
@@ -250,28 +227,20 @@ void IdentifierResolver::visit(BinaryExpression* node) {
     if (node->operation == lexer::TokenType::Dot) {
         auto operand1 = std::dynamic_pointer_cast<Identifier>(node->operand1);
         if (operand1 == nullptr) {
-            m_errors.push_back(Error{
-                .pos = node->operand1->begin,
-                .message = "Expected variable identifier before '.'",
-            });
+            error(node->operand1->begin, "expected variable identifier before '.'");
             return;
         }
 
         auto operand2 = std::dynamic_pointer_cast<Identifier>(node->operand2);
         if (operand2 == nullptr) {
-            m_errors.push_back(Error{
-                .pos = node->operand2->begin,
-                .message = "Expected identifier after '.'",
-            });
+            error(node->operand2->begin, "expected identifier after '.'");
             return;
         }
 
         auto recordDecl = std::dynamic_pointer_cast<RecordType>(operand1->type);
         if (recordDecl == nullptr) {
-            m_errors.push_back(Error{
-                .pos = node->operand2->begin,
-                .message = "Can only access member of records",
-            });
+            // WTF:.message = "Can only access member of records",
+            error(node->operand2->begin, "only records can be member accessed");
             return;
         }
         for (auto field : recordDecl->fields) {
@@ -282,11 +251,8 @@ void IdentifierResolver::visit(BinaryExpression* node) {
             }
         }
         if (operand2->variable == nullptr) {
-            m_errors.push_back(Error{
-                .pos = operand2->begin,
-                .message = fmt::format("{} is not a member of {}",
-                                       operand2->name, operand1->name),
-            });
+            error(operand2->begin, "record '{}' has no member '{}'", 
+                  operand1->name, operand2->name);
             return;
         }
     } else if (node->operation == lexer::TokenType::OpenBrack) {
@@ -297,10 +263,7 @@ void IdentifierResolver::visit(BinaryExpression* node) {
         auto arrayDecl =
             std::dynamic_pointer_cast<ArrayType>(node->operand1->type);
         if (arrayDecl == nullptr) {
-            m_errors.push_back(Error{
-                .pos = node->operand1->end,
-                .message = "Cannot index in a variable of non-array type",
-            });
+            error(node->operand1->end, "non-array types cannot be indexed");
             return;
         }
         node->operand2->accept(*this);
@@ -321,7 +284,7 @@ void IdentifierResolver::visit(BooleanLiteral*) {}
 
 void IdentifierResolver::visit(Identifier* node) {
     // Here comes the main work of figuring out which variable/routine this
-    //  identifier refers to
+    // identifier refers to
 
     auto variable = findVarDecl(node->name);
     if (variable != nullptr) {
@@ -336,10 +299,7 @@ void IdentifierResolver::visit(Identifier* node) {
 
     auto routineIt = m_routines.find(node->name);
     if (routineIt == m_routines.end()) {
-        m_errors.push_back(Error{
-            .pos = node->begin,
-            .message = "Unknown identifier",
-        });
+        error(node->begin, "undeclared identifier: {}", node->name);
         return;
     }
 
@@ -353,10 +313,7 @@ void IdentifierResolver::visit(Identifier* node) {
 void IdentifierResolver::visit(RoutineCall* node) {
     auto routineIt = m_routines.find(node->routineName);
     if (routineIt == m_routines.end()) {
-        m_errors.push_back(Error{
-            .pos = node->begin,
-            .message = "There is no routine with this name",
-        });
+        error(node->begin, "undeclared routine: {}", node->routineName);
         return;
     }
     node->routine = routineIt->second;
@@ -395,29 +352,6 @@ sPtr<VariableDecl> IdentifierResolver::findVarDecl(std::string name) {
         if (variable->name == name) {
             return variable;
         }
-    }
-    return nullptr;
-}
-
-sPtr<VariableDecl> IdentifierResolver::duplicateVarExists(
-    std::vector<sPtr<VariableDecl>> m_variables) {
-    std::set<std::string> names;
-    for (auto variable : m_variables) {
-        if (names.find(variable->name) != names.end()) {
-            return variable;
-        }
-        names.insert(variable->name);
-    }
-    return nullptr;
-}
-sPtr<TypeDecl>
-IdentifierResolver::duplicateTypeExists(std::vector<sPtr<TypeDecl>> m_types) {
-    std::set<std::string> names;
-    for (auto type : m_types) {
-        if (names.find(type->name) != names.end()) {
-            return type;
-        }
-        names.insert(type->name);
     }
     return nullptr;
 }
