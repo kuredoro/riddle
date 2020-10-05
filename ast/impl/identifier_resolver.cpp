@@ -246,12 +246,21 @@ void IdentifierResolver::visit(BinaryExpression* node) {
     node->operand1->accept(*this);
     checkReplacementVar(node->operand1);
     if (node->operation == lexer::TokenType::Dot) {
-        auto operand1 = std::dynamic_pointer_cast<Identifier>(node->operand1);
-        if (operand1 == nullptr) {
-            error(node->operand1->begin,
-                  "expected variable identifier before '.'");
-            return;
-        }
+        // The left operand can be an expression (ex: `a.b` in `a.b.c`), but the
+        //  right one always has to be an Identifier (cannot have `x.3`).
+        // No further checks can be implemented here since we need to first
+        //  populate expression types to make sure that the identifier is
+        //  actually a record member.
+        // The code is left here commented out for later use in the upcoming
+        //  checkers
+
+        // auto operand1 =
+        // std::dynamic_pointer_cast<Identifier>(node->operand1); if (operand1
+        // == nullptr) {
+        //     error(node->operand1->begin,
+        //           "expected variable identifier before '.'");
+        //     return;
+        // }
 
         auto operand2 = std::dynamic_pointer_cast<Identifier>(node->operand2);
         if (operand2 == nullptr) {
@@ -259,34 +268,35 @@ void IdentifierResolver::visit(BinaryExpression* node) {
             return;
         }
 
-        auto recordDecl = std::dynamic_pointer_cast<RecordType>(operand1->type);
-        if (recordDecl == nullptr) {
-            error(node->operand2->begin, "only records can be member accessed");
-            return;
-        }
-        for (auto field : recordDecl->fields) {
-            if (field->name == operand2->name) {
-                operand2->variable = field;
-                operand2->type = field->type;
-                break;
-            }
-        }
-        if (operand2->variable == nullptr) {
-            error(operand2->begin, "record '{}' has no member '{}'",
-                  operand1->name, operand2->name);
-            return;
-        }
+        // auto recordDecl =
+        // std::dynamic_pointer_cast<RecordType>(operand1->type); if (recordDecl
+        // == nullptr) {
+        //     error(node->operand2->begin, "only records can be member
+        //     accessed"); return;
+        // }
+        // for (auto field : recordDecl->fields) {
+        //     if (field->name == operand2->name) {
+        //         operand2->variable = field;
+        //         operand2->type = field->type;
+        //         break;
+        //     }
+        // }
+        // if (operand2->variable == nullptr) {
+        //     error(operand2->begin, "record '{}' has no member '{}'",
+        //           operand1->name, operand2->name);
+        //     return;
+        // }
     } else if (node->operation == lexer::TokenType::OpenBrack) {
-        // TODO: Need to implement expression type evaluation for this to work
-        //  for expressions like `a.b[5] := 5`
-        // Or perhaps this entire type checking does not belong to this visitor?
+        // Similar to the problem with record access, we cannot check the type
+        //  of the left operand until expression types are populated.
+        // Code is left for reference.
 
-        auto arrayDecl =
-            std::dynamic_pointer_cast<ArrayType>(node->operand1->type);
-        if (arrayDecl == nullptr) {
-            error(node->operand1->end, "non-array types cannot be indexed");
-            return;
-        }
+        // auto arrayDecl =
+        //     std::dynamic_pointer_cast<ArrayType>(node->operand1->type);
+        // if (arrayDecl == nullptr) {
+        //     error(node->operand1->end, "non-array types cannot be indexed");
+        //     return;
+        // }
         node->operand2->accept(*this);
         checkReplacementVar(node->operand2);
     } else {
