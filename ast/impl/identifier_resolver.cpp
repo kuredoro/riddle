@@ -261,7 +261,6 @@ void IdentifierResolver::visit(BinaryExpression* node) {
 
         auto recordDecl = std::dynamic_pointer_cast<RecordType>(operand1->type);
         if (recordDecl == nullptr) {
-            // WTF:.message = "Can only access member of records",
             error(node->operand2->begin, "only records can be member accessed");
             return;
         }
