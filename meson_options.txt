@@ -1,2 +1,3 @@
 option('build-tests', type : 'boolean', value : true)
 option('build-demos', type : 'boolean', value : false)
+option('build-compiler', type : 'boolean', value : true)
