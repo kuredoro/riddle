@@ -86,5 +86,22 @@ int main(int argc, char* argv[]) {
     fmt::print(fg(fmt::color::gold), "\nNew tree:\n\n");
     ast->accept(astPrinter);
 
+    // Check that all array types have the length defined if not in params
+    visitors::ArrayLengthEnforcer arrLenEnforcer;
+    ast->accept(arrLenEnforcer);
+    errors = arrLenEnforcer.getErrors();
+
+    if (!errors.empty()) {
+        fmt::print(fg(fmt::color::indian_red) | fmt::emphasis::bold,
+                   "Errors:\n");
+        printErrors(code, errors);
+
+        // TODO: should we maybe accumulate errors that don't break further
+        //  analysis instead of returning?
+        // Perhaps add a `severity` field to the Error struct that decides
+        //  if it is possible to continue?
+        return 1;
+    }
+
     return 0;
 }
