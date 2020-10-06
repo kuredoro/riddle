@@ -107,16 +107,17 @@ void ParamsValidator::visit(Identifier*) {}
 void ParamsValidator::visit(RoutineCall* node) {
     sPtr<RoutineDecl> routine = node->routine.lock();
     std::size_t length = node->args.size();
-    if (node->args.size() != routine->parameters.size()) {
+    if (length != routine->parameters.size()) {
         error(node->begin, "amount of arguments is invalid");
     }
     node->type = routine->returnType;
-    for (std::size_t i = 0; i < length; i++) {
-        // check that types of args are pairwise equal:
-        if (node->args[i]->type != routine->parameters[i]->type) {
-            error(node->args[i]->begin, "argument type is invalid");
-        }
-    }
+    // can be used in the next seteps
+    // for (std::size_t i = 0; i < length; i++) {
+    //     // check that types of args are pairwise equal:
+    //     if (node->args[i]->type != routine->parameters[i]->type) {
+    //         error(node->args[i]->begin, "argument type is invalid");
+    //     }
+    // }
 }
 
 } // namespace visitors
