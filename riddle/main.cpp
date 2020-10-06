@@ -95,7 +95,7 @@ int main(int argc, char* argv[]) {
     ast->accept(prettyPrinter);
 
     // Check that all array types have the length defined if not in params
-    visitors::ArrayLengthEnforcer arrLenEnforcer;
+    san::ArrayLengthEnforcer arrLenEnforcer;
     ast->accept(arrLenEnforcer);
     errors = arrLenEnforcer.getErrors();
 

@@ -1,8 +1,8 @@
 #include "visitors.hpp"
 
-namespace visitors {
-
 using namespace ast;
+
+namespace san {
 
 void ArrayLengthEnforcer::visit(Program* node) {
     for (auto var : node->variables) {
