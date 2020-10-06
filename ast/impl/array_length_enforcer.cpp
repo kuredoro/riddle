@@ -40,7 +40,7 @@ void ArrayLengthEnforcer::visit(BooleanType*) {}
 
 void ArrayLengthEnforcer::visit(ArrayType* node) {
     if (!insideParameters && node->length == nullptr) {
-        error(node->begin, "Array size can only be left out in parameters");
+        error(node->begin, "array size omitted in non-signature context");
     }
     node->elementType->accept(*this);
 }
