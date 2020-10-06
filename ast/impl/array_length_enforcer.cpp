@@ -14,11 +14,11 @@ void ArrayLengthEnforcer::visit(Program* node) {
 }
 
 void ArrayLengthEnforcer::visit(RoutineDecl* node) {
-    insideParameters = true;
+    m_insideParameters = true;
     for (auto param : node->parameters) {
         param->type->accept(*this);
     }
-    insideParameters = false;
+    m_insideParameters = false;
 
     if (node->returnType != nullptr) {
         node->returnType->accept(*this);
@@ -39,7 +39,7 @@ void ArrayLengthEnforcer::visit(RealType*) {}
 void ArrayLengthEnforcer::visit(BooleanType*) {}
 
 void ArrayLengthEnforcer::visit(ArrayType* node) {
-    if (!insideParameters && node->length == nullptr) {
+    if (!m_insideParameters && node->length == nullptr) {
         error(node->begin, "array size omitted in non-signature context");
     }
     node->elementType->accept(*this);
