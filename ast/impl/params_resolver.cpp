@@ -8,7 +8,9 @@ using namespace ast;
 void ParamsValidator::visit(Program* node) {
     // initial value of a varible could be an expression
     for (auto var : node->variables) {
-        var->type->accept(*this);
+        if (var->type != nullptr) {
+            var->type->accept(*this);
+        }
     }
     // length of array could be an expression
     for (auto type : node->types) {
@@ -110,14 +112,12 @@ void ParamsValidator::visit(RoutineCall* node) {
     if (length != routine->parameters.size()) {
         error(node->begin, "amount of arguments is invalid");
     }
-    node->type = routine->returnType;
-    // can be used in the next seteps
-    // for (std::size_t i = 0; i < length; i++) {
-    //     // check that types of args are pairwise equal:
-    //     if (node->args[i]->type != routine->parameters[i]->type) {
-    //         error(node->args[i]->begin, "argument type is invalid");
-    //     }
-    // }
+    if (node->type == nullptr) {
+        node->type = routine->returnType;
+    }
+    for (auto arg : node->args) {
+        arg->accept(*this);
+    }
 }
 
 } // namespace visitors
