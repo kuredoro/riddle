@@ -86,5 +86,18 @@ int main(int argc, char* argv[]) {
     fmt::print(fg(fmt::color::gold), "\nNew tree:\n\n");
     ast->accept(astPrinter);
 
+    // Check that all array types have the length defined if not in params
+    visitors::ParamsValidator paramsValidator;
+    ast->accept(paramsValidator);
+    errors = paramsValidator.getErrors();
+
+    if (!errors.empty()) {
+        fmt::print(fg(fmt::color::indian_red) | fmt::emphasis::bold,
+                   "Errors:\n");
+        printErrors(code, errors);
+
+        return 1;
+    }
+
     return 0;
 }
