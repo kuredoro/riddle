@@ -164,7 +164,7 @@ public:
     void visit(ast::RoutineCall* node) override;
 
 private:
-    bool insideParameters = false;
+    bool m_insideParameters = false;
 };
 
 } // namespace visitors
