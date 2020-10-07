@@ -64,8 +64,8 @@ int main(int argc, char* argv[]) {
 
     // TODO: hide behind option `--print-ast`
     // Print the AST
-    //san::AstPrinter astPrinter;
-    //ast->accept(astPrinter);
+    // san::AstPrinter astPrinter;
+    // ast->accept(astPrinter);
 
     san::PrettyPrinter prettyPrinter;
     ast->accept(prettyPrinter);
@@ -108,6 +108,19 @@ int main(int argc, char* argv[]) {
         //  analysis instead of returning?
         // Perhaps add a `severity` field to the Error struct that decides
         //  if it is possible to continue?
+        return 1;
+    }
+
+    // Check that all array types have the length defined if not in params
+    san::ParamsValidator paramsValidator;
+    ast->accept(paramsValidator);
+    errors = paramsValidator.getErrors();
+
+    if (!errors.empty()) {
+        fmt::print(fg(fmt::color::indian_red) | fmt::emphasis::bold,
+                   "Errors:\n");
+        printErrors(code, errors);
+
         return 1;
     }
 

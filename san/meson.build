@@ -5,6 +5,7 @@ libsan = static_library('visitors',
                                  'impl/identifier_resolver.cpp',
                                  'impl/pretty_printer.cpp',
                                  'impl/array_length_enforcer.cpp',
+                                 'impl/params_resolver.cpp'
                              ],
                              cpp_args : riddle_cpp_args,
                              c_args : riddle_c_args,
