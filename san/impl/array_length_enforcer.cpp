@@ -6,7 +6,7 @@ namespace san {
 
 void ArrayLengthEnforcer::visit(Program* node) {
     for (auto var : node->variables) {
-        var->type->accept(*this);
+        var->accept(*this);
     }
     for (auto routine : node->routines) {
         routine->accept(*this);
@@ -16,7 +16,7 @@ void ArrayLengthEnforcer::visit(Program* node) {
 void ArrayLengthEnforcer::visit(RoutineDecl* node) {
     m_insideParameters = true;
     for (auto param : node->parameters) {
-        param->type->accept(*this);
+        param->accept(*this);
     }
     m_insideParameters = false;
 
