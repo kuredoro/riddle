@@ -36,7 +36,7 @@ void ParamsValidator::visit(RealType*) {}
 
 void ParamsValidator::visit(BooleanType*) {}
 
-void ParamsValidator::visit(ArrayType* node) {}
+void ParamsValidator::visit(ArrayType*) {}
 
 void ParamsValidator::visit(RecordType* node) {
     for (auto field : node->fields) {
