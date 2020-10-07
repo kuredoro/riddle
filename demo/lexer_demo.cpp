@@ -7,7 +7,6 @@
 #include <iostream>
 #include <iterator>
 
-
 void printTokens(const std::vector<lexer::Token>& toks) {
     for (auto& tok : toks) {
         auto str = common::replaceAll(tok.lit, "\n", "\\n");
