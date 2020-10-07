@@ -19,7 +19,9 @@ jobs:
         with:
           action: build
           meson-version: 0.55.1
-      # - name: Run clang-tidy
-      # run: ninja clang-tidy -C build
+      - name: Install dependencies
+        run: pip install PyYAML
+      - name: Run clang-tidy
+        run: ninja clang-tidy -C build
       - name: Run clang-format
         run: ninja clang-format -C build
