@@ -1,10 +1,11 @@
-#include "visitors.hpp"
+#include "san.hpp"
 #include <memory>
 #include <set>
-
-namespace visitors {
+#include <sys/select.h>
 
 using namespace ast;
+
+namespace san {
 
 void IdentifierResolver::visit(Program* node) {
     // Check if anything is declared twice in global scope and visit
@@ -121,14 +122,19 @@ void IdentifierResolver::visit(ArrayType* node) {
 
 void IdentifierResolver::visit(RecordType* node) {
     // ensure that no two fields have the same name
-    std::set<std::string> fieldNames;
+    // Note: vector here will be faster than set, due to cache-friendliness and
+    // practically small amount of actual fields.
+    std::vector<std::string> fieldNames;
+    fieldNames.reserve(node->fields.size());
+
     for (auto field : node->fields) {
-        if (fieldNames.find(field->name) != fieldNames.end()) {
+        auto dup = std::find(fieldNames.begin(), fieldNames.end(), field->name);
+        if (dup != fieldNames.end()) {
             error(field->begin, "field name is already in use");
             return;
         }
 
-        fieldNames.insert(field->name);
+        fieldNames.push_back(field->name);
     }
 
     for (auto field : node->fields) {
@@ -402,4 +408,4 @@ sPtr<VariableDecl> IdentifierResolver::findVarDecl(std::string name) {
     return nullptr;
 }
 
-} // namespace visitors
+} // namespace san
