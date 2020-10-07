@@ -1,32 +1,29 @@
-name: Run unit tests
+name: Lint using clang-tidy
 
-on: pull_request
+on: push
 
 jobs:
-  gcc:
+  clang-tidy:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v1
+      - name: Install clang-tidy
+        run: sudo apt-get install -y clang-format clang-tidy
       - uses: BSFishy/meson-build@v1.0.1
+        name: Run clang-tidy
         env:
           CC: gcc
           CXX: g++
         with:
-          action: test
+          action: tidy
           meson-version: 0.55.1
-
-  clang:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
       - uses: BSFishy/meson-build@v1.0.1
+        name: Run clang-format
         env:
-          CC: clang
-          CXX: clang++
+          CC: gcc
+          CXX: g++
         with:
-          action: test
+          action: format
           meson-version: 0.55.1
