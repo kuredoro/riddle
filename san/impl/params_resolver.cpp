@@ -10,7 +10,7 @@ void ParamsValidator::visit(Program* node) {
     for (auto var : node->variables) {
         var->accept(*this);
     }
-    // length of array could be an expression
+    // initial value of a record could be a routine call
     for (auto type : node->types) {
         type->type->accept(*this);
     }
@@ -36,7 +36,7 @@ void ParamsValidator::visit(RealType*) {}
 
 void ParamsValidator::visit(BooleanType*) {}
 
-void ParamsValidator::visit(ArrayType* node) { node->length->accept(*this); }
+void ParamsValidator::visit(ArrayType* node) {}
 
 void ParamsValidator::visit(RecordType* node) {
     for (auto field : node->fields) {
