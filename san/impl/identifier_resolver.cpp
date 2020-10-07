@@ -13,6 +13,14 @@ void IdentifierResolver::visit(Program* node) {
 
     bool ok = true;
 
+    for (auto routine : node->routines) {
+        if (isRedeclared(node, routine)) {
+            ok = false;
+        }
+
+        m_routines.insert({routine->name, routine});
+    }
+
     for (auto& typeDecl : node->types) {
         if (isRedeclared(node, typeDecl)) {
             ok = false;
@@ -40,14 +48,6 @@ void IdentifierResolver::visit(Program* node) {
         }
 
         m_variables.push_back(var);
-    }
-
-    for (auto routine : node->routines) {
-        if (isRedeclared(node, routine)) {
-            ok = false;
-        }
-
-        m_routines.insert({routine->name, routine});
     }
 
     if (!ok) {
