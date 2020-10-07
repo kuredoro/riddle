@@ -8,9 +8,7 @@ using namespace ast;
 void ParamsValidator::visit(Program* node) {
     // initial value of a variable could be an expression
     for (auto var : node->variables) {
-        if (var->type != nullptr) {
-            var->type->accept(*this);
-        }
+        var->accept(*this);
     }
     // length of array could be an expression
     for (auto type : node->types) {
@@ -58,6 +56,9 @@ void ParamsValidator::visit(VariableDecl* node) {
 void ParamsValidator::visit(TypeDecl* node) { node->type->accept(*this); }
 
 void ParamsValidator::visit(Body* node) {
+    for (auto type : node->types) {
+        type->accept(*this);
+    }
     for (auto var : node->variables) {
         var->accept(*this);
     }
@@ -74,11 +75,19 @@ void ParamsValidator::visit(ReturnStatement* node) {
 
 void ParamsValidator::visit(Assignment* node) { node->rhs->accept(*this); }
 
-void ParamsValidator::visit(WhileLoop* node) { node->body->accept(*this); }
+void ParamsValidator::visit(WhileLoop* node) {
+    node->condition->accept(*this);
+    node->body->accept(*this);
+}
 
-void ParamsValidator::visit(ForLoop* node) { node->body->accept(*this); }
+void ParamsValidator::visit(ForLoop* node) {
+    node->rangeFrom->accept(*this);
+    node->rangeTo->accept(*this);
+    node->body->accept(*this);
+}
 
 void ParamsValidator::visit(IfStatement* node) {
+    node->condition->accept(*this);
     node->ifBody->accept(*this);
     if (node->elseBody != nullptr) {
         node->elseBody->accept(*this);
@@ -112,9 +121,7 @@ void ParamsValidator::visit(RoutineCall* node) {
     if (length != routine->parameters.size()) {
         error(node->begin, "amount of arguments is invalid");
     }
-    if (node->type == nullptr) {
-        node->type = routine->returnType;
-    }
+    node->type = routine->returnType;
     for (auto arg : node->args) {
         arg->accept(*this);
     }
