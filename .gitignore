@@ -38,6 +38,8 @@ build-gcc/
 build-clang/
 subprojects/*
 !subprojects/*.wrap
+!subprojects/.clang-tidy
+!subprojects/.clang-format
 .vscode/
 .clangd/
 compile_commands.json
