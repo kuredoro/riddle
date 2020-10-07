@@ -6,7 +6,7 @@ namespace san {
 using namespace ast;
 
 void ParamsValidator::visit(Program* node) {
-    // initial value of a varible could be an expression
+    // initial value of a variable could be an expression
     for (auto var : node->variables) {
         if (var->type != nullptr) {
             var->type->accept(*this);
