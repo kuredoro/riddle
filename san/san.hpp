@@ -5,7 +5,7 @@ namespace san {
 
 template <typename T> using sPtr = std::shared_ptr<T>;
 
-class AstPrinter : public ast::Visitor {
+class AstPrinter : public ast::Visitor<> {
 public:
     AstPrinter(size_t depth = 0) : m_depth(depth) {}
     void visit(ast::Program* node) override;
@@ -42,7 +42,7 @@ private:
  *
  * Does not alter the tree.
  */
-class PrettyPrinter : public ast::Visitor {
+class PrettyPrinter : public ast::Visitor<> {
 public:
     PrettyPrinter(size_t depth = 0) : m_depth(depth) {}
     void visit(ast::Program* node) override;
@@ -102,7 +102,7 @@ private:
  *     end
  * end
  */
-class MissingReturn : public ast::Visitor {
+class MissingReturn : public ast::Visitor<> {
 public:
     MissingReturn() {}
     void visit(ast::Program* node) override;
@@ -141,7 +141,7 @@ private:
  *  declaration or replaced with a routine call referring to its routine
  *  declaration.
  */
-class IdentifierResolver : public ast::Visitor {
+class IdentifierResolver : public ast::Visitor<> {
 public:
     void visit(ast::Program* node) override;
     void visit(ast::RoutineDecl* node) override;
@@ -219,7 +219,7 @@ private:
  * This visitor is responsible for verifying that declarations of array type
  *  include the size except possibly for parameters
  */
-class ArrayLengthEnforcer : public ast::Visitor {
+class ArrayLengthEnforcer : public ast::Visitor<> {
 public:
     void visit(ast::Program* node) override;
     void visit(ast::RoutineDecl* node) override;
