@@ -36,7 +36,9 @@ void ParamsValidator::visit(RealType*) {}
 
 void ParamsValidator::visit(BooleanType*) {}
 
-void ParamsValidator::visit(ArrayType*) {}
+void ParamsValidator::visit(ArrayType* node) {
+    node->elementType->accept(*this);
+}
 
 void ParamsValidator::visit(RecordType* node) {
     for (auto field : node->fields) {
