@@ -117,9 +117,10 @@ void ParamsValidator::visit(Identifier*) {}
 
 void ParamsValidator::visit(RoutineCall* node) {
     sPtr<RoutineDecl> routine = node->routine.lock();
-    std::size_t length = node->args.size();
-    if (length != routine->parameters.size()) {
-        error(node->begin, "amount of arguments is invalid");
+    std::size_t argCount = node->args.size();
+    if (argCount != routine->parameters.size()) {
+        error(node->begin, "routine call to {} expects {} arguments, got {}",
+              routine->name, routine->parameters.size(), argCount);
     }
     node->type = routine->returnType;
     for (auto arg : node->args) {

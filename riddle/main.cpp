@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Check that all array types have the length defined if not in params
+    // Check if amount of params is equal to record's amount of params
     san::ParamsValidator paramsValidator;
     ast->accept(paramsValidator);
     errors = paramsValidator.getErrors();
