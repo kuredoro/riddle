@@ -43,32 +43,32 @@ struct BooleanLiteral;
 struct Identifier;
 struct RoutineCall;
 
-class Visitor {
+template <typename T = void> class Visitor {
 public:
     virtual ~Visitor() = default;
-    virtual void visit(Program* node) = 0;
-    virtual void visit(RoutineDecl* node) = 0;
-    virtual void visit(AliasedType* node) = 0;
-    virtual void visit(TypeDecl* node) = 0;
-    virtual void visit(IntegerType* node) = 0;
-    virtual void visit(RealType* node) = 0;
-    virtual void visit(BooleanType* node) = 0;
-    virtual void visit(ArrayType* node) = 0;
-    virtual void visit(RecordType* node) = 0;
-    virtual void visit(VariableDecl* node) = 0;
-    virtual void visit(Body* node) = 0;
-    virtual void visit(ReturnStatement* node) = 0;
-    virtual void visit(Assignment* node) = 0;
-    virtual void visit(WhileLoop* node) = 0;
-    virtual void visit(ForLoop* node) = 0;
-    virtual void visit(IfStatement* node) = 0;
-    virtual void visit(IntegerLiteral* node) = 0;
-    virtual void visit(RealLiteral* node) = 0;
-    virtual void visit(BooleanLiteral* node) = 0;
-    virtual void visit(Identifier* node) = 0;
-    virtual void visit(RoutineCall* node) = 0;
-    virtual void visit(UnaryExpression* node) = 0;
-    virtual void visit(BinaryExpression* node) = 0;
+    virtual T visit(Program* node) = 0;
+    virtual T visit(RoutineDecl* node) = 0;
+    virtual T visit(AliasedType* node) = 0;
+    virtual T visit(TypeDecl* node) = 0;
+    virtual T visit(IntegerType* node) = 0;
+    virtual T visit(RealType* node) = 0;
+    virtual T visit(BooleanType* node) = 0;
+    virtual T visit(ArrayType* node) = 0;
+    virtual T visit(RecordType* node) = 0;
+    virtual T visit(VariableDecl* node) = 0;
+    virtual T visit(Body* node) = 0;
+    virtual T visit(ReturnStatement* node) = 0;
+    virtual T visit(Assignment* node) = 0;
+    virtual T visit(WhileLoop* node) = 0;
+    virtual T visit(ForLoop* node) = 0;
+    virtual T visit(IfStatement* node) = 0;
+    virtual T visit(IntegerLiteral* node) = 0;
+    virtual T visit(RealLiteral* node) = 0;
+    virtual T visit(BooleanLiteral* node) = 0;
+    virtual T visit(Identifier* node) = 0;
+    virtual T visit(RoutineCall* node) = 0;
+    virtual T visit(UnaryExpression* node) = 0;
+    virtual T visit(BinaryExpression* node) = 0;
 
     std::vector<Error> getErrors() { return std::vector<Error>(m_errors); }
 
@@ -90,7 +90,8 @@ struct Node {
     bool operator==(const Node& other) const {
         return begin == other.begin && end == other.end;
     }
-    virtual void accept(Visitor& v) = 0;
+    // should be virtual, never to be called
+    template <typename T> T accept(Visitor<T>&){};
     virtual ~Node() = default;
 };
 
@@ -102,7 +103,7 @@ struct Program : Node {
         return Node::operator==(other) && routines == other.routines &&
                variables == other.variables && types == other.types;
     }
-    void accept(Visitor& v) override { v.visit(this); }
+    template <typename T> T accept(Visitor<T>& v) { return v.visit(this); }
 };
 
 struct RoutineDecl : Node {
@@ -115,7 +116,7 @@ struct RoutineDecl : Node {
                returnType == other.returnType && body == other.body &&
                parameters == other.parameters;
     }
-    void accept(Visitor& v) override { v.visit(this); }
+    template <typename T> T accept(Visitor<T>& v) { return v.visit(this); }
 };
 
 struct TypeDecl : Node {
@@ -124,11 +125,12 @@ struct TypeDecl : Node {
     bool operator==(const TypeDecl& other) const {
         return Node::operator==(other) && name == other.name;
     }
-    virtual void accept(Visitor& v) override { v.visit(this); }
+    template <typename T> T accept(Visitor<T>& v) { return v.visit(this); }
 };
 
 struct Type : Node {
-    virtual void accept(Visitor& v) override = 0;
+    // should be virtual, never to be called
+    template <typename T> T accept(Visitor<T>&){};
 };
 
 /**
@@ -140,26 +142,27 @@ struct AliasedType : Type {
     bool operator==(const AliasedType& other) const {
         return Node::operator==(other) && name == other.name;
     }
-    void accept(Visitor& v) override { v.visit(this); }
+    template <typename T> T accept(Visitor<T>& v) { return v.visit(this); }
 };
 
 struct PrimitiveType : Type {
     bool operator==(const PrimitiveType& other) const {
         return Node::operator==(other);
     }
-    virtual void accept(Visitor& v) override = 0;
+    // should be virtual, never to be called
+    template <typename T> T accept(Visitor<T>&){};
 };
 
 struct IntegerType : PrimitiveType {
-    void accept(Visitor& v) override { v.visit(this); }
+    template <typename T> T accept(Visitor<T>& v) { return v.visit(this); }
 };
 
 struct RealType : PrimitiveType {
-    void accept(Visitor& v) override { v.visit(this); }
+    template <typename T> T accept(Visitor<T>& v) { return v.visit(this); }
 };
 
 struct BooleanType : PrimitiveType {
-    void accept(Visitor& v) override { v.visit(this); }
+    template <typename T> T accept(Visitor<T>& v) { return v.visit(this); }
 };
 
 struct ArrayType : Type {
@@ -169,7 +172,7 @@ struct ArrayType : Type {
         return Node::operator==(other) && length == other.length &&
                elementType == other.elementType;
     }
-    void accept(Visitor& v) override { v.visit(this); }
+    template <typename T> T accept(Visitor<T>& v) { return v.visit(this); }
 };
 
 struct RecordType : Type {
@@ -177,7 +180,7 @@ struct RecordType : Type {
     bool operator==(const RecordType& other) const {
         return Node::operator==(other) && fields == other.fields;
     }
-    void accept(Visitor& v) override { v.visit(this); }
+    template <typename T> T accept(Visitor<T>& v) { return v.visit(this); }
 };
 
 struct VariableDecl : Node {
@@ -188,7 +191,7 @@ struct VariableDecl : Node {
         return Node::operator==(other) && name == other.name &&
                type == other.type && initialValue == other.initialValue;
     }
-    void accept(Visitor& v) override { v.visit(this); }
+    template <typename T> T accept(Visitor<T>& v) { return v.visit(this); }
 };
 
 struct Body : Node {
@@ -199,11 +202,16 @@ struct Body : Node {
         return Node::operator==(other) && statements == other.statements &&
                variables == other.variables && types == other.types;
     }
-    void accept(Visitor& v) override { v.visit(this); }
+    template <typename T> T accept(Visitor<T>& v) { return v.visit(this); }
 };
 
 struct Statement : virtual Node {
-    void accept(Visitor& v) override = 0;
+    // should be virtual, never to be called
+    template <typename T> T accept(Visitor<T>& v) {
+        if (auto ret = dynamic_cast<ReturnStatement*>(this)) {
+            return ret->accept(v);
+        }
+    };
 };
 
 struct Assignment : Statement {
@@ -211,7 +219,7 @@ struct Assignment : Statement {
     bool operator==(const Assignment& other) const {
         return Node::operator==(other) && lhs == other.lhs && rhs == other.rhs;
     }
-    void accept(Visitor& v) override { v.visit(this); }
+    template <typename T> T accept(Visitor<T>& v) { return v.visit(this); }
 };
 
 struct WhileLoop : Statement {
@@ -221,7 +229,7 @@ struct WhileLoop : Statement {
         return Node::operator==(other) && condition == other.condition &&
                body == other.body;
     }
-    void accept(Visitor& v) override { v.visit(this); }
+    template <typename T> T accept(Visitor<T>& v) { return v.visit(this); }
 };
 
 struct ForLoop : Statement {
@@ -235,7 +243,7 @@ struct ForLoop : Statement {
                rangeFrom == other.rangeFrom && rangeTo == other.rangeTo &&
                reverse == other.reverse && body == other.body;
     }
-    void accept(Visitor& v) override { v.visit(this); }
+    template <typename T> T accept(Visitor<T>& v) { return v.visit(this); }
 };
 
 struct IfStatement : Statement {
@@ -246,7 +254,7 @@ struct IfStatement : Statement {
         return Node::operator==(other) && condition == other.condition &&
                ifBody == other.ifBody && elseBody == other.elseBody;
     }
-    void accept(Visitor& v) override { v.visit(this); }
+    template <typename T> T accept(Visitor<T>& v) { return v.visit(this); }
 };
 
 struct ReturnStatement : Statement {
@@ -254,13 +262,23 @@ struct ReturnStatement : Statement {
     bool operator==(const ReturnStatement& other) const {
         return Node::operator==(other) && expression == other.expression;
     }
-    void accept(Visitor& v) override { v.visit(this); }
+    template <typename T> T accept(Visitor<T>& v) { return v.visit(this); }
 };
 
 struct Expression : virtual Node {
     bool constant = false; // tells if this expression is compile-time constant
     sPtr<Type> type;
-    virtual void accept(Visitor& v) override = 0;
+    // should be virtual, never to be called
+    template <typename T> T accept(Visitor<T>& v) {
+        if (auto bin = dynamic_cast<BinaryExpression*>(this)) {
+            return bin->accept(v);
+        } else if (auto un = dynamic_cast<UnaryExpression*>(this)) {
+            return un->accept(v);
+        } else if (auto rl = dynamic_cast<RealLiteral*>(this)) {
+            return rl->accept(v);
+        }
+    };
+    virtual ~Expression() = default;
 };
 
 struct UnaryExpression : Expression {
@@ -271,7 +289,7 @@ struct UnaryExpression : Expression {
         return Node::operator==(other) && operand == other.operand &&
                operation == other.operation;
     }
-    virtual void accept(Visitor& v) override { v.visit(this); }
+    template <typename T> T accept(Visitor<T>& v) { return v.visit(this); }
 };
 
 struct BinaryExpression : Expression {
@@ -283,14 +301,15 @@ struct BinaryExpression : Expression {
         return Node::operator==(other) && operand1 == other.operand1 &&
                operand2 == other.operand2 && operation == other.operation;
     }
-    virtual void accept(Visitor& v) override { v.visit(this); }
+    template <typename T> T accept(Visitor<T>& v) { return v.visit(this); }
 };
 
 struct Primary : Expression, Statement {
     bool operator==(const Primary& other) const {
         return Node::operator==(other);
     }
-    virtual void accept(Visitor& v) override = 0;
+    // should be virtual, never to be called
+    template <typename T> T accept(Visitor<T>&){};
 };
 
 struct IntegerLiteral : Expression {
@@ -302,7 +321,7 @@ struct IntegerLiteral : Expression {
     bool operator==(const IntegerLiteral& other) const {
         return Expression::operator==(other) && value == other.value;
     }
-    void accept(Visitor& v) override { v.visit(this); }
+    template <typename T> T accept(Visitor<T>& v) { return v.visit(this); }
 };
 
 struct RealLiteral : Expression {
@@ -314,7 +333,7 @@ struct RealLiteral : Expression {
     bool operator==(const RealLiteral& other) const {
         return Expression::operator==(other) && value == other.value;
     }
-    void accept(Visitor& v) override { v.visit(this); }
+    template <typename T> T accept(Visitor<T>& v) { return v.visit(this); }
 };
 
 struct BooleanLiteral : Expression {
@@ -326,7 +345,7 @@ struct BooleanLiteral : Expression {
     bool operator==(const BooleanLiteral& other) const {
         return Expression::operator==(other) && value == other.value;
     }
-    void accept(Visitor& v) override { v.visit(this); }
+    template <typename T> T accept(Visitor<T>& v) { return v.visit(this); }
 };
 
 // Used for holding variables. Can temporary hold unparenthesized routine calls
@@ -339,7 +358,7 @@ struct Identifier : Primary {
         return Primary::operator==(other) && name == other.name &&
                variable == other.variable;
     }
-    void accept(Visitor& v) override { v.visit(this); }
+    template <typename T> T accept(Visitor<T>& v) { return v.visit(this); }
 };
 
 struct RoutineCall : Primary {
@@ -351,7 +370,7 @@ struct RoutineCall : Primary {
         return Node::operator==(other) && args == other.args &&
                routine.lock() == other.routine.lock();
     }
-    void accept(Visitor& v) override { v.visit(this); }
+    template <typename T> T accept(Visitor<T>& v) { return v.visit(this); }
 };
 
 } // namespace ast
