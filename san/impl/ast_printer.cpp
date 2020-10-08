@@ -154,7 +154,7 @@ void AstPrinter::visit(Body* node) {
 
 void AstPrinter::visit(ReturnStatement* node) {
     fmt::print("{:|>{}}- [Return]>\n", "", m_depth);
-    
+
     m_depth++;
 
     if (node->expression != nullptr) {
@@ -201,7 +201,7 @@ void AstPrinter::visit(ForLoop* node) {
 
 void AstPrinter::visit(IfStatement* node) {
     fmt::print("{:|>{}}- [IfStatement]>\n", "", m_depth);
-    
+
     m_depth++;
 
     node->condition->accept(*this);
@@ -262,26 +262,6 @@ void AstPrinter::visit(RoutineCall* node) {
     }
 
     m_depth--;
-}
-
-void AstPrinter::visit(Type*) {
-    assert(false);
-}
-
-void AstPrinter::visit(PrimitiveType*) {
-    assert(false);
-}
-
-void AstPrinter::visit(Statement*) {
-    assert(false);
-}
-
-void AstPrinter::visit(Expression*) {
-    assert(false);
-}
-
-void AstPrinter::visit(Primary*) {
-    assert(false);
 }
 
 } // namespace san

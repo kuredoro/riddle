@@ -70,13 +70,6 @@ public:
     virtual void visit(UnaryExpression* node) = 0;
     virtual void visit(BinaryExpression* node) = 0;
 
-    // Abstract, should never be called
-    virtual void visit(Type* node) = 0;
-    virtual void visit(PrimitiveType* node) = 0;
-    virtual void visit(Statement* node) = 0;
-    virtual void visit(Expression* node) = 0;
-    virtual void visit(Primary* node) = 0;
-
     std::vector<Error> getErrors() { return std::vector<Error>(m_errors); }
 
 protected:
@@ -135,7 +128,7 @@ struct TypeDecl : Node {
 };
 
 struct Type : Node {
-    virtual void accept(Visitor& v) override { v.visit(this); }
+    virtual void accept(Visitor& v) override = 0;
 };
 
 /**
@@ -154,7 +147,7 @@ struct PrimitiveType : Type {
     bool operator==(const PrimitiveType& other) const {
         return Node::operator==(other);
     }
-    virtual void accept(Visitor& v) override { v.visit(this); }
+    virtual void accept(Visitor& v) override = 0;
 };
 
 struct IntegerType : PrimitiveType {
@@ -210,7 +203,7 @@ struct Body : Node {
 };
 
 struct Statement : virtual Node {
-    void accept(Visitor& v) override { v.visit(this); }
+    void accept(Visitor& v) override = 0;
 };
 
 struct Assignment : Statement {
@@ -267,7 +260,7 @@ struct ReturnStatement : Statement {
 struct Expression : virtual Node {
     bool constant = false; // tells if this expression is compile-time constant
     sPtr<Type> type;
-    virtual void accept(Visitor& v) override { v.visit(this); }
+    virtual void accept(Visitor& v) override = 0;
 };
 
 struct UnaryExpression : Expression {
@@ -297,7 +290,7 @@ struct Primary : Expression, Statement {
     bool operator==(const Primary& other) const {
         return Node::operator==(other);
     }
-    virtual void accept(Visitor& v) override { v.visit(this); }
+    virtual void accept(Visitor& v) override = 0;
 };
 
 struct IntegerLiteral : Expression {
