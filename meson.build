@@ -33,6 +33,7 @@ subdir('lexer')
 subdir('ast')
 subdir('parser')
 subdir('san')
+subdir('code_generator')
 
 if get_option('build-tests')
   subdir('tests')

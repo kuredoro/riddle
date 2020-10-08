@@ -1,3 +1,4 @@
+#include "code_generator.hpp"
 #include "fmt/color.h"
 #include "fmt/core.h"
 #include "lexer.hpp"
@@ -64,8 +65,8 @@ int main(int argc, char* argv[]) {
 
     // TODO: hide behind option `--print-ast`
     // Print the AST
-    //san::AstPrinter astPrinter;
-    //ast->accept(astPrinter);
+    // san::AstPrinter astPrinter;
+    // ast->accept(astPrinter);
 
     san::PrettyPrinter prettyPrinter;
     ast->accept(prettyPrinter);
@@ -124,5 +125,17 @@ int main(int argc, char* argv[]) {
     }
 
     fmt::print(fmt::fg(fmt::color::green), "pass\n");
+
+    fmt::print("\nGenerated code:\n\n");
+
+    cg::CodeGenerator codeGen(argv[1]);
+    ast->accept(codeGen);
+    errors = codeGen.getErrors();
+    if (!errors.empty()) {
+        fmt::print("Code gen errors!\n");
+        printErrors(code, errors);
+    }
+    codeGen.print();
+
     return 0;
 }
