@@ -28,7 +28,12 @@ void DeriveType::visit(Program* node) {
     }
 }
 
-void DeriveType::visit(RoutineDecl* node) { node->body->accept(*this); }
+void DeriveType::visit(RoutineDecl* node) {
+    for (auto parameter : node->parameters) {
+        parameter->accept(*this);
+    }
+    node->body->accept(*this);
+}
 
 void DeriveType::visit(Type*) {}
 
