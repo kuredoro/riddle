@@ -82,7 +82,7 @@ void CodeGenerator::visit(ast::ReturnStatement* node) {
     Value* returnValue = nullptr;
     if (node->expression != nullptr) {
         node->expression->accept(*this);
-        extractTempVal(returnValue);
+        returnValue = extractTempVal();
     }
     tempVal = m_builder.CreateRet(returnValue);
 }
@@ -100,10 +100,10 @@ void CodeGenerator::visit(ast::UnaryExpression* node) {}
 void CodeGenerator::visit(ast::BinaryExpression* node) {
     Value *L, *R;
     node->operand1->accept(*this);
-    extractTempVal(L);
+    L = extractTempVal();
 
     node->operand2->accept(*this);
-    extractTempVal(R);
+    R = extractTempVal();
 
     if (L == nullptr || R == nullptr) {
         error(node->begin, "a binary expression needs both operands");
@@ -166,9 +166,9 @@ void CodeGenerator::visit(ast::RoutineCall* node) {
 
     std::vector<Value*> args;
     for (auto& arg : node->args) {
-        Value* argCode;
+
         arg->accept(*this);
-        extractTempVal(argCode);
+        Value* argCode = extractTempVal();
         if (argCode == nullptr) {
             error(arg->begin, "what is this?");
             return;

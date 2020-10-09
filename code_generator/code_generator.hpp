@@ -57,9 +57,10 @@ private:
 
     // used for holding values that should be returned by functions
     llvm::Value* tempVal = nullptr;
-    void extractTempVal(llvm::Value*& insertInto) {
-        insertInto = tempVal;
+    llvm::Value* extractTempVal() {
+        llvm::Value* t = tempVal;
         tempVal = nullptr;
+        return t;
     }
 };
 
