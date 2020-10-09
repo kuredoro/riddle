@@ -350,6 +350,12 @@ public:
     void visit(ast::BooleanLiteral* node) override;
     void visit(ast::Identifier* node) override;
     void visit(ast::RoutineCall* node) override;
+
+private: // ??? could be made public
+    sPtr<ast::Type> getGreaterType(sPtr<ast::Type> initialType,
+                                   sPtr<ast::Type> targetType);
+
+    bool typeIsBase(sPtr<ast::Type> type);
 };
 
 } // namespace san
