@@ -64,8 +64,8 @@ int main(int argc, char* argv[]) {
 
     // TODO: hide behind option `--print-ast`
     // Print the AST
-    //san::AstPrinter astPrinter;
-    //ast->accept(astPrinter);
+    // san::AstPrinter astPrinter;
+    // ast->accept(astPrinter);
 
     san::PrettyPrinter prettyPrinter;
     ast->accept(prettyPrinter);
@@ -124,5 +124,19 @@ int main(int argc, char* argv[]) {
     }
 
     fmt::print(fmt::fg(fmt::color::green), "pass\n");
+
+    // Check if amount of params is equal to record's amount of params
+    san::ParamsValidator paramsValidator;
+    ast->accept(paramsValidator);
+    errors = paramsValidator.getErrors();
+
+    if (!errors.empty()) {
+        fmt::print(fg(fmt::color::indian_red) | fmt::emphasis::bold,
+                   "Errors:\n");
+        printErrors(code, errors);
+
+        return 1;
+    }
+  
     return 0;
 }
