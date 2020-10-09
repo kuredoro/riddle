@@ -4,13 +4,13 @@ using namespace llvm;
 
 namespace cg {
 
-Value* CodeGenerator::visit(ast::Program* node) {
+void CodeGenerator::visit(ast::Program* node) {
     for (auto& routine : node->routines) {
         routine->accept(*this);
     }
 }
 
-Value* CodeGenerator::visit(ast::RoutineDecl* node) {
+void CodeGenerator::visit(ast::RoutineDecl* node) {
     // Types of the parameters
     std::vector<Type*> paramTypes;
     // for (auto& param : node->parameters) {
@@ -19,7 +19,8 @@ Value* CodeGenerator::visit(ast::RoutineDecl* node) {
     // The routine's return type
     Type* returnType = Type::getVoidTy(m_context);
     if (node->returnType != nullptr) {
-        // returnType = node->returnType->accept(*this);
+        // node->returnType->accept(*this);
+        // extractTempVal(returnType);
     }
 
     // The function's type: (return type, parameter types, varargs?)
@@ -51,119 +52,131 @@ Value* CodeGenerator::visit(ast::RoutineDecl* node) {
 
     verifyFunction(*F);
 
-    return F;
+    tempVal = F;
 }
 
-Value* CodeGenerator::visit(ast::AliasedType* node) {}
+void CodeGenerator::visit(ast::AliasedType* node) {}
 
-Value* CodeGenerator::visit(ast::IntegerType* node) {}
+void CodeGenerator::visit(ast::IntegerType* node) {}
 
-Value* CodeGenerator::visit(ast::RealType* node) {}
+void CodeGenerator::visit(ast::RealType* node) {}
 
-Value* CodeGenerator::visit(ast::BooleanType* node) {}
+void CodeGenerator::visit(ast::BooleanType* node) {}
 
-Value* CodeGenerator::visit(ast::ArrayType* node) {}
+void CodeGenerator::visit(ast::ArrayType* node) {}
 
-Value* CodeGenerator::visit(ast::RecordType* node) {}
+void CodeGenerator::visit(ast::RecordType* node) {}
 
-Value* CodeGenerator::visit(ast::VariableDecl* node) {}
+void CodeGenerator::visit(ast::VariableDecl* node) {}
 
-Value* CodeGenerator::visit(ast::TypeDecl* node) {}
+void CodeGenerator::visit(ast::TypeDecl* node) {}
 
-Value* CodeGenerator::visit(ast::Body* node) {
+void CodeGenerator::visit(ast::Body* node) {
     for (auto& statement : node->statements) {
         std::dynamic_pointer_cast<ast::ReturnStatement>(statement)->accept(
             *this);
     }
 }
 
-Value* CodeGenerator::visit(ast::ReturnStatement* node) {
+void CodeGenerator::visit(ast::ReturnStatement* node) {
     Value* returnValue = nullptr;
     if (node->expression != nullptr) {
-        returnValue = node->expression->accept(*this);
+        node->expression->accept(*this);
+        extractTempVal(returnValue);
     }
-    return m_builder.CreateRet(returnValue);
+    tempVal = m_builder.CreateRet(returnValue);
 }
 
-Value* CodeGenerator::visit(ast::Assignment* node) {}
+void CodeGenerator::visit(ast::Assignment* node) {}
 
-Value* CodeGenerator::visit(ast::WhileLoop* node) {}
+void CodeGenerator::visit(ast::WhileLoop* node) {}
 
-Value* CodeGenerator::visit(ast::ForLoop* node) {}
+void CodeGenerator::visit(ast::ForLoop* node) {}
 
-Value* CodeGenerator::visit(ast::IfStatement* node) {}
+void CodeGenerator::visit(ast::IfStatement* node) {}
 
-Value* CodeGenerator::visit(ast::UnaryExpression* node) {}
+void CodeGenerator::visit(ast::UnaryExpression* node) {}
 
-Value* CodeGenerator::visit(ast::BinaryExpression* node) {
-    auto L = node->operand1->accept(*this);
-    auto R = node->operand2->accept(*this);
+void CodeGenerator::visit(ast::BinaryExpression* node) {
+    Value *L, *R;
+    node->operand1->accept(*this);
+    extractTempVal(L);
+
+    node->operand2->accept(*this);
+    extractTempVal(R);
+
     if (L == nullptr || R == nullptr) {
         error(node->begin, "a binary expression needs both operands");
-        return nullptr;
+        return;
     }
 
     switch (node->operation) {
     case lexer::TokenType::Add:
-        return m_builder.CreateFAdd(L, R, "addtmp");
+        tempVal = m_builder.CreateFAdd(L, R, "addtmp");
+        return;
     case lexer::TokenType::Sub:
-        return m_builder.CreateFSub(L, R, "subtmp");
+        tempVal = m_builder.CreateFSub(L, R, "subtmp");
+        return;
     case lexer::TokenType::Mul:
-        return m_builder.CreateFMul(L, R, "multmp");
+        tempVal = m_builder.CreateFMul(L, R, "multmp");
+        return;
     case lexer::TokenType::Less:
         L = m_builder.CreateFCmpULT(L, R, "cmptmp");
         // Convert bool 0/1 to double 0.0 or 1.0
-        return m_builder.CreateUIToFP(L, Type::getDoubleTy(m_context),
-                                      "booltmp");
+        tempVal =
+            m_builder.CreateUIToFP(L, Type::getDoubleTy(m_context), "booltmp");
+        return;
     // TODO: /, %, =, !=, ., [], <=, >, >=
     default:
         error(node->begin, "invalid binary operator");
-        return nullptr;
+        return;
     }
 }
 
-Value* CodeGenerator::visit(ast::IntegerLiteral* node) {
+void CodeGenerator::visit(ast::IntegerLiteral* node) {
     // return ConstantInt::get(m_context, APInt(node->value));
 }
 
-ConstantFP* CodeGenerator::visit(ast::RealLiteral* node) {
-    return ConstantFP::get(m_context, APFloat(node->value));
+void CodeGenerator::visit(ast::RealLiteral* node) {
+    tempVal = ConstantFP::get(m_context, APFloat(node->value));
 }
 
-Value* CodeGenerator::visit(ast::BooleanLiteral* node) {}
+void CodeGenerator::visit(ast::BooleanLiteral* node) {}
 
-Value* CodeGenerator::visit(ast::Identifier* node) {
+void CodeGenerator::visit(ast::Identifier* node) {
     auto V = m_namedValues[node->name];
     if (V == nullptr) {
         error(node->begin, "Unknown variable name");
     }
-    return V;
+    tempVal = V;
 }
 
-Value* CodeGenerator::visit(ast::RoutineCall* node) {
+void CodeGenerator::visit(ast::RoutineCall* node) {
     Function* CalleeF = m_module->getFunction(node->routineName);
     if (CalleeF == nullptr) {
         error(node->begin, "unknown function referenced");
-        return nullptr;
+        return;
     }
 
     if (CalleeF->arg_size() != node->args.size()) {
         error(node->begin, "expected {} but got {} parameters",
               CalleeF->arg_size(), node->args.size());
-        return nullptr;
+        return;
     }
 
     std::vector<Value*> args;
     for (auto& arg : node->args) {
-        auto argCode = arg->accept(*this);
+        Value* argCode;
+        arg->accept(*this);
+        extractTempVal(argCode);
         if (argCode == nullptr) {
             error(arg->begin, "what is this?");
-            return nullptr;
+            return;
         }
         args.push_back(argCode);
     }
 
-    return m_builder.CreateCall(CalleeF, args, "calltmp");
+    tempVal = m_builder.CreateCall(CalleeF, args, "calltmp");
 }
 
 } // namespace cg
