@@ -145,8 +145,6 @@ void DeriveType::visit(UnaryExpression* node) {
 }
 
 void DeriveType::visit(BinaryExpression* node) {
-    // node->operand1->accept(*this);
-    node->operand2->accept(*this);
     //  set correct type
     if (node->operation == lexer::TokenType::OpenBrack) {
         // if operation is array access
