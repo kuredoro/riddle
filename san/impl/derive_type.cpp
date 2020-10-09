@@ -43,18 +43,26 @@ void DeriveType::visit(RealType*) {}
 void DeriveType::visit(BooleanType*) {}
 
 void DeriveType::visit(ArrayType* node) {
+
     node->length->accept(*this);
+
     // any primitive type can be convered to the int
     // if (!typeIsBase(node->length->type)) {
     //     error(node->begin, "invalid array length type, should be integer");
     // }
 
     node->elementType->accept(*this);
+    if (m_searchArray) {
+        m_arrayInnerType = node->elementType;
+    }
 }
 
 void DeriveType::visit(RecordType* node) {
     for (auto field : node->fields) {
         field->accept(*this);
+        if (m_searchRecord && field->name == m_recordField) {
+            m_recordInnerType = field->type;
+        }
     }
 }
 
@@ -137,34 +145,63 @@ void DeriveType::visit(UnaryExpression* node) {
 }
 
 void DeriveType::visit(BinaryExpression* node) {
-    node->operand1->accept(*this);
+    // node->operand1->accept(*this);
     node->operand2->accept(*this);
     //  set correct type
-    sPtr<ast::Type> type1 = node->operand1->type;
-    sPtr<ast::Type> type2 = node->operand2->type;
-    // if (node->operation == lexer::TokenType::OpenBrack) {
-    //     // if operation is array access
-    //     // check that the first item is array -> not nec a[1][0]
-    //     node->type = type1;
-    // } else if (node->operation == lexer::TokenType::Dot) {
-    //     // if operation is dot ntation
-    //     // check that the first operand is a record -???
-    //     // take the type of key arg
-    //     node->type = type1;
-    // } else if (type1 != type2) {
+    if (node->operation == lexer::TokenType::OpenBrack) {
+        // if operation is array access
+        // check that the first item is array -> not nec a[1][0]
+        m_searchArray = true;
+        node->operand1->accept(*this);
+        if (m_arrayInnerType == nullptr) {
+            error(node->operand1->begin,
+                  "invalid operation [] on the given type");
+        }
+        m_searchArray = false;
+        node->operand2->accept(*this);
+        if (!typeIsBase(node->operand2->type)) {
+            error(node->operand2->begin, "invalid type for array index");
+        }
+        node->type = m_arrayInnerType;
+    } else if (node->operation == lexer::TokenType::Dot) {
+        // if operation is dot ntation
+        // check that the first operand is a record -???
+        // take the type of key arg
+        m_searchFiled = true;
+        node->operand2->accept(*this);
+        m_searchFiled = false;
+        if (m_recordField == "") {
+            error(node->operand2->begin, "field name of record not found");
+        }
+        // search for the type of key arg
+        m_searchRecord = true;
+        node->operand1->accept(*this);
+        m_searchRecord = false;
 
-    //     if (!typeIsBase(type1)) {
-    //         error(node->operand1->begin, "invalid type of expression");
-    //     }
+        if (m_recordInnerType == nullptr) {
+            error(node->operand1->begin,
+                  "invalid operation '.' on the given type");
+        }
 
-    //     if (!typeIsBase(type2)) {
-    //         error(node->operand2->begin, "invalid type of expression");
-    //     }
+        node->type = m_recordInnerType;
 
-    //     node->type = getGreaterType(type1, type2);
-    // } else {
-    node->type = type1;
-    // }
+    } else if (node->operand1->type != node->operand2->type) {
+
+        sPtr<ast::Type> type1 = node->operand1->type;
+        if (!typeIsBase(type1)) {
+            error(node->operand1->begin, "invalid type of expression");
+        }
+
+        sPtr<ast::Type> type2 = node->operand2->type;
+        if (!typeIsBase(type2)) {
+            error(node->operand2->begin, "invalid type of expression");
+        }
+
+        node->type = getGreaterType(type1, type2);
+    } else {
+        // types are equal
+        node->type = node->operand1->type;
+    }
 }
 
 void DeriveType::visit(Primary*) {}
@@ -175,7 +212,14 @@ void DeriveType::visit(RealLiteral*) {}
 
 void DeriveType::visit(BooleanLiteral*) {}
 
-void DeriveType::visit(Identifier* node) { node->variable->accept(*this); }
+void DeriveType::visit(Identifier* node) {
+    node->variable->accept(*this);
+    if (m_searchFiled) {
+        m_recordField = node->name;
+    }
+    std::cout << "NAME: " << node->name;
+    node->type = node->variable->type;
+}
 
 // already has a type
 void DeriveType::visit(RoutineCall*) {}
@@ -188,22 +232,17 @@ sPtr<ast::Type> DeriveType::getGreaterType(sPtr<ast::Type> type1,
     if (type1 == type2) {
         return type1;
     }
-    sPtr<BooleanType> boolType = std::make_shared<BooleanType>();
-    sPtr<RealType> realType = std::make_shared<RealType>();
-    if (type1 == boolType) {
+    if (type1 == m_boolType) {
         return type2;
     }
-    if (type2 == boolType) {
+    if (type2 == m_boolType) {
         return type1;
     }
-    return realType;
+    return m_realType;
 }
 bool DeriveType::typeIsBase(sPtr<ast::Type> type) {
 
-    sPtr<IntegerType> intType = std::make_shared<IntegerType>();
-    sPtr<BooleanType> boolType = std::make_shared<BooleanType>();
-    sPtr<RealType> realType = std::make_shared<RealType>();
-    return (type == intType) || (type == boolType) || (type == realType);
+    return (type == m_intType) || (type == m_boolType) || (type == m_realType);
 }
 
 } // namespace san
