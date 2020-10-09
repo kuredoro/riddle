@@ -185,8 +185,10 @@ void DeriveType::visit(BinaryExpression* node) {
 
         node->type = m_recordInnerType;
 
-    } else if (node->operand1->type != node->operand2->type) {
-
+    } else if (node->operand1->type != nullptr &&
+               node->operand2->type != nullptr &&
+               node->operand1->type->getTypeKind() !=
+                   node->operand2->type->getTypeKind()) {
         sPtr<ast::Type> type1 = node->operand1->type;
         if (!typeIsBase(type1)) {
             error(node->operand1->begin, "invalid type of expression");
@@ -214,10 +216,10 @@ void DeriveType::visit(BooleanLiteral*) {}
 
 void DeriveType::visit(Identifier* node) {
     node->variable->accept(*this);
+
     if (m_searchFiled) {
         m_recordField = node->name;
     }
-    std::cout << "NAME: " << node->name;
     node->type = node->variable->type;
 }
 
@@ -229,20 +231,27 @@ sPtr<ast::Type> DeriveType::getGreaterType(sPtr<ast::Type> type1,
     // int  & real = real
     // bool & int  = int
     // bool & real = real
-    if (type1 == type2) {
-        return type1;
+    if (type1->getTypeKind() == type2->getTypeKind()) {
+        return type1; // if equal
     }
-    if (type1 == m_boolType) {
+    if (type1->getTypeKind() == ast::TypeKind::Boolean) {
         return type2;
     }
-    if (type2 == m_boolType) {
+    if (type2->getTypeKind() == ast::TypeKind::Boolean) {
         return type1;
     }
-    return m_realType;
+    if (type1->getTypeKind() == ast::TypeKind::Integer) {
+        return type2; // return real
+    }
+    if (type2->getTypeKind() == ast::TypeKind::Integer) {
+        return type1; // return real
+    }
+    return type1;
 }
 bool DeriveType::typeIsBase(sPtr<ast::Type> type) {
-
-    return (type == m_intType) || (type == m_boolType) || (type == m_realType);
+    ast::TypeKind kind = type->getTypeKind();
+    return (kind == ast::TypeKind::Integer) ||
+           (kind == ast::TypeKind::Boolean) || (kind == ast::TypeKind::Real);
 }
 
 } // namespace san
