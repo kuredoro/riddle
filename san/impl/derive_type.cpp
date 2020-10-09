@@ -119,17 +119,16 @@ void DeriveType::visit(WhileLoop* node) {
 void DeriveType::visit(ForLoop* node) {
     // check that loop var is of type int
     node->rangeFrom->accept(*this);
+    if (!typeIsBase(node->rangeFrom->type)) {
+        error(node->rangeFrom->begin, "invalid type of the beginning of range");
+    }
+
     node->rangeTo->accept(*this);
-    // check range vars are comforable to int
-    // if (!typeIsBase(node->rangeFrom->type)) {
-    //     error(node->rangeFrom->begin, "invalid type of the beginning of
-    //     range");
-    // }
-    // if (!typeIsBase(node->rangeTo->type)) {
-    //     error(node->rangeTo->begin, "invalid type of the beginning of
-    //     range");
-    // }
-    // compare??? TBD
+    if (!typeIsBase(node->rangeTo->type)) {
+        error(node->rangeTo->begin, "invalid type of the beginning of range");
+    }
+
+    node->loopVar->type = std::make_shared<ast::IntegerType>();
     node->body->accept(*this);
 }
 
