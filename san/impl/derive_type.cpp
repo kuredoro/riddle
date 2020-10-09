@@ -61,12 +61,16 @@ void DeriveType::visit(RecordType* node) {
 void DeriveType::visit(VariableDecl* node) {
 
     // check type
-    if (node->type) {
+    if (node->type != nullptr) {
         node->type->accept(*this);
     }
     // check/evaluate expression value
-    if (node->initialValue) {
+    if (node->initialValue != nullptr) {
         node->initialValue->accept(*this);
+    }
+    // assign initial value
+    if (node->type == nullptr) {
+        node->type = node->initialValue->type;
     }
 }
 
