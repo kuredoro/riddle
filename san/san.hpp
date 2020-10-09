@@ -41,7 +41,6 @@ private:
     size_t m_depth;
 };
 
-
 /**
  * Pretty printer will produce a code using the AST, that would resemble
  * real code as much as possible.
@@ -97,7 +96,6 @@ private:
     void newline();
 };
 
-
 /**
  * Analyze bodies of the routines and check that routine will always return.
  *
@@ -149,7 +147,6 @@ public:
 private:
     bool m_hasReturn = true;
 };
-
 
 /**
  * This visitor performs resolution of variables/routine calls to their
@@ -284,6 +281,46 @@ private:
  * + assignment of the RoutineDecl's return type to the RoutineCall's type
  */
 class ParamsValidator : public ast::Visitor {
+public:
+    void visit(ast::Program* node) override;
+    void visit(ast::RoutineDecl* node) override;
+    void visit(ast::Type* node) override;
+    void visit(ast::AliasedType* node) override;
+    void visit(ast::PrimitiveType* node) override;
+    void visit(ast::IntegerType* node) override;
+    void visit(ast::RealType* node) override;
+    void visit(ast::BooleanType* node) override;
+    void visit(ast::ArrayType* node) override;
+    void visit(ast::RecordType* node) override;
+    void visit(ast::VariableDecl* node) override;
+    void visit(ast::TypeDecl* node) override;
+    void visit(ast::Body* node) override;
+    void visit(ast::Statement* node) override;
+    void visit(ast::ReturnStatement* node) override;
+    void visit(ast::Assignment* node) override;
+    void visit(ast::WhileLoop* node) override;
+    void visit(ast::ForLoop* node) override;
+    void visit(ast::IfStatement* node) override;
+    void visit(ast::Expression* node) override;
+    void visit(ast::UnaryExpression* node) override;
+    void visit(ast::BinaryExpression* node) override;
+    void visit(ast::Primary* node) override;
+    void visit(ast::IntegerLiteral* node) override;
+    void visit(ast::RealLiteral* node) override;
+    void visit(ast::BooleanLiteral* node) override;
+    void visit(ast::Identifier* node) override;
+    void visit(ast::RoutineCall* node) override;
+};
+
+/**
+ * This visitor is responsibel for
+ * - detection of possibility of type converges
+ * - determining of the resulted type of the expression
+ * - check, that array index, range thresholds are integers
+ * - check that dot is called only on structures
+ */
+
+class DeriveType : public ast::Visitor {
 public:
     void visit(ast::Program* node) override;
     void visit(ast::RoutineDecl* node) override;

@@ -7,6 +7,7 @@ libsan = static_library('visitors',
                                  'impl/array_length_enforcer.cpp',
                                  'impl/params_resolver.cpp',
                                  'impl/missing_return.cpp',
+                                 'impl/derive_type.cpp'
                              ],
                              cpp_args : riddle_cpp_args,
                              c_args : riddle_c_args,
