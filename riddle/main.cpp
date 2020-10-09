@@ -111,6 +111,20 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    fmt::print(fmt::emphasis::bold, "missing return: ");
+
+    san::MissingReturn missingReturn;
+    ast->accept(missingReturn);
+
+    errors = missingReturn.getErrors();
+    if (!errors.empty()) {
+        fmt::print(fmt::fg(fmt::color::indian_red), "fail\n");
+        printErrors(code, errors);
+        return 1;
+    }
+
+    fmt::print(fmt::fg(fmt::color::green), "pass\n");
+
     // Check if amount of params is equal to record's amount of params
     san::ParamsValidator paramsValidator;
     ast->accept(paramsValidator);
@@ -123,6 +137,6 @@ int main(int argc, char* argv[]) {
 
         return 1;
     }
-
+  
     return 0;
 }
