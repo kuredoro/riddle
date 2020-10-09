@@ -356,6 +356,16 @@ private: // ??? could be made public
                                    sPtr<ast::Type> targetType);
 
     bool typeIsBase(sPtr<ast::Type> type);
+    bool m_searchArray = false;
+    bool m_searchRecord = false;
+    bool m_searchFiled = false;
+    std::string m_recordField = "";
+    sPtr<ast::Type> m_arrayInnerType = nullptr;
+    sPtr<ast::Type> m_recordInnerType = nullptr;
+
+    sPtr<ast::Type> m_intType = std::make_shared<ast::IntegerType>();
+    sPtr<ast::Type> m_boolType = std::make_shared<ast::BooleanType>();
+    sPtr<ast::Type> m_realType = std::make_shared<ast::RealType>();
 };
 
 } // namespace san
