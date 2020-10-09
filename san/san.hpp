@@ -259,9 +259,7 @@ class ParamsValidator : public ast::Visitor {
 public:
     void visit(ast::Program* node) override;
     void visit(ast::RoutineDecl* node) override;
-    void visit(ast::Type* node) override;
     void visit(ast::AliasedType* node) override;
-    void visit(ast::PrimitiveType* node) override;
     void visit(ast::IntegerType* node) override;
     void visit(ast::RealType* node) override;
     void visit(ast::BooleanType* node) override;
@@ -270,16 +268,13 @@ public:
     void visit(ast::VariableDecl* node) override;
     void visit(ast::TypeDecl* node) override;
     void visit(ast::Body* node) override;
-    void visit(ast::Statement* node) override;
     void visit(ast::ReturnStatement* node) override;
     void visit(ast::Assignment* node) override;
     void visit(ast::WhileLoop* node) override;
     void visit(ast::ForLoop* node) override;
     void visit(ast::IfStatement* node) override;
-    void visit(ast::Expression* node) override;
     void visit(ast::UnaryExpression* node) override;
     void visit(ast::BinaryExpression* node) override;
-    void visit(ast::Primary* node) override;
     void visit(ast::IntegerLiteral* node) override;
     void visit(ast::RealLiteral* node) override;
     void visit(ast::BooleanLiteral* node) override;
