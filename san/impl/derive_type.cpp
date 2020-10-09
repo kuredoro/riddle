@@ -124,7 +124,7 @@ void DeriveType::visit(IfStatement* node) {
     node->condition->accept(*this);
     // check condition is of type boolean
     node->ifBody->accept(*this);
-    if (node->elseBody) {
+    if (node->elseBody != nullptr) {
         node->elseBody->accept(*this);
     }
 }
@@ -142,20 +142,29 @@ void DeriveType::visit(BinaryExpression* node) {
     //  set correct type
     sPtr<ast::Type> type1 = node->operand1->type;
     sPtr<ast::Type> type2 = node->operand2->type;
-    if (type1 != type2) {
+    // if (node->operation == lexer::TokenType::OpenBrack) {
+    //     // if operation is array access
+    //     // check that the first item is array -> not nec a[1][0]
+    //     node->type = type1;
+    // } else if (node->operation == lexer::TokenType::Dot) {
+    //     // if operation is dot ntation
+    //     // check that the first operand is a record -???
+    //     // take the type of key arg
+    //     node->type = type1;
+    // } else if (type1 != type2) {
 
-        // if (!typeIsBase(type1)) {
-        //     error(node->operand1->begin, "invalid type of expression");
-        // }
+    //     if (!typeIsBase(type1)) {
+    //         error(node->operand1->begin, "invalid type of expression");
+    //     }
 
-        // if (!typeIsBase(type2)) {
-        //     error(node->operand2->begin, "invalid type of expression");
-        // }
+    //     if (!typeIsBase(type2)) {
+    //         error(node->operand2->begin, "invalid type of expression");
+    //     }
 
-        node->type = getGreaterType(type1, type2);
-    } else {
-        node->type = type1;
-    }
+    //     node->type = getGreaterType(type1, type2);
+    // } else {
+    node->type = type1;
+    // }
 }
 
 void DeriveType::visit(Primary*) {}
@@ -166,7 +175,7 @@ void DeriveType::visit(RealLiteral*) {}
 
 void DeriveType::visit(BooleanLiteral*) {}
 
-void DeriveType::visit(Identifier*) {}
+void DeriveType::visit(Identifier* node) { node->variable->accept(*this); }
 
 // already has a type
 void DeriveType::visit(RoutineCall*) {}
@@ -179,7 +188,6 @@ sPtr<ast::Type> DeriveType::getGreaterType(sPtr<ast::Type> type1,
     if (type1 == type2) {
         return type1;
     }
-    // sPtr<IntegerType> intType = std::make_shared<IntegerType>();
     sPtr<BooleanType> boolType = std::make_shared<BooleanType>();
     sPtr<RealType> realType = std::make_shared<RealType>();
     if (type1 == boolType) {
@@ -189,9 +197,6 @@ sPtr<ast::Type> DeriveType::getGreaterType(sPtr<ast::Type> type1,
         return type1;
     }
     return realType;
-
-    // !!! boolean	real	assignment is illegal
-    // Only in case of user-defined types works like assignment by reference
 }
 bool DeriveType::typeIsBase(sPtr<ast::Type> type) {
 
