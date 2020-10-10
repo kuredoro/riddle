@@ -62,6 +62,12 @@ private:
         tempVal = nullptr;
         return t;
     }
+    llvm::Type* tempType = nullptr;
+    llvm::Type* extractTempType() {
+        llvm::Type* t = tempType;
+        tempType = nullptr;
+        return t;
+    }
 };
 
 } // namespace cg
