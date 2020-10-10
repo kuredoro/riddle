@@ -140,7 +140,7 @@ int main(int argc, char* argv[]) {
 
     fmt::print(fmt::emphasis::bold, "types conformance: ");
 
-    san::DeriveType deriveType;
+    san::TypeDeriver deriveType;
     ast->accept(deriveType);
 
     errors = deriveType.getErrors();

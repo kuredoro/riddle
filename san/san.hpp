@@ -320,7 +320,7 @@ public:
  * - check that dot is called only on structures
  */
 
-class DeriveType : public ast::Visitor {
+class TypeDeriver : public ast::Visitor {
 public:
     void visit(ast::Program* node) override;
     void visit(ast::RoutineDecl* node) override;
@@ -363,6 +363,9 @@ private: // ??? could be made public
     std::string m_recordField = "";
     sPtr<ast::Type> m_arrayInnerType = nullptr;
     sPtr<ast::Type> m_recordInnerType = nullptr;
+    // bool DeriveType::checkTypesAreEqual(sPtr<ast::Type> type1,
+    //                                     sPtr<ast::Type> type2);
+    // sPtr<std::vector<ast::TypeKind>> getFullType(sPtr<ast::Type> type1);
 };
 
 } // namespace san
