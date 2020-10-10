@@ -121,7 +121,9 @@ void TypeDeriver::visit(WhileLoop* node) {
     if (conditionType != TypeKind::Integer ||
         conditionType != TypeKind::Boolean) {
         error(node->condition->begin,
-              "type of condition should be convertable to boolean");
+              "type of condition should be convertable to boolean, current "
+              "type is {}",
+              conditionType);
     }
     node->body->accept(*this);
 }
@@ -146,10 +148,12 @@ void TypeDeriver::visit(IfStatement* node) {
     node->condition->accept(*this);
     // check condition is of type boolean
     TypeKind conditionType = node->condition->type->getTypeKind();
-    if (conditionType != TypeKind::Integer ||
+    if (conditionType != TypeKind::Integer &&
         conditionType != TypeKind::Boolean) {
         error(node->condition->begin,
-              "type of condition should be convertable to boolean");
+              "type of condition should be convertable to boolean, current "
+              "type is {}",
+              conditionType);
     }
     node->ifBody->accept(*this);
     if (node->elseBody != nullptr) {
