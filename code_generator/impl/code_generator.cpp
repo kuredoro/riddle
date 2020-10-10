@@ -96,7 +96,7 @@ void CodeGenerator::visit(ast::ReturnStatement* node) {
         node->expression->accept(*this);
         returnValue = extractTempVal();
     }
-    tempVal = m_builder.CreateRet(returnValue);
+    m_builder.CreateRet(returnValue);
 }
 
 void CodeGenerator::visit(ast::Assignment* node) {}
@@ -105,7 +105,64 @@ void CodeGenerator::visit(ast::WhileLoop* node) {}
 
 void CodeGenerator::visit(ast::ForLoop* node) {}
 
-void CodeGenerator::visit(ast::IfStatement* node) {}
+void CodeGenerator::visit(ast::IfStatement* node) {
+    node->condition->accept(*this);
+    Value* condition = extractTempVal();
+    if (condition == nullptr) {
+        error(node->condition->begin, "Cannot understand the condition");
+        return;
+    }
+
+    if (condition->getType()->isFloatingPointTy()) {
+        error(node->condition->begin, "Cannot cast real to boolean");
+        return;
+    }
+    // Convert condition to a bool by comparing it to 0
+    condition = m_builder.CreateICmpNE(
+        condition, ConstantInt::get(m_context, APInt(1, 0)), "ifcond");
+
+    // Get the current function
+    Function* func = m_builder.GetInsertBlock()->getParent();
+
+    // Create blocks for the then and else cases.
+    // Insert the 'then' block at the end of the function.
+    bool hasElse = node->elseBody != nullptr;
+    BasicBlock* thenBB = BasicBlock::Create(m_context, "then", func);
+    BasicBlock* elseBB =
+        hasElse ? BasicBlock::Create(m_context, "else") : nullptr;
+    BasicBlock* mergeBB = BasicBlock::Create(m_context, "endif");
+
+    m_builder.CreateCondBr(condition, thenBB, hasElse ? elseBB : mergeBB);
+
+    // Start inserting into the "then" block
+    m_builder.SetInsertPoint(thenBB);
+
+    node->ifBody->accept(*this);
+
+    if (hasElse) {
+        // Jump to after the "else" block
+        m_builder.CreateBr(mergeBB);
+    }
+
+    // Code of "then" can change current block; update thenBB for the PHI
+    thenBB = m_builder.GetInsertBlock();
+
+    if (hasElse) {
+        // Emit else block
+        func->getBasicBlockList().push_back(elseBB);
+        m_builder.SetInsertPoint(elseBB);
+
+        node->elseBody->accept(*this);
+        // m_builder.CreateBr(mergeBB); // should not need to explicitly branch
+
+        // Code of 'else' can change the current block; update elseBB for PHI
+        // elseBB = m_builder.GetInsertBlock(); // we don't use PHI
+    }
+
+    // Emit merge block
+    func->getBasicBlockList().push_back(mergeBB);
+    m_builder.SetInsertPoint(mergeBB);
+}
 
 void CodeGenerator::visit(ast::UnaryExpression* node) {}
 
