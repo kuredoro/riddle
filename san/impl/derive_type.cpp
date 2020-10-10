@@ -117,13 +117,9 @@ void TypeDeriver::visit(Assignment* node) { node->rhs->accept(*this); }
 void TypeDeriver::visit(WhileLoop* node) {
     node->condition->accept(*this);
     // check that condition is convertable to bool
-    TypeKind conditionType = node->condition->type->getTypeKind();
-    if (conditionType != TypeKind::Integer ||
-        conditionType != TypeKind::Boolean) {
+    if (!typeIsBooleanConvertable(node->condition->type)) {
         error(node->condition->begin,
-              "type of condition should be convertable to boolean, current "
-              "type is {}",
-              conditionType);
+              "type of condition should be convertable to boolean");
     }
     node->body->accept(*this);
 }
@@ -147,13 +143,9 @@ void TypeDeriver::visit(ForLoop* node) {
 void TypeDeriver::visit(IfStatement* node) {
     node->condition->accept(*this);
     // check condition is of type boolean
-    TypeKind conditionType = node->condition->type->getTypeKind();
-    if (conditionType != TypeKind::Integer &&
-        conditionType != TypeKind::Boolean) {
+    if (!typeIsBooleanConvertable(node->condition->type)) {
         error(node->condition->begin,
-              "type of condition should be convertable to boolean, current "
-              "type is {}",
-              conditionType);
+              "type of condition should be convertable to boolean");
     }
     node->ifBody->accept(*this);
     if (node->elseBody != nullptr) {
@@ -211,22 +203,16 @@ void TypeDeriver::visit(BinaryExpression* node) {
         // lhs and rhs should be convertable to boolean
         node->operand1->accept(*this);
 
-        TypeKind conditionType = node->operand1->type->getTypeKind();
-        if (conditionType != TypeKind::Integer &&
-            conditionType != TypeKind::Boolean) {
+        if (!typeIsBooleanConvertable(node->operand1->type)) {
             error(node->operand1->begin,
-                  "lhs of logical operation should be convertable to boolean",
-                  conditionType);
+                  "lhs of logical operation should be convertable to boolean");
         }
 
         node->operand2->accept(*this);
 
-        TypeKind conditionType = node->operand2->type->getTypeKind();
-        if (conditionType != TypeKind::Integer &&
-            conditionType != TypeKind::Boolean) {
+        if (!typeIsBooleanConvertable(node->operand2->type)) {
             error(node->operand2->begin,
-                  "rhs of logical operation should be convertable to boolean",
-                  conditionType);
+                  "rhs of logical operation should be convertable to boolean");
         }
 
         node->type = std::make_shared<BooleanType>();
@@ -316,6 +302,12 @@ bool TypeDeriver::typeIsPrimitive(sPtr<Type> type) {
     TypeKind kind = type->getTypeKind();
     return (kind == TypeKind::Integer) || (kind == TypeKind::Boolean) ||
            (kind == TypeKind::Real);
+}
+bool TypeDeriver::typeIsBooleanConvertable(sPtr<Type> type) {
+
+    TypeKind conditionType = type->getTypeKind();
+    return conditionType == TypeKind::Integer ||
+           conditionType == TypeKind::Boolean;
 }
 
 // bool DeriveType::checkTypesAreEqual(sPtr<Type> type1,
