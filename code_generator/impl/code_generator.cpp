@@ -190,10 +190,7 @@ void CodeGenerator::visit(ast::BinaryExpression* node) {
         tempVal = m_builder.CreateFMul(L, R, "multmp");
         return;
     case lexer::TokenType::Less:
-        L = m_builder.CreateFCmpULT(L, R, "cmptmp");
-        // Convert bool 0/1 to double 0.0 or 1.0
-        tempVal =
-            m_builder.CreateUIToFP(L, Type::getDoubleTy(m_context), "booltmp");
+        tempVal = m_builder.CreateFCmpULT(L, R, "cmptmp");
         return;
     // TODO: /, %, =, !=, ., [], <=, >, >=
     default:
