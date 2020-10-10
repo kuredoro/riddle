@@ -313,11 +313,11 @@ public:
 };
 
 /**
- * This visitor is responsibel for
- * - detection of possibility of type converges
- * - determining of the resulted type of the expression
- * - check, that array index, range thresholds are integers
- * - check that dot is called only on structures
+ * This visitor is responsible for
+ * - detection of possibility of type conversion
+ * - determining the resulting type of the expression
+ * - checking that array index and range thresholds are integers
+ * - checking that dot is called only on records
  */
 
 class TypeDeriver : public ast::Visitor {
