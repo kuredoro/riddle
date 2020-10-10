@@ -294,7 +294,7 @@ struct Primary : Expression, Statement {
 };
 
 struct IntegerLiteral : Expression {
-    long long value;
+    uint64_t value;
     IntegerLiteral(long long value) : value(value) {
         this->constant = true;
         this->type = std::make_shared<IntegerType>();

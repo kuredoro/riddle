@@ -146,7 +146,7 @@ void CodeGenerator::visit(ast::BinaryExpression* node) {
 }
 
 void CodeGenerator::visit(ast::IntegerLiteral* node) {
-    tempVal = ConstantInt::getSigned(Type::getInt64Ty(m_context), node->value);
+    tempVal = ConstantInt::get(m_context, APInt(64, node->value));
 }
 
 void CodeGenerator::visit(ast::RealLiteral* node) {
@@ -154,11 +154,7 @@ void CodeGenerator::visit(ast::RealLiteral* node) {
 }
 
 void CodeGenerator::visit(ast::BooleanLiteral* node) {
-    if (node->value) {
-        tempVal = ConstantInt::getTrue(m_context);
-    } else {
-        tempVal = ConstantInt::getFalse(m_context);
-    }
+    tempVal = ConstantInt::get(m_context, APInt(1, node->value));
 }
 
 void CodeGenerator::visit(ast::Identifier* node) {
