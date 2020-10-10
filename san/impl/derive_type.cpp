@@ -166,7 +166,7 @@ void TypeDeriver::visit(BinaryExpression* node) {
     //  set correct type
     if (node->operation == lexer::TokenType::OpenBrack) {
         // if operation is array access
-        // check that the first item is array -> not nec a[1][0]
+        // find the type of array
         m_searchArray = true;
         node->operand1->accept(*this);
         if (m_arrayInnerType == nullptr) {
@@ -179,10 +179,10 @@ void TypeDeriver::visit(BinaryExpression* node) {
             error(node->operand2->begin, "invalid type for array index");
         }
         node->type = m_arrayInnerType;
+        m_arrayInnerType = nullptr;
     } else if (node->operation == lexer::TokenType::Dot) {
-        // if operation is dot ntation
-        // check that the first operand is a record -???
-        // take the type of key arg
+        // if operation is dot notation
+        // find record field name
         m_searchField = true;
         node->operand2->accept(*this);
         m_searchField = false;
@@ -193,14 +193,14 @@ void TypeDeriver::visit(BinaryExpression* node) {
         m_searchRecord = true;
         node->operand1->accept(*this);
         m_searchRecord = false;
+        m_recordField = "";
 
         if (m_recordInnerType == nullptr) {
             error(node->operand1->begin,
                   "invalid operation '.' on the given type");
         }
-
         node->type = m_recordInnerType;
-
+        m_recordInnerType = nullptr;
     } else if (node->operand1->type != nullptr &&
                node->operand2->type != nullptr &&
                node->operand1->type->getTypeKind() !=
