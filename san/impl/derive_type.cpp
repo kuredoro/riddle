@@ -5,13 +5,6 @@ namespace san {
 
 using namespace ast;
 
-/**
- * This visitor is responsibel for
- * - detection of possibility of type converges
- * - determining of the resulted type of the expression
- * - check, that array index, range thresholds are integers
- * - check that dot is called only on structures
- */
 void DeriveType::visit(Program* node) {
 
     // check variables with both type and initial value
@@ -49,7 +42,7 @@ void DeriveType::visit(BooleanType*) {}
 
 void DeriveType::visit(ArrayType* node) {
 
-    if (node->length) {
+    if (node->length) { // can be absent in case of routine parameter
         node->length->accept(*this);
 
         // any primitive type can be convered to the int
