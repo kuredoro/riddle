@@ -22,9 +22,11 @@ void DeriveType::visit(Program* node) {
 }
 
 void DeriveType::visit(RoutineDecl* node) {
+    m_inRoutineParams = true;
     for (auto parameter : node->parameters) {
         parameter->accept(*this);
     }
+    m_inRoutineParams = false;
     node->body->accept(*this);
 }
 
@@ -42,14 +44,15 @@ void DeriveType::visit(BooleanType*) {}
 
 void DeriveType::visit(ArrayType* node) {
 
-    if (node->length) { // can be absent in case of routine parameter
+    if (node->length) {
         node->length->accept(*this);
-
         // any primitive type can be convered to the int
         if (!typeIsBase(node->length->type)) {
             error(node->begin, "invalid array length type, should be integer");
         }
-    }
+    } else if (!m_inRoutineParams) {
+        error(node->begin, "length of array should be always defined");
+    } // length can be absent in case of routine parameter
     node->elementType->accept(*this);
     if (m_searchArray) {
         m_arrayInnerType = node->elementType;

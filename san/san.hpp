@@ -359,6 +359,7 @@ private: // ??? could be made public
     bool m_searchArray = false;
     bool m_searchRecord = false;
     bool m_searchFiled = false;
+    bool m_inRoutineParams = false;
     std::string m_recordField = "";
     sPtr<ast::Type> m_arrayInnerType = nullptr;
     sPtr<ast::Type> m_recordInnerType = nullptr;
