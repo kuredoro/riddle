@@ -43,7 +43,7 @@ struct BooleanLiteral;
 struct Identifier;
 struct RoutineCall;
 
-enum class TypeKind { Integer, Real, Boolean, Array, Record };
+enum class TypeKind { Boolean, Integer, Real, Array, Record };
 
 class Visitor {
 public:

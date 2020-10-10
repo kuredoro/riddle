@@ -358,10 +358,15 @@ private:
     // `initialType` and rhs is of type `targetType`
     sPtr<ast::Type> getGreaterType(sPtr<ast::Type> initialType,
                                    sPtr<ast::Type> targetType);
+
     // checks if the given type is an Integer, Boolean or Real
     bool typeIsPrimitive(sPtr<ast::Type> type);
-    // if this variable is set to true, variable `m_arrayInnerType` will be set
-    // to the type of the array during array visitin
+
+    // checks if TypeKind is Integer or Boolean
+    bool typeIsBooleanConvertable(sPtr<ast::Type> type);
+
+    // if this variable is set to true, variable `m_arrayInnerType` will be
+    // set to the type of the array during array visitin
     bool m_searchArray = false;
     sPtr<ast::Type> m_arrayInnerType = nullptr;
 
