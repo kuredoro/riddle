@@ -106,7 +106,9 @@ void TypeDeriver::visit(Body* node) {
     }
 }
 
-void TypeDeriver::visit(ReturnStatement*) {}
+void TypeDeriver::visit(ReturnStatement* node) {
+    node->expression->accept(*this);
+}
 
 void TypeDeriver::visit(Assignment* node) { node->rhs->accept(*this); }
 
