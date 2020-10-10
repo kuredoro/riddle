@@ -237,8 +237,11 @@ void TypeDeriver::visit(Identifier* node) {
     node->type = node->variable->type;
 }
 
-// already has a type
-void TypeDeriver::visit(RoutineCall*) {}
+void TypeDeriver::visit(RoutineCall* node) {
+    for (auto arg : node->args) {
+        arg->accept(*this);
+    }
+}
 
 sPtr<Type> TypeDeriver::getGreaterType(sPtr<Type> type1, sPtr<Type> type2) {
     // int  & real = real
