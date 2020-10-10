@@ -114,6 +114,13 @@ void TypeDeriver::visit(Assignment* node) { node->rhs->accept(*this); }
 
 void TypeDeriver::visit(WhileLoop* node) {
     node->condition->accept(*this);
+    // check that condition is convertable to bool
+    ast::TypeKind conditionType = node->condition->type->getTypeKind();
+    if (conditionType != ast::TypeKind::Integer ||
+        conditionType != ast::TypeKind::Boolean) {
+        error(node->condition->begin,
+              "type of condition should be convertable to boolean");
+    }
     node->body->accept(*this);
 }
 
@@ -136,6 +143,12 @@ void TypeDeriver::visit(ForLoop* node) {
 void TypeDeriver::visit(IfStatement* node) {
     node->condition->accept(*this);
     // check condition is of type boolean
+    ast::TypeKind conditionType = node->condition->type->getTypeKind();
+    if (conditionType != ast::TypeKind::Integer ||
+        conditionType != ast::TypeKind::Boolean) {
+        error(node->condition->begin,
+              "type of condition should be convertable to boolean");
+    }
     node->ifBody->accept(*this);
     if (node->elseBody != nullptr) {
         node->elseBody->accept(*this);
