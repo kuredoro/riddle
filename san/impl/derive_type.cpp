@@ -1,11 +1,9 @@
-#include <iostream>
-
 #include "san.hpp"
 namespace san {
 
 using namespace ast;
 
-void DeriveType::visit(Program* node) {
+void TypeDeriver::visit(Program* node) {
 
     // check variables with both type and initial value
     for (auto var : node->variables) {
@@ -21,7 +19,7 @@ void DeriveType::visit(Program* node) {
     }
 }
 
-void DeriveType::visit(RoutineDecl* node) {
+void TypeDeriver::visit(RoutineDecl* node) {
     m_inRoutineParams = true;
     for (auto parameter : node->parameters) {
         parameter->accept(*this);
@@ -30,19 +28,19 @@ void DeriveType::visit(RoutineDecl* node) {
     node->body->accept(*this);
 }
 
-void DeriveType::visit(Type*) {}
+void TypeDeriver::visit(Type*) {}
 
-void DeriveType::visit(AliasedType* node) { node->actualType->accept(*this); }
+void TypeDeriver::visit(AliasedType* node) { node->actualType->accept(*this); }
 
-void DeriveType::visit(PrimitiveType*) {}
+void TypeDeriver::visit(PrimitiveType*) {}
 
-void DeriveType::visit(IntegerType*) {}
+void TypeDeriver::visit(IntegerType*) {}
 
-void DeriveType::visit(RealType*) {}
+void TypeDeriver::visit(RealType*) {}
 
-void DeriveType::visit(BooleanType*) {}
+void TypeDeriver::visit(BooleanType*) {}
 
-void DeriveType::visit(ArrayType* node) {
+void TypeDeriver::visit(ArrayType* node) {
 
     if (node->length) {
         node->length->accept(*this);
@@ -59,7 +57,7 @@ void DeriveType::visit(ArrayType* node) {
     }
 }
 
-void DeriveType::visit(RecordType* node) {
+void TypeDeriver::visit(RecordType* node) {
     for (auto field : node->fields) {
         field->accept(*this);
         if (m_searchRecord && field->name == m_recordField) {
@@ -68,7 +66,7 @@ void DeriveType::visit(RecordType* node) {
     }
 }
 
-void DeriveType::visit(VariableDecl* node) {
+void TypeDeriver::visit(VariableDecl* node) {
 
     // check type
     if (node->type != nullptr) {
@@ -84,9 +82,9 @@ void DeriveType::visit(VariableDecl* node) {
     }
 }
 
-void DeriveType::visit(TypeDecl* node) { node->type->accept(*this); }
+void TypeDeriver::visit(TypeDecl* node) { node->type->accept(*this); }
 
-void DeriveType::visit(Body* node) {
+void TypeDeriver::visit(Body* node) {
 
     // to check array length type
     for (auto type : node->types) {
@@ -102,18 +100,18 @@ void DeriveType::visit(Body* node) {
     }
 }
 
-void DeriveType::visit(Statement*) {}
+void TypeDeriver::visit(Statement*) {}
 
-void DeriveType::visit(ReturnStatement*) {}
+void TypeDeriver::visit(ReturnStatement*) {}
 
-void DeriveType::visit(Assignment* node) { node->rhs->accept(*this); }
+void TypeDeriver::visit(Assignment* node) { node->rhs->accept(*this); }
 
-void DeriveType::visit(WhileLoop* node) {
+void TypeDeriver::visit(WhileLoop* node) {
     node->condition->accept(*this);
     node->body->accept(*this);
 }
 
-void DeriveType::visit(ForLoop* node) {
+void TypeDeriver::visit(ForLoop* node) {
     // check that loop var is of type int
     node->rangeFrom->accept(*this);
     if (!typeIsBase(node->rangeFrom->type)) {
@@ -129,7 +127,7 @@ void DeriveType::visit(ForLoop* node) {
     node->body->accept(*this);
 }
 
-void DeriveType::visit(IfStatement* node) {
+void TypeDeriver::visit(IfStatement* node) {
     node->condition->accept(*this);
     // check condition is of type boolean
     node->ifBody->accept(*this);
@@ -138,14 +136,14 @@ void DeriveType::visit(IfStatement* node) {
     }
 }
 
-void DeriveType::visit(Expression*) {}
+void TypeDeriver::visit(Expression*) {}
 
-void DeriveType::visit(UnaryExpression* node) {
+void TypeDeriver::visit(UnaryExpression* node) {
     node->operand->accept(*this);
     node->type = node->operand->type;
 }
 
-void DeriveType::visit(BinaryExpression* node) {
+void TypeDeriver::visit(BinaryExpression* node) {
     //  set correct type
     if (node->operation == lexer::TokenType::OpenBrack) {
         // if operation is array access
@@ -205,15 +203,15 @@ void DeriveType::visit(BinaryExpression* node) {
     }
 }
 
-void DeriveType::visit(Primary*) {}
+void TypeDeriver::visit(Primary*) {}
 
-void DeriveType::visit(IntegerLiteral*) {}
+void TypeDeriver::visit(IntegerLiteral*) {}
 
-void DeriveType::visit(RealLiteral*) {}
+void TypeDeriver::visit(RealLiteral*) {}
 
-void DeriveType::visit(BooleanLiteral*) {}
+void TypeDeriver::visit(BooleanLiteral*) {}
 
-void DeriveType::visit(Identifier* node) {
+void TypeDeriver::visit(Identifier* node) {
     node->variable->accept(*this);
 
     if (m_searchFiled) {
@@ -223,10 +221,10 @@ void DeriveType::visit(Identifier* node) {
 }
 
 // already has a type
-void DeriveType::visit(RoutineCall*) {}
+void TypeDeriver::visit(RoutineCall*) {}
 
-sPtr<ast::Type> DeriveType::getGreaterType(sPtr<ast::Type> type1,
-                                           sPtr<ast::Type> type2) {
+sPtr<ast::Type> TypeDeriver::getGreaterType(sPtr<ast::Type> type1,
+                                            sPtr<ast::Type> type2) {
     // int  & real = real
     // bool & int  = int
     // bool & real = real
@@ -247,10 +245,48 @@ sPtr<ast::Type> DeriveType::getGreaterType(sPtr<ast::Type> type1,
     }
     return type1;
 }
-bool DeriveType::typeIsBase(sPtr<ast::Type> type) {
+bool TypeDeriver::typeIsBase(sPtr<ast::Type> type) {
     ast::TypeKind kind = type->getTypeKind();
     return (kind == ast::TypeKind::Integer) ||
            (kind == ast::TypeKind::Boolean) || (kind == ast::TypeKind::Real);
 }
+
+// bool DeriveType::checkTypesAreEqual(sPtr<ast::Type> type1,
+//                                     sPtr<ast::Type> type2) {
+//     sPtr<std::vector<ast::TypeKind>> fullType1 = getFullType(type1);
+//     sPtr<std::vector<ast::TypeKind>> fullType2 = getFullType(type2);
+//     if (fullType1->size() != fullType2->size()) {
+//         return false;
+//     }
+//     for (std::size_t i = 0; i < fullType1->size(); i++) {
+//         if (fullType1->at(i) != fullType2->at(i)) {
+//             return false;
+//         }
+//         if (fullType1->at(i) == ast::TypeKind::Array) {
+//             // check length
+//         }
+//     }
+// }
+
+// sPtr<std::vector<ast::TypeKind>>
+// DeriveType::getFullType(sPtr<ast::Type> type1) {
+//     std::vector<ast::TypeKind> result = {type1->getTypeKind()};
+//     if (result[0] == ast::TypeKind::Array) {
+//         m_searchArray = true;
+//         type1->accept(*this);
+//         m_searchArray = false;
+//         if (m_arrayInnerType) {
+//             // append more deep values
+//             sPtr<std::vector<ast::TypeKind>> depth =
+//                 getFullType(m_arrayInnerType);
+//             for (std::size_t i = 0; i < depth->size(); i++) {
+//                 result.push_back(depth->at(i));
+//             }
+//         } else {
+//             error(type1->begin, "ivalid array inner type");
+//         }
+//     } else if (result[0] == ast::TypeKind::Record) {
+//     }
+// }
 
 } // namespace san
