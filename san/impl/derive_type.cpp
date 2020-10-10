@@ -1,7 +1,9 @@
 #include "san.hpp"
-namespace san {
 
 using namespace ast;
+
+namespace san {
+
 // Tobe removed
 void TypeDeriver::visit(Type*) {}
 
@@ -115,9 +117,9 @@ void TypeDeriver::visit(Assignment* node) { node->rhs->accept(*this); }
 void TypeDeriver::visit(WhileLoop* node) {
     node->condition->accept(*this);
     // check that condition is convertable to bool
-    ast::TypeKind conditionType = node->condition->type->getTypeKind();
-    if (conditionType != ast::TypeKind::Integer ||
-        conditionType != ast::TypeKind::Boolean) {
+    TypeKind conditionType = node->condition->type->getTypeKind();
+    if (conditionType != TypeKind::Integer ||
+        conditionType != TypeKind::Boolean) {
         error(node->condition->begin,
               "type of condition should be convertable to boolean");
     }
@@ -136,16 +138,16 @@ void TypeDeriver::visit(ForLoop* node) {
         error(node->rangeTo->begin, "invalid type of the beginning of range");
     }
 
-    node->loopVar->type = std::make_shared<ast::IntegerType>();
+    node->loopVar->type = std::make_shared<IntegerType>();
     node->body->accept(*this);
 }
 
 void TypeDeriver::visit(IfStatement* node) {
     node->condition->accept(*this);
     // check condition is of type boolean
-    ast::TypeKind conditionType = node->condition->type->getTypeKind();
-    if (conditionType != ast::TypeKind::Integer ||
-        conditionType != ast::TypeKind::Boolean) {
+    TypeKind conditionType = node->condition->type->getTypeKind();
+    if (conditionType != TypeKind::Integer ||
+        conditionType != TypeKind::Boolean) {
         error(node->condition->begin,
               "type of condition should be convertable to boolean");
     }
@@ -203,12 +205,12 @@ void TypeDeriver::visit(BinaryExpression* node) {
                node->operand2->type != nullptr &&
                node->operand1->type->getTypeKind() !=
                    node->operand2->type->getTypeKind()) {
-        sPtr<ast::Type> type1 = node->operand1->type;
+        sPtr<Type> type1 = node->operand1->type;
         if (!typeIsBase(type1)) {
             error(node->operand1->begin, "invalid type of expression");
         }
 
-        sPtr<ast::Type> type2 = node->operand2->type;
+        sPtr<Type> type2 = node->operand2->type;
         if (!typeIsBase(type2)) {
             error(node->operand2->begin, "invalid type of expression");
         }
@@ -238,38 +240,37 @@ void TypeDeriver::visit(Identifier* node) {
 // already has a type
 void TypeDeriver::visit(RoutineCall*) {}
 
-sPtr<ast::Type> TypeDeriver::getGreaterType(sPtr<ast::Type> type1,
-                                            sPtr<ast::Type> type2) {
+sPtr<Type> TypeDeriver::getGreaterType(sPtr<Type> type1, sPtr<Type> type2) {
     // int  & real = real
     // bool & int  = int
     // bool & real = real
     if (type1->getTypeKind() == type2->getTypeKind()) {
         return type1; // if equal
     }
-    if (type1->getTypeKind() == ast::TypeKind::Boolean) {
+    if (type1->getTypeKind() == TypeKind::Boolean) {
         return type2;
     }
-    if (type2->getTypeKind() == ast::TypeKind::Boolean) {
+    if (type2->getTypeKind() == TypeKind::Boolean) {
         return type1;
     }
-    if (type1->getTypeKind() == ast::TypeKind::Integer) {
+    if (type1->getTypeKind() == TypeKind::Integer) {
         return type2; // return real
     }
-    if (type2->getTypeKind() == ast::TypeKind::Integer) {
+    if (type2->getTypeKind() == TypeKind::Integer) {
         return type1; // return real
     }
     return type1;
 }
-bool TypeDeriver::typeIsBase(sPtr<ast::Type> type) {
-    ast::TypeKind kind = type->getTypeKind();
-    return (kind == ast::TypeKind::Integer) ||
-           (kind == ast::TypeKind::Boolean) || (kind == ast::TypeKind::Real);
+bool TypeDeriver::typeIsBase(sPtr<Type> type) {
+    TypeKind kind = type->getTypeKind();
+    return (kind == TypeKind::Integer) || (kind == TypeKind::Boolean) ||
+           (kind == TypeKind::Real);
 }
 
-// bool DeriveType::checkTypesAreEqual(sPtr<ast::Type> type1,
-//                                     sPtr<ast::Type> type2) {
-//     sPtr<std::vector<ast::TypeKind>> fullType1 = getFullType(type1);
-//     sPtr<std::vector<ast::TypeKind>> fullType2 = getFullType(type2);
+// bool DeriveType::checkTypesAreEqual(sPtr<Type> type1,
+//                                     sPtr<Type> type2) {
+//     sPtr<std::vector<TypeKind>> fullType1 = getFullType(type1);
+//     sPtr<std::vector<TypeKind>> fullType2 = getFullType(type2);
 //     if (fullType1->size() != fullType2->size()) {
 //         return false;
 //     }
@@ -277,22 +278,22 @@ bool TypeDeriver::typeIsBase(sPtr<ast::Type> type) {
 //         if (fullType1->at(i) != fullType2->at(i)) {
 //             return false;
 //         }
-//         if (fullType1->at(i) == ast::TypeKind::Array) {
+//         if (fullType1->at(i) == TypeKind::Array) {
 //             // check length
 //         }
 //     }
 // }
 
-// sPtr<std::vector<ast::TypeKind>>
-// DeriveType::getFullType(sPtr<ast::Type> type1) {
-//     std::vector<ast::TypeKind> result = {type1->getTypeKind()};
-//     if (result[0] == ast::TypeKind::Array) {
+// sPtr<std::vector<TypeKind>>
+// DeriveType::getFullType(sPtr<Type> type1) {
+//     std::vector<TypeKind> result = {type1->getTypeKind()};
+//     if (result[0] == TypeKind::Array) {
 //         m_searchArray = true;
 //         type1->accept(*this);
 //         m_searchArray = false;
 //         if (m_arrayInnerType) {
 //             // append more deep values
-//             sPtr<std::vector<ast::TypeKind>> depth =
+//             sPtr<std::vector<TypeKind>> depth =
 //                 getFullType(m_arrayInnerType);
 //             for (std::size_t i = 0; i < depth->size(); i++) {
 //                 result.push_back(depth->at(i));
@@ -300,7 +301,7 @@ bool TypeDeriver::typeIsBase(sPtr<ast::Type> type) {
 //         } else {
 //             error(type1->begin, "ivalid array inner type");
 //         }
-//     } else if (result[0] == ast::TypeKind::Record) {
+//     } else if (result[0] == TypeKind::Record) {
 //     }
 // }
 
