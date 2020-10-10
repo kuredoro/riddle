@@ -53,7 +53,7 @@ void TypeDeriver::visit(ArrayType* node) {
     if (node->length) {
         node->length->accept(*this);
         // any primitive type can be convered to the int
-        if (!typeIsBase(node->length->type)) {
+        if (!typeIsPrimitive(node->length->type)) {
             error(node->begin, "invalid array length type, should be integer");
         }
     } else if (!m_inRoutineParams) {
@@ -129,12 +129,12 @@ void TypeDeriver::visit(WhileLoop* node) {
 void TypeDeriver::visit(ForLoop* node) {
     // check that loop var is of type int
     node->rangeFrom->accept(*this);
-    if (!typeIsBase(node->rangeFrom->type)) {
+    if (!typeIsPrimitive(node->rangeFrom->type)) {
         error(node->rangeFrom->begin, "invalid type of the beginning of range");
     }
 
     node->rangeTo->accept(*this);
-    if (!typeIsBase(node->rangeTo->type)) {
+    if (!typeIsPrimitive(node->rangeTo->type)) {
         error(node->rangeTo->begin, "invalid type of the beginning of range");
     }
 
@@ -175,7 +175,7 @@ void TypeDeriver::visit(BinaryExpression* node) {
         }
         m_searchArray = false;
         node->operand2->accept(*this);
-        if (!typeIsBase(node->operand2->type)) {
+        if (!typeIsPrimitive(node->operand2->type)) {
             error(node->operand2->begin, "invalid type for array index");
         }
         node->type = m_arrayInnerType;
@@ -206,12 +206,12 @@ void TypeDeriver::visit(BinaryExpression* node) {
                node->operand1->type->getTypeKind() !=
                    node->operand2->type->getTypeKind()) {
         sPtr<Type> type1 = node->operand1->type;
-        if (!typeIsBase(type1)) {
+        if (!typeIsPrimitive(type1)) {
             error(node->operand1->begin, "invalid type of expression");
         }
 
         sPtr<Type> type2 = node->operand2->type;
-        if (!typeIsBase(type2)) {
+        if (!typeIsPrimitive(type2)) {
             error(node->operand2->begin, "invalid type of expression");
         }
 
@@ -261,7 +261,7 @@ sPtr<Type> TypeDeriver::getGreaterType(sPtr<Type> type1, sPtr<Type> type2) {
     }
     return type1;
 }
-bool TypeDeriver::typeIsBase(sPtr<Type> type) {
+bool TypeDeriver::typeIsPrimitive(sPtr<Type> type) {
     TypeKind kind = type->getTypeKind();
     return (kind == TypeKind::Integer) || (kind == TypeKind::Boolean) ||
            (kind == TypeKind::Real);

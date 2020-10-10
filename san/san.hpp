@@ -359,7 +359,7 @@ private:
     sPtr<ast::Type> getGreaterType(sPtr<ast::Type> initialType,
                                    sPtr<ast::Type> targetType);
     // checks if the given type is an Integer, Boolean or Real
-    bool typeIsBase(sPtr<ast::Type> type);
+    bool typeIsPrimitive(sPtr<ast::Type> type);
     // if this variable is set to true, variable `m_arrayInnerType` will be set
     // to the type of the array during array visitin
     bool m_searchArray = false;
