@@ -49,13 +49,14 @@ void DeriveType::visit(BooleanType*) {}
 
 void DeriveType::visit(ArrayType* node) {
 
-    node->length->accept(*this);
+    if (node->length) {
+        node->length->accept(*this);
 
-    // any primitive type can be convered to the int
-    // if (!typeIsBase(node->length->type)) {
-    //     error(node->begin, "invalid array length type, should be integer");
-    // }
-
+        // any primitive type can be convered to the int
+        if (!typeIsBase(node->length->type)) {
+            error(node->begin, "invalid array length type, should be integer");
+        }
+    }
     node->elementType->accept(*this);
     if (m_searchArray) {
         m_arrayInnerType = node->elementType;
