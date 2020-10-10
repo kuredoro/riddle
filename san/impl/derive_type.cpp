@@ -205,6 +205,50 @@ void TypeDeriver::visit(BinaryExpression* node) {
         }
         node->type = m_recordInnerType;
         m_recordInnerType = nullptr;
+    } else if (node->operation == lexer::TokenType::Or ||
+               node->operation == lexer::TokenType::Xor ||
+               node->operation == lexer::TokenType::And) {
+        // lhs and rhs should be convertable to boolean
+        node->operand1->accept(*this);
+
+        TypeKind conditionType = node->operand1->type->getTypeKind();
+        if (conditionType != TypeKind::Integer &&
+            conditionType != TypeKind::Boolean) {
+            error(node->operand1->begin,
+                  "lhs of logical operation should be convertable to boolean",
+                  conditionType);
+        }
+
+        node->operand2->accept(*this);
+
+        TypeKind conditionType = node->operand2->type->getTypeKind();
+        if (conditionType != TypeKind::Integer &&
+            conditionType != TypeKind::Boolean) {
+            error(node->operand2->begin,
+                  "rhs of logical operation should be convertable to boolean",
+                  conditionType);
+        }
+
+        node->type = std::make_shared<BooleanType>();
+    } else if (node->operation == lexer::TokenType::Eq ||
+               node->operation == lexer::TokenType::Neq ||
+               node->operation == lexer::TokenType::Leq ||
+               node->operation == lexer::TokenType::Geq ||
+               node->operation == lexer::TokenType::Less ||
+               node->operation == lexer::TokenType::Greater) {
+        // the result of comparisons is alvays boolean
+        node->operand1->accept(*this);
+        if (!typeIsPrimitive(node->operand1->type)) {
+            error(node->operand1->begin,
+                  "invalid type for comparison operation");
+        }
+        node->operand2->accept(*this);
+        if (!typeIsPrimitive(node->operand2->type)) {
+            error(node->operand2->begin,
+                  "invalid type for comparison operation");
+        }
+        node->type = std::make_shared<BooleanType>();
+
     } else if (node->operand1->type != nullptr &&
                node->operand2->type != nullptr &&
                node->operand1->type->getTypeKind() !=
