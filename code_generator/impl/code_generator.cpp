@@ -13,14 +13,15 @@ void CodeGenerator::visit(ast::Program* node) {
 void CodeGenerator::visit(ast::RoutineDecl* node) {
     // Types of the parameters
     std::vector<Type*> paramTypes;
-    // for (auto& param : node->parameters) {
-    //     paramTypes.push_back(param->type->accept(*this));
-    // }
+    for (auto& param : node->parameters) {
+        param->type->accept(*this);
+        paramTypes.push_back(extractTempType());
+    }
     // The routine's return type
     Type* returnType = Type::getVoidTy(m_context);
     if (node->returnType != nullptr) {
-        // node->returnType->accept(*this);
-        // extractTempVal(returnType);
+        node->returnType->accept(*this);
+        returnType = extractTempType();
     }
 
     // The function's type: (return type, parameter types, varargs?)
@@ -57,11 +58,17 @@ void CodeGenerator::visit(ast::RoutineDecl* node) {
 
 void CodeGenerator::visit(ast::AliasedType* node) {}
 
-void CodeGenerator::visit(ast::IntegerType* node) {}
+void CodeGenerator::visit(ast::IntegerType* node) {
+    tempType = Type::getInt64Ty(m_context);
+}
 
-void CodeGenerator::visit(ast::RealType* node) {}
+void CodeGenerator::visit(ast::RealType* node) {
+    tempType = Type::getDoubleTy(m_context);
+}
 
-void CodeGenerator::visit(ast::BooleanType* node) {}
+void CodeGenerator::visit(ast::BooleanType* node) {
+    tempType = Type::getInt1Ty(m_context);
+}
 
 void CodeGenerator::visit(ast::ArrayType* node) {}
 
@@ -72,9 +79,14 @@ void CodeGenerator::visit(ast::VariableDecl* node) {}
 void CodeGenerator::visit(ast::TypeDecl* node) {}
 
 void CodeGenerator::visit(ast::Body* node) {
+    for (auto& type : node->types) {
+        type->accept(*this);
+    }
+    for (auto& var : node->variables) {
+        var->accept(*this);
+    }
     for (auto& statement : node->statements) {
-        std::dynamic_pointer_cast<ast::ReturnStatement>(statement)->accept(
-            *this);
+        statement->accept(*this);
     }
 }
 
@@ -134,14 +146,20 @@ void CodeGenerator::visit(ast::BinaryExpression* node) {
 }
 
 void CodeGenerator::visit(ast::IntegerLiteral* node) {
-    // return ConstantInt::get(m_context, APInt(node->value));
+    tempVal = ConstantInt::getSigned(Type::getInt64Ty(m_context), node->value);
 }
 
 void CodeGenerator::visit(ast::RealLiteral* node) {
     tempVal = ConstantFP::get(m_context, APFloat(node->value));
 }
 
-void CodeGenerator::visit(ast::BooleanLiteral* node) {}
+void CodeGenerator::visit(ast::BooleanLiteral* node) {
+    if (node->value) {
+        tempVal = ConstantInt::getTrue(m_context);
+    } else {
+        tempVal = ConstantInt::getFalse(m_context);
+    }
+}
 
 void CodeGenerator::visit(ast::Identifier* node) {
     auto V = m_namedValues[node->name];
