@@ -2,6 +2,16 @@
 namespace san {
 
 using namespace ast;
+// Tobe removed
+void TypeDeriver::visit(Type*) {}
+
+void TypeDeriver::visit(PrimitiveType*) {}
+
+void TypeDeriver::visit(Statement*) {}
+
+void TypeDeriver::visit(Expression*) {}
+
+void TypeDeriver::visit(Primary*) {}
 
 void TypeDeriver::visit(Program* node) {
 
@@ -11,7 +21,7 @@ void TypeDeriver::visit(Program* node) {
     }
     // to check array length type
     for (auto type : node->types) {
-        type->type->accept(*this);
+        type->accept(*this);
     }
     // routine has an expression
     for (auto routine : node->routines) {
@@ -28,11 +38,7 @@ void TypeDeriver::visit(RoutineDecl* node) {
     node->body->accept(*this);
 }
 
-void TypeDeriver::visit(Type*) {}
-
 void TypeDeriver::visit(AliasedType* node) { node->actualType->accept(*this); }
-
-void TypeDeriver::visit(PrimitiveType*) {}
 
 void TypeDeriver::visit(IntegerType*) {}
 
@@ -100,8 +106,6 @@ void TypeDeriver::visit(Body* node) {
     }
 }
 
-void TypeDeriver::visit(Statement*) {}
-
 void TypeDeriver::visit(ReturnStatement*) {}
 
 void TypeDeriver::visit(Assignment* node) { node->rhs->accept(*this); }
@@ -136,8 +140,6 @@ void TypeDeriver::visit(IfStatement* node) {
     }
 }
 
-void TypeDeriver::visit(Expression*) {}
-
 void TypeDeriver::visit(UnaryExpression* node) {
     node->operand->accept(*this);
     node->type = node->operand->type;
@@ -164,9 +166,9 @@ void TypeDeriver::visit(BinaryExpression* node) {
         // if operation is dot ntation
         // check that the first operand is a record -???
         // take the type of key arg
-        m_searchFiled = true;
+        m_searchField = true;
         node->operand2->accept(*this);
-        m_searchFiled = false;
+        m_searchField = false;
         if (m_recordField == "") {
             error(node->operand2->begin, "field name of record not found");
         }
@@ -203,8 +205,6 @@ void TypeDeriver::visit(BinaryExpression* node) {
     }
 }
 
-void TypeDeriver::visit(Primary*) {}
-
 void TypeDeriver::visit(IntegerLiteral*) {}
 
 void TypeDeriver::visit(RealLiteral*) {}
@@ -214,7 +214,7 @@ void TypeDeriver::visit(BooleanLiteral*) {}
 void TypeDeriver::visit(Identifier* node) {
     node->variable->accept(*this);
 
-    if (m_searchFiled) {
+    if (m_searchField) {
         m_recordField = node->name;
     }
     node->type = node->variable->type;
