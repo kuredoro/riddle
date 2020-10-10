@@ -6,7 +6,7 @@ namespace san {
 
 void ArrayLengthEnforcer::visit(Program* node) {
     for (auto var : node->variables) {
-        var->type->accept(*this);
+        var->accept(*this);
     }
     for (auto routine : node->routines) {
         routine->accept(*this);
@@ -16,7 +16,7 @@ void ArrayLengthEnforcer::visit(Program* node) {
 void ArrayLengthEnforcer::visit(RoutineDecl* node) {
     m_insideParameters = true;
     for (auto param : node->parameters) {
-        param->type->accept(*this);
+        param->accept(*this);
     }
     m_insideParameters = false;
 
@@ -26,11 +26,7 @@ void ArrayLengthEnforcer::visit(RoutineDecl* node) {
     node->body->accept(*this);
 }
 
-void ArrayLengthEnforcer::visit(Type*) {}
-
 void ArrayLengthEnforcer::visit(AliasedType*) {}
-
-void ArrayLengthEnforcer::visit(PrimitiveType*) {}
 
 void ArrayLengthEnforcer::visit(IntegerType*) {}
 
@@ -65,8 +61,6 @@ void ArrayLengthEnforcer::visit(Body* node) {
     }
 }
 
-void ArrayLengthEnforcer::visit(Statement*) {}
-
 void ArrayLengthEnforcer::visit(ReturnStatement*) {}
 
 void ArrayLengthEnforcer::visit(Assignment*) {}
@@ -82,13 +76,9 @@ void ArrayLengthEnforcer::visit(IfStatement* node) {
     }
 }
 
-void ArrayLengthEnforcer::visit(Expression*) {}
-
 void ArrayLengthEnforcer::visit(UnaryExpression*) {}
 
 void ArrayLengthEnforcer::visit(BinaryExpression*) {}
-
-void ArrayLengthEnforcer::visit(Primary*) {}
 
 void ArrayLengthEnforcer::visit(IntegerLiteral*) {}
 
@@ -100,4 +90,4 @@ void ArrayLengthEnforcer::visit(Identifier*) {}
 
 void ArrayLengthEnforcer::visit(RoutineCall*) {}
 
-} // namespace visitors
+} // namespace san

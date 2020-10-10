@@ -1,7 +1,5 @@
 #include "san.hpp"
 #include <memory>
-#include <set>
-#include <sys/select.h>
 
 using namespace ast;
 
@@ -12,6 +10,14 @@ void IdentifierResolver::visit(Program* node) {
     // all routines.
 
     bool ok = true;
+
+    for (auto routine : node->routines) {
+        if (isRedeclared(node, routine)) {
+            ok = false;
+        }
+
+        m_routines.insert({routine->name, routine});
+    }
 
     for (auto& typeDecl : node->types) {
         if (isRedeclared(node, typeDecl)) {
@@ -40,14 +46,6 @@ void IdentifierResolver::visit(Program* node) {
         }
 
         m_variables.push_back(var);
-    }
-
-    for (auto routine : node->routines) {
-        if (isRedeclared(node, routine)) {
-            ok = false;
-        }
-
-        m_routines.insert({routine->name, routine});
     }
 
     if (!ok) {
@@ -89,8 +87,6 @@ void IdentifierResolver::visit(RoutineDecl* node) {
     m_variables.resize(oldSize);
 }
 
-void IdentifierResolver::visit(Type*) {}
-
 void IdentifierResolver::visit(AliasedType* node) {
     for (auto it = m_types.rbegin(); it != m_types.rend(); it++) {
         auto typeDecl = *it;
@@ -101,8 +97,6 @@ void IdentifierResolver::visit(AliasedType* node) {
     }
     error(node->begin, "{} does not name a type", node->name);
 }
-
-void IdentifierResolver::visit(PrimitiveType*) {}
 
 void IdentifierResolver::visit(IntegerType*) {}
 
@@ -214,8 +208,6 @@ void IdentifierResolver::visit(Body* node) {
     m_types.resize(oldTypesSize);
 }
 
-void IdentifierResolver::visit(Statement*) {}
-
 void IdentifierResolver::visit(ReturnStatement* node) {
     node->expression->accept(*this);
     checkReplacementVar(node->expression);
@@ -256,8 +248,6 @@ void IdentifierResolver::visit(IfStatement* node) {
         node->elseBody->accept(*this);
     }
 }
-
-void IdentifierResolver::visit(Expression*) {}
 
 void IdentifierResolver::visit(UnaryExpression* node) {
     node->operand->accept(*this);
@@ -327,8 +317,6 @@ void IdentifierResolver::visit(BinaryExpression* node) {
         checkReplacementVar(node->operand2);
     }
 }
-
-void IdentifierResolver::visit(Primary*) {}
 
 void IdentifierResolver::visit(IntegerLiteral*) {}
 

@@ -1,8 +1,6 @@
 #include "ast.hpp"
 #include "fmt/core.h"
 #include "san.hpp"
-#include <memory>
-#include <cassert>
 
 using namespace ast;
 
@@ -11,10 +9,6 @@ extern std::map<lexer::TokenType, std::string> g_opToString;
 namespace san {
 
 void PrettyPrinter::visit(Program* node) {
-    if (node == nullptr) {
-        return;
-    }
-
     for (auto type : node->types) {
         type->accept(*this);
         newline();
@@ -67,21 +61,13 @@ void PrettyPrinter::visit(RoutineDecl* node) {
     fmt::print("end");
 }
 
-void PrettyPrinter::visit(AliasedType* node) {
-    fmt::print("{}", node->name);
-}
+void PrettyPrinter::visit(AliasedType* node) { fmt::print("{}", node->name); }
 
-void PrettyPrinter::visit(IntegerType*) {
-    fmt::print("integer");
-}
+void PrettyPrinter::visit(IntegerType*) { fmt::print("integer"); }
 
-void PrettyPrinter::visit(RealType*) {
-    fmt::print("real");
-}
+void PrettyPrinter::visit(RealType*) { fmt::print("real"); }
 
-void PrettyPrinter::visit(BooleanType*) {
-    fmt::print("boolean", "", m_depth);
-}
+void PrettyPrinter::visit(BooleanType*) { fmt::print("boolean", "", m_depth); }
 
 void PrettyPrinter::visit(ArrayType* node) {
     fmt::print("array");
@@ -156,7 +142,7 @@ void PrettyPrinter::visit(VariableDecl* node) {
 
 void PrettyPrinter::visit(TypeDecl* node) {
     fmt::print("type {} is ", node->name);
-    
+
     if (node->type != nullptr) {
         node->type->accept(*this);
     }
@@ -204,6 +190,7 @@ void PrettyPrinter::visit(Assignment* node) {
 
     node->rhs->accept(*this);
 }
+
 void PrettyPrinter::visit(WhileLoop* node) {
     fmt::print("while ");
 
@@ -278,17 +265,13 @@ void PrettyPrinter::visit(IntegerLiteral* node) {
     fmt::print("{}", node->value);
 }
 
-void PrettyPrinter::visit(RealLiteral* node) {
-    fmt::print("{}", node->value);
-}
+void PrettyPrinter::visit(RealLiteral* node) { fmt::print("{}", node->value); }
 
 void PrettyPrinter::visit(BooleanLiteral* node) {
     fmt::print("{}", node->value);
 }
 
-void PrettyPrinter::visit(Identifier* node) {
-    fmt::print("{}", node->name);
-}
+void PrettyPrinter::visit(Identifier* node) { fmt::print("{}", node->name); }
 
 void PrettyPrinter::visit(RoutineCall* node) {
     fmt::print("{}(", node->routineName);
@@ -304,28 +287,6 @@ void PrettyPrinter::visit(RoutineCall* node) {
     fmt::print(")");
 }
 
-void PrettyPrinter::visit(Type*) {
-    assert(false);
-}
-
-void PrettyPrinter::visit(PrimitiveType*) {
-    assert(false);
-}
-
-void PrettyPrinter::visit(Statement*) {
-    assert(false);
-}
-
-void PrettyPrinter::visit(Expression*) {
-    assert(false);
-}
-
-void PrettyPrinter::visit(Primary*) {
-    assert(false);
-}
-
-void PrettyPrinter::newline() {
-    fmt::print("\n{:\t>{}}", "", m_depth);
-}
+void PrettyPrinter::newline() { fmt::print("\n{:\t>{}}", "", m_depth); }
 
 } // namespace san
