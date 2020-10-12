@@ -120,6 +120,13 @@ void TypeDeriver::visit(Assignment* node) {
         !typeIsBooleanconvertible(node->rhs->type)) {
         error(node->begin, "type of rhs is not convertible to the type of lhs");
     }
+    // if either type is a non-primitive, they must be the same type
+    if (!typeIsPrimitive(node->lhs->type) ||
+        !typeIsPrimitive(node->rhs->type)) {
+        if (node->lhs->type != node->rhs->type) {
+            error(node->begin, "cannot assign incompatible types");
+        }
+    }
 }
 
 void TypeDeriver::visit(WhileLoop* node) {
