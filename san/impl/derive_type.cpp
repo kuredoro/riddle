@@ -256,24 +256,26 @@ void TypeDeriver::visit(BinaryExpression* node) {
         }
         node->type = std::make_shared<BooleanType>();
 
-    } else if (node->operand1->type != nullptr &&
-               node->operand2->type != nullptr &&
-               node->operand1->type->getTypeKind() !=
-                   node->operand2->type->getTypeKind()) {
-        sPtr<Type> type1 = node->operand1->type;
-        if (!typeIsPrimitive(type1)) {
-            error(node->operand1->begin, "invalid type of expression");
-        }
-
-        sPtr<Type> type2 = node->operand2->type;
-        if (!typeIsPrimitive(type2)) {
-            error(node->operand2->begin, "invalid type of expression");
-        }
-
-        node->type = getGreaterType(type1, type2);
     } else {
-        // types are equal
-        node->type = node->operand1->type;
+        node->operand1->accept(*this);
+        node->operand2->accept(*this);
+        if (node->operand1->type->getTypeKind() !=
+            node->operand2->type->getTypeKind()) {
+            sPtr<Type> type1 = node->operand1->type;
+            if (!typeIsPrimitive(type1)) {
+                error(node->operand1->begin, "invalid type of expression");
+            }
+
+            sPtr<Type> type2 = node->operand2->type;
+            if (!typeIsPrimitive(type2)) {
+                error(node->operand2->begin, "invalid type of expression");
+            }
+
+            node->type = getGreaterType(type1, type2);
+        } else {
+            // types are equal
+            node->type = node->operand1->type;
+        }
     }
 }
 
@@ -284,12 +286,14 @@ void TypeDeriver::visit(RealLiteral*) {}
 void TypeDeriver::visit(BooleanLiteral*) {}
 
 void TypeDeriver::visit(Identifier* node) {
-    node->variable->accept(*this);
+    if (node->variable) { // field name is an identifier, but not a variable
+        node->variable->accept(*this);
+        node->type = node->variable->type;
+    }
 
     if (m_searchField) {
         m_recordField = node->name;
     }
-    node->type = node->variable->type;
 }
 
 void TypeDeriver::visit(RoutineCall* node) {
