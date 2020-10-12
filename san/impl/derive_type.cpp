@@ -38,7 +38,7 @@ void TypeDeriver::visit(RealType*) {}
 void TypeDeriver::visit(BooleanType*) {}
 
 void TypeDeriver::visit(ArrayType* node) {
-    if (node->length) {
+    if (node->length != nullptr) {
         node->length->accept(*this);
         // any primitive type can be converted to int
         if (!typeIsPrimitive(node->length->type)) {
@@ -234,7 +234,7 @@ void TypeDeriver::visit(BinaryExpression* node) {
                node->operation == lexer::TokenType::Geq ||
                node->operation == lexer::TokenType::Less ||
                node->operation == lexer::TokenType::Greater) {
-        // the result of comparisons is alvays boolean
+        // the result of comparisons is always boolean
         node->operand1->accept(*this);
         if (!typeIsPrimitive(node->operand1->type)) {
             error(node->operand1->begin,
@@ -277,7 +277,8 @@ void TypeDeriver::visit(RealLiteral*) {}
 void TypeDeriver::visit(BooleanLiteral*) {}
 
 void TypeDeriver::visit(Identifier* node) {
-    if (node->variable) { // field name is an identifier, but not a variable
+    // field name is an identifier, but not linked to a variable
+    if (node->variable != nullptr) {
         node->variable->accept(*this);
         node->type = node->variable->type;
     }
