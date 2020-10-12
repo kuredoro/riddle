@@ -4,19 +4,7 @@ using namespace ast;
 
 namespace san {
 
-// Tobe removed
-void TypeDeriver::visit(Type*) {}
-
-void TypeDeriver::visit(PrimitiveType*) {}
-
-void TypeDeriver::visit(Statement*) {}
-
-void TypeDeriver::visit(Expression*) {}
-
-void TypeDeriver::visit(Primary*) {}
-
 void TypeDeriver::visit(Program* node) {
-
     // check variables with both type and initial value
     for (auto var : node->variables) {
         var->accept(*this);
@@ -50,7 +38,6 @@ void TypeDeriver::visit(RealType*) {}
 void TypeDeriver::visit(BooleanType*) {}
 
 void TypeDeriver::visit(ArrayType* node) {
-
     if (node->length) {
         node->length->accept(*this);
         // any primitive type can be convered to the int
@@ -107,7 +94,6 @@ void TypeDeriver::visit(VariableDecl* node) {
 void TypeDeriver::visit(TypeDecl* node) { node->type->accept(*this); }
 
 void TypeDeriver::visit(Body* node) {
-
     for (auto type : node->types) {
         type->type->accept(*this);
     }

@@ -292,13 +292,6 @@ public:
 
 class TypeDeriver : public ast::Visitor {
 public:
-    // tobe removed
-    void visit(ast::Type* node) override;
-    void visit(ast::PrimitiveType* node) override;
-    void visit(ast::Statement* node) override;
-    void visit(ast::Expression* node) override;
-    void visit(ast::Primary* node) override;
-    // to be saved
     void visit(ast::Program* node) override;
     void visit(ast::RoutineDecl* node) override;
     void visit(ast::AliasedType* node) override;
