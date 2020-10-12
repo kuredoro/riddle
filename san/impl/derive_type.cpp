@@ -169,7 +169,15 @@ void TypeDeriver::visit(IfStatement* node) {
 
 void TypeDeriver::visit(UnaryExpression* node) {
     node->operand->accept(*this);
-    node->type = node->operand->type;
+    if (node->operation == lexer::TokenType::Not) {
+        if (!typeIsBooleanConvertable(node->operand->type)) {
+            error(node->operand->begin,
+                  "lhs of 'not' operation should be convertable to boolean");
+        }
+        node->type = std::make_shared<BooleanType>();
+    } else {
+        node->type = node->operand->type;
+    }
 }
 
 void TypeDeriver::visit(BinaryExpression* node) {
