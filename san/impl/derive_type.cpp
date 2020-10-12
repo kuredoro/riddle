@@ -141,7 +141,6 @@ void TypeDeriver::visit(ForLoop* node) {
         error(node->rangeTo->begin, "invalid type of the end of range");
     }
 
-    node->loopVar->type = std::make_shared<IntegerType>();
     node->body->accept(*this);
 }
 
