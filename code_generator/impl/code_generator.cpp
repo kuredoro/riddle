@@ -101,7 +101,34 @@ void CodeGenerator::visit(ast::ReturnStatement* node) {
 
 void CodeGenerator::visit(ast::Assignment* node) {}
 
-void CodeGenerator::visit(ast::WhileLoop* node) {}
+void CodeGenerator::visit(ast::WhileLoop* node) {
+    Function* TheFunction = m_builder.GetInsertBlock()->getParent();
+    // BasicBlock* PreheaderBB = m_builder.GetInsertBlock();
+    BasicBlock* conditionBB =
+        BasicBlock::Create(m_context, "condition", TheFunction);
+    BasicBlock* loopBB = BasicBlock::Create(m_context, "loop");
+    BasicBlock* endBB = BasicBlock::Create(m_context, "loopend");
+
+    // Insert an explicit fall through from the current block to the LoopBB.
+    m_builder.CreateBr(conditionBB);
+    // Start insertion in conditionBB.
+    m_builder.SetInsertPoint(conditionBB);
+    node->condition->accept(*this);
+    Value* condition = extractTempVal();
+    condition = m_builder.CreateICmpNE(
+        condition, ConstantInt::get(m_context, APInt(1, 0)), "loopcond");
+    m_builder.CreateCondBr(condition, loopBB, endBB);
+
+    TheFunction->getBasicBlockList().push_back(loopBB);
+
+    m_builder.SetInsertPoint(loopBB);
+    node->body->accept(*this);
+
+    m_builder.CreateBr(conditionBB);
+
+    TheFunction->getBasicBlockList().push_back(endBB);
+    m_builder.SetInsertPoint(endBB);
+}
 
 void CodeGenerator::visit(ast::ForLoop* node) {}
 
