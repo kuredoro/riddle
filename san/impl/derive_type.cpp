@@ -126,7 +126,15 @@ void TypeDeriver::visit(ReturnStatement* node) {
     node->expression->accept(*this);
 }
 
-void TypeDeriver::visit(Assignment* node) { node->rhs->accept(*this); }
+void TypeDeriver::visit(Assignment* node) {
+    node->rhs->accept(*this);
+    node->lhs->accept(*this);
+    // check the type confrmance
+    if (node->lhs->type->getTypeKind() == TypeKind::Boolean &&
+        !typeIsBooleanConvertable(node->rhs->type)) {
+        error(node->begin, "type of rhs is not convertable to the type of lhs");
+    }
+}
 
 void TypeDeriver::visit(WhileLoop* node) {
     node->condition->accept(*this);
