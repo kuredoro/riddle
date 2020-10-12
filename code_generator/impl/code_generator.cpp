@@ -56,7 +56,10 @@ void CodeGenerator::visit(ast::RoutineDecl* node) {
     tempVal = F;
 }
 
-void CodeGenerator::visit(ast::AliasedType* node) {}
+void CodeGenerator::visit(ast::AliasedType*) {
+    // Nothing to do here.
+    // All aliased types should have been already replaced
+}
 
 void CodeGenerator::visit(ast::IntegerType* node) {
     tempType = Type::getInt64Ty(m_context);
@@ -99,7 +102,13 @@ void CodeGenerator::visit(ast::ReturnStatement* node) {
     m_builder.CreateRet(returnValue);
 }
 
-void CodeGenerator::visit(ast::Assignment* node) {}
+void CodeGenerator::visit(ast::Assignment* node) {
+    node->rhs->accept(*this);
+    auto rhs = extractTempVal();
+    node->lhs->accept(*this);
+    auto lhs = extractTempVal();
+    m_builder.CreateStore(rhs, lhs);
+}
 
 void CodeGenerator::visit(ast::WhileLoop* node) {
     Function* TheFunction = m_builder.GetInsertBlock()->getParent();
