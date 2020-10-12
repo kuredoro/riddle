@@ -36,6 +36,7 @@ void TypeDeriver::visit(RoutineDecl* node) {
     for (auto parameter : node->parameters) {
         parameter->accept(*this);
     }
+
     m_inRoutineParams = false;
     node->body->accept(*this);
 }
@@ -56,9 +57,10 @@ void TypeDeriver::visit(ArrayType* node) {
         if (!typeIsPrimitive(node->length->type)) {
             error(node->begin, "invalid array length type, should be integer");
         }
-    } else if (!m_inRoutineParams) {
+    } else if (!m_inRoutineParams && !m_searchArray) {
         error(node->begin, "length of array should be always defined");
     } // length can be absent in case of routine parameter
+
     node->elementType->accept(*this);
     if (m_searchArray) {
         m_arrayInnerType = node->elementType;
@@ -75,18 +77,30 @@ void TypeDeriver::visit(RecordType* node) {
 }
 
 void TypeDeriver::visit(VariableDecl* node) {
+    // validation
+    if (node->type == nullptr && node->initialValue == nullptr) {
+        error(node->begin, "invalid defnition of variable");
+    }
 
-    // check type
     if (node->type != nullptr) {
         node->type->accept(*this);
-    }
-    // check/evaluate expression value
-    if (node->initialValue != nullptr) {
+        if (node->initialValue != nullptr) {
+            node->initialValue->accept(*this);
+            // checkTypesAreEqual or conferable:
+            // initial value can be only of primitive type
+            // the only inconforable case is duering attempt to cast real to
+            // bool
+            if (node->type->getTypeKind() == TypeKind::Boolean &&
+                !typeIsBooleanConvertable(node->initialValue->type)) {
+                error(node->begin,
+                      "invalid combination of initial type and initial value");
+            }
+        }
+    } else if (node->initialValue != nullptr) {
         node->initialValue->accept(*this);
-    }
-    // assign initial value
-    if (node->type == nullptr) {
         node->type = node->initialValue->type;
+    } else {
+        error(node->begin, "nvalid variable declaration");
     }
 }
 
@@ -175,7 +189,6 @@ void TypeDeriver::visit(BinaryExpression* node) {
             error(node->operand2->begin, "invalid type for array index");
         }
         node->type = m_arrayInnerType;
-        m_arrayInnerType = nullptr;
     } else if (node->operation == lexer::TokenType::Dot) {
         // if operation is dot notation
         // find record field name
