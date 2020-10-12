@@ -24,8 +24,11 @@ void TypeDeriver::visit(RoutineDecl* node) {
     for (auto& parameter : node->parameters) {
         parameter->accept(*this);
     }
-
     m_inRoutineParams = false;
+    // Return type might be an array with defined length
+    if (node->returnType != nullptr) {
+        node->returnType->accept(*this);
+    }
     node->body->accept(*this);
 }
 
