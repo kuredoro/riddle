@@ -22,13 +22,9 @@ void ParamsValidator::visit(Program* node) {
 
 void ParamsValidator::visit(RoutineDecl* node) { node->body->accept(*this); }
 
-void ParamsValidator::visit(Type*) {}
-
 void ParamsValidator::visit(AliasedType* node) {
     node->actualType->accept(*this);
 }
-
-void ParamsValidator::visit(PrimitiveType*) {}
 
 void ParamsValidator::visit(IntegerType*) {}
 
@@ -69,8 +65,6 @@ void ParamsValidator::visit(Body* node) {
     }
 }
 
-void ParamsValidator::visit(Statement*) {}
-
 void ParamsValidator::visit(ReturnStatement* node) {
     node->expression->accept(*this);
 }
@@ -96,8 +90,6 @@ void ParamsValidator::visit(IfStatement* node) {
     }
 }
 
-void ParamsValidator::visit(Expression*) {}
-
 void ParamsValidator::visit(UnaryExpression* node) {
     node->operand->accept(*this);
 }
@@ -106,8 +98,6 @@ void ParamsValidator::visit(BinaryExpression* node) {
     node->operand1->accept(*this);
     node->operand2->accept(*this);
 }
-
-void ParamsValidator::visit(Primary*) {}
 
 void ParamsValidator::visit(IntegerLiteral*) {}
 
