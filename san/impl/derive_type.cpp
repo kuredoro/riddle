@@ -6,22 +6,22 @@ namespace san {
 
 void TypeDeriver::visit(Program* node) {
     // check variables with both type and initial value
-    for (auto var : node->variables) {
+    for (auto& var : node->variables) {
         var->accept(*this);
     }
     // to check array length type
-    for (auto type : node->types) {
+    for (auto& type : node->types) {
         type->accept(*this);
     }
     // routine has an expression
-    for (auto routine : node->routines) {
+    for (auto& routine : node->routines) {
         routine->accept(*this);
     }
 }
 
 void TypeDeriver::visit(RoutineDecl* node) {
     m_inRoutineParams = true;
-    for (auto parameter : node->parameters) {
+    for (auto& parameter : node->parameters) {
         parameter->accept(*this);
     }
 
@@ -55,7 +55,7 @@ void TypeDeriver::visit(ArrayType* node) {
 }
 
 void TypeDeriver::visit(RecordType* node) {
-    for (auto field : node->fields) {
+    for (auto& field : node->fields) {
         field->accept(*this);
         if (m_searchRecord && field->name == m_recordField) {
             m_recordInnerType = field->type;
@@ -94,13 +94,13 @@ void TypeDeriver::visit(VariableDecl* node) {
 void TypeDeriver::visit(TypeDecl* node) { node->type->accept(*this); }
 
 void TypeDeriver::visit(Body* node) {
-    for (auto type : node->types) {
-        type->type->accept(*this);
+    for (auto& type : node->types) {
+        type->accept(*this);
     }
-    for (auto var : node->variables) {
+    for (auto& var : node->variables) {
         var->accept(*this);
     }
-    for (auto statement : node->statements) {
+    for (auto& statement : node->statements) {
         statement->accept(*this);
     }
 }
@@ -288,7 +288,7 @@ void TypeDeriver::visit(Identifier* node) {
 }
 
 void TypeDeriver::visit(RoutineCall* node) {
-    for (auto arg : node->args) {
+    for (auto& arg : node->args) {
         arg->accept(*this);
     }
 }
