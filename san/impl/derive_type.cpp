@@ -40,7 +40,7 @@ void TypeDeriver::visit(BooleanType*) {}
 void TypeDeriver::visit(ArrayType* node) {
     if (node->length) {
         node->length->accept(*this);
-        // any primitive type can be convered to the int
+        // any primitive type can be converted to int
         if (!typeIsPrimitive(node->length->type)) {
             error(node->begin, "invalid array length type, should be integer");
         }
@@ -73,12 +73,12 @@ void TypeDeriver::visit(VariableDecl* node) {
         node->type->accept(*this);
         if (node->initialValue != nullptr) {
             node->initialValue->accept(*this);
-            // checkTypesAreEqual or conferable:
+            // checkTypesAreEqual or conforming:
             // initial value can be only of primitive type
-            // the only inconforable case is duering attempt to cast real to
+            // the only nonconforming case is during attempt to cast real to
             // bool
             if (node->type->getTypeKind() == TypeKind::Boolean &&
-                !typeIsBooleanConvertable(node->initialValue->type)) {
+                !typeIsBooleanconvertible(node->initialValue->type)) {
                 error(node->begin,
                       "invalid combination of initial type and initial value");
             }
@@ -87,7 +87,7 @@ void TypeDeriver::visit(VariableDecl* node) {
         node->initialValue->accept(*this);
         node->type = node->initialValue->type;
     } else {
-        error(node->begin, "nvalid variable declaration");
+        error(node->begin, "invalid variable declaration");
     }
 }
 
@@ -112,19 +112,19 @@ void TypeDeriver::visit(ReturnStatement* node) {
 void TypeDeriver::visit(Assignment* node) {
     node->rhs->accept(*this);
     node->lhs->accept(*this);
-    // check the type confrmance
+    // check the type conformance
     if (node->lhs->type->getTypeKind() == TypeKind::Boolean &&
-        !typeIsBooleanConvertable(node->rhs->type)) {
-        error(node->begin, "type of rhs is not convertable to the type of lhs");
+        !typeIsBooleanconvertible(node->rhs->type)) {
+        error(node->begin, "type of rhs is not convertible to the type of lhs");
     }
 }
 
 void TypeDeriver::visit(WhileLoop* node) {
     node->condition->accept(*this);
-    // check that condition is convertable to bool
-    if (!typeIsBooleanConvertable(node->condition->type)) {
+    // check that condition is convertible to bool
+    if (!typeIsBooleanconvertible(node->condition->type)) {
         error(node->condition->begin,
-              "type of condition should be convertable to boolean");
+              "type of condition should be convertible to boolean");
     }
     node->body->accept(*this);
 }
@@ -138,7 +138,7 @@ void TypeDeriver::visit(ForLoop* node) {
 
     node->rangeTo->accept(*this);
     if (!typeIsPrimitive(node->rangeTo->type)) {
-        error(node->rangeTo->begin, "invalid type of the beginning of range");
+        error(node->rangeTo->begin, "invalid type of the end of range");
     }
 
     node->loopVar->type = std::make_shared<IntegerType>();
@@ -148,9 +148,9 @@ void TypeDeriver::visit(ForLoop* node) {
 void TypeDeriver::visit(IfStatement* node) {
     node->condition->accept(*this);
     // check condition is of type boolean
-    if (!typeIsBooleanConvertable(node->condition->type)) {
+    if (!typeIsBooleanconvertible(node->condition->type)) {
         error(node->condition->begin,
-              "type of condition should be convertable to boolean");
+              "type of condition should be convertible to boolean");
     }
     node->ifBody->accept(*this);
     if (node->elseBody != nullptr) {
@@ -161,9 +161,10 @@ void TypeDeriver::visit(IfStatement* node) {
 void TypeDeriver::visit(UnaryExpression* node) {
     node->operand->accept(*this);
     if (node->operation == lexer::TokenType::Not) {
-        if (!typeIsBooleanConvertable(node->operand->type)) {
-            error(node->operand->begin,
-                  "lhs of 'not' operation should be convertable to boolean");
+        if (!typeIsBooleanconvertible(node->operand->type)) {
+            error(
+                node->operand->begin,
+                "operand of 'not' operation should be convertible to boolean");
         }
         node->type = std::make_shared<BooleanType>();
     } else {
@@ -212,19 +213,19 @@ void TypeDeriver::visit(BinaryExpression* node) {
     } else if (node->operation == lexer::TokenType::Or ||
                node->operation == lexer::TokenType::Xor ||
                node->operation == lexer::TokenType::And) {
-        // lhs and rhs should be convertable to boolean
+        // lhs and rhs should be convertible to boolean
         node->operand1->accept(*this);
 
-        if (!typeIsBooleanConvertable(node->operand1->type)) {
+        if (!typeIsBooleanconvertible(node->operand1->type)) {
             error(node->operand1->begin,
-                  "lhs of logical operation should be convertable to boolean");
+                  "lhs of logical operation should be convertible to boolean");
         }
 
         node->operand2->accept(*this);
 
-        if (!typeIsBooleanConvertable(node->operand2->type)) {
+        if (!typeIsBooleanconvertible(node->operand2->type)) {
             error(node->operand2->begin,
-                  "rhs of logical operation should be convertable to boolean");
+                  "rhs of logical operation should be convertible to boolean");
         }
 
         node->type = std::make_shared<BooleanType>();
@@ -319,8 +320,7 @@ bool TypeDeriver::typeIsPrimitive(sPtr<Type> type) {
     return (kind == TypeKind::Integer) || (kind == TypeKind::Boolean) ||
            (kind == TypeKind::Real);
 }
-bool TypeDeriver::typeIsBooleanConvertable(sPtr<Type> type) {
-
+bool TypeDeriver::typeIsBooleanconvertible(sPtr<Type> type) {
     TypeKind conditionType = type->getTypeKind();
     return conditionType == TypeKind::Integer ||
            conditionType == TypeKind::Boolean;

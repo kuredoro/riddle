@@ -326,10 +326,10 @@ private:
     bool typeIsPrimitive(sPtr<ast::Type> type);
 
     // checks if TypeKind is Integer or Boolean
-    bool typeIsBooleanConvertable(sPtr<ast::Type> type);
+    bool typeIsBooleanconvertible(sPtr<ast::Type> type);
 
     // if this variable is set to true, variable `m_arrayInnerType` will be
-    // set to the type of the array during array visitin
+    // set to the type of the array during array visiting
     bool m_searchArray = false;
     sPtr<ast::Type> m_arrayInnerType = nullptr;
 
@@ -338,7 +338,7 @@ private:
     bool m_searchField = false;
     std::string m_recordField = "";
 
-    // if this variavle is set to true, variable `n_recordInnerType` will be set
+    // if this variable is set to true, variable `m_recordInnerType` will be set
     // to the type of field `m_recordField`
     bool m_searchRecord = false;
     sPtr<ast::Type> m_recordInnerType = nullptr;
