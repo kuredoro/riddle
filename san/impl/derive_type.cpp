@@ -108,15 +108,12 @@ void TypeDeriver::visit(TypeDecl* node) { node->type->accept(*this); }
 
 void TypeDeriver::visit(Body* node) {
 
-    // to check array length type
     for (auto type : node->types) {
         type->type->accept(*this);
     }
-    // check variables with both type and initial value
     for (auto var : node->variables) {
         var->accept(*this);
     }
-    // routine has an expression
     for (auto statement : node->statements) {
         statement->accept(*this);
     }
