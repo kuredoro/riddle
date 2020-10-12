@@ -1,0 +1,27 @@
+name: Lint using clang-tidy
+
+on: push
+
+jobs:
+  clang-tidy:
+    runs-on: ubuntu-latest
+    env:
+      CC: clang
+      CXX: clang++
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v1
+      - name: Install clang-tidy and clang-format
+        run: sudo apt-get install -y clang-format clang-tidy
+      - uses: BSFishy/meson-build@v1.0.1
+        name: Build the project
+        with:
+          action: build
+          meson-version: 0.55.1
+      - name: Install dependencies
+        run: pip install PyYAML
+      - name: Run clang-tidy
+        run: ninja clang-tidy -C build
+      # - name: Run clang-format
+      #   run: ninja clang-format -C build

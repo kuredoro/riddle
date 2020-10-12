@@ -1,8 +1,6 @@
 #include "ast.hpp"
 #include "fmt/core.h"
 #include "san.hpp"
-#include <memory>
-#include <cassert>
 
 using namespace ast;
 
@@ -20,14 +18,13 @@ void MissingReturn::visit(Program* node) {
         routine->accept(*this);
 
         if (!m_hasReturn) {
-            error(routine->begin, "missing a return statement on some execution paths");
+            error(routine->begin,
+                  "missing a return statement on some execution paths");
         }
     }
 }
 
-void MissingReturn::visit(RoutineDecl* node) {
-    node->body->accept(*this);
-}
+void MissingReturn::visit(RoutineDecl* node) { node->body->accept(*this); }
 
 void MissingReturn::visit(AliasedType*) {}
 
@@ -57,9 +54,7 @@ void MissingReturn::visit(Body* node) {
     }
 }
 
-void MissingReturn::visit(ReturnStatement*) {
-    m_hasReturn = true;
-}
+void MissingReturn::visit(ReturnStatement*) { m_hasReturn = true; }
 
 void MissingReturn::visit(Assignment*) {}
 
@@ -88,7 +83,7 @@ void MissingReturn::visit(IfStatement* node) {
     if (node->elseBody == nullptr) {
         return;
     }
-    
+
     node->ifBody->accept(*this);
 
     // Don't waste our time on else branch, if we already know that if may
@@ -113,25 +108,5 @@ void MissingReturn::visit(BooleanLiteral*) {}
 void MissingReturn::visit(Identifier*) {}
 
 void MissingReturn::visit(RoutineCall*) {}
-
-void MissingReturn::visit(Type*) {
-    assert(false);
-}
-
-void MissingReturn::visit(PrimitiveType*) {
-    assert(false);
-}
-
-void MissingReturn::visit(Statement*) {
-    assert(false);
-}
-
-void MissingReturn::visit(Expression*) {
-    assert(false);
-}
-
-void MissingReturn::visit(Primary*) {
-    assert(false);
-}
 
 } // namespace san
