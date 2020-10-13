@@ -36,6 +36,12 @@ CodeGenerator::CodeGenerator(std::string name) : m_builder(m_context) {
 }
 
 void CodeGenerator::visit(ast::Program* node) {
+    for (auto& type : node->types) {
+        type->accept(*this);
+    }
+    for (auto& var : node->variables) {
+        var->accept(*this);
+    }
     for (auto& routine : node->routines) {
         routine->accept(*this);
     }
