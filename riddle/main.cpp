@@ -50,7 +50,9 @@ int main(int argc, char* argv[]) {
         //  code after the different modification steps.
         ("v,verbosity", "Level of output verbosity (0-3)",
          cxxopts::value<int>()->default_value("0")->implicit_value("1")) //
-        ("h,help", "Print usage")                                        // help
+        ("keep-temp", "Keep temporary files created during compilation",
+         cxxopts::value<bool>()->default_value("false")) //
+        ("h,help", "Print usage")                        // help
         ;
     options.parse_positional("file");
     options.positional_help("<path to file>");
@@ -72,6 +74,7 @@ int main(int argc, char* argv[]) {
     auto path = result["file"].as<std::string>();
     auto verbosity = result["verbosity"].as<int>();
     auto outFile = result["out"].as<std::string>();
+    auto keepTemp = result["keep-temp"].as<bool>();
 
     std::ifstream f(path);
     std::string code((std::istreambuf_iterator<char>(f)),
@@ -217,7 +220,10 @@ int main(int argc, char* argv[]) {
     system(fmt::format("clang++ {} {} -o {}", tempCppFileName, tempObjFileName,
                        outFile)
                .c_str());
-    system(fmt::format("rm {} {}", tempCppFileName, tempObjFileName).c_str());
+    if (!keepTemp) {
+        system(
+            fmt::format("rm {} {}", tempCppFileName, tempObjFileName).c_str());
+    }
     if (verbosity > 0) {
         fmt::print(fmt::emphasis::bold, "Executable: creation: ");
         fmt::print(fmt::fg(fmt::color::green), "success\n");
