@@ -1,3 +1,4 @@
+#include "code_generator.hpp"
 #include "fmt/color.h"
 #include "fmt/core.h"
 #include "lexer.hpp"
@@ -151,6 +152,28 @@ int main(int argc, char* argv[]) {
     }
 
     fmt::print(fmt::fg(fmt::color::green), "pass\n");
+
+    fmt::print("\nGenerated code:\n\n");
+
+    cg::CodeGenerator codeGen(argv[1]);
+    ast->accept(codeGen);
+    errors = codeGen.getErrors();
+    if (!errors.empty()) {
+        fmt::print("Code gen errors!\n");
+        printErrors(code, errors);
+    }
+    codeGen.print();
+
+    std::string tempCppFileName = "_temp_.cpp";
+    std::string tempObjFileName = "_temp_output_.o";
+
+    codeGen.emitCode(tempObjFileName);
+    cg::generateIntermediateCpp(tempCppFileName, codeGen);
+    system(fmt::format("clang++ {} {} -o main.out", tempCppFileName,
+                       tempObjFileName)
+               .c_str());
+    // system(fmt::format("rm {} {}", tempCppFileName,
+    // tempObjFileName).c_str());
 
     return 0;
 }

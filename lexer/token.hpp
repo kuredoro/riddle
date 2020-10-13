@@ -78,7 +78,9 @@ struct Token {
         }
 
         bool operator<(const Position& other) const {
-            return line < other.line ? true : column < other.column;
+            return line < other.line
+                       ? true
+                       : (line == other.line && column < other.column);
         }
     };
 
