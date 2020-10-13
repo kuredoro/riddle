@@ -68,6 +68,15 @@ private:
         tempType = nullptr;
         return t;
     }
+
+    bool anyIsFloat(std::initializer_list<llvm::Value*> values) {
+        for (auto& val : values) {
+            if (val->getType()->isFloatingPointTy()) {
+                return true;
+            }
+        }
+        return false;
+    }
 };
 
 } // namespace cg
