@@ -230,6 +230,8 @@ void IdentifierResolver::visit(WhileLoop* node) {
 
 void IdentifierResolver::visit(ForLoop* node) {
     auto oldSize = m_variables.size();
+    node->rangeFrom->accept(*this);
+    node->rangeTo->accept(*this);
 
     m_variables.push_back(node->loopVar);
 

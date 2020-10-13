@@ -43,6 +43,8 @@ struct BooleanLiteral;
 struct Identifier;
 struct RoutineCall;
 
+enum class TypeKind { Boolean, Integer, Real, Array, Record };
+
 class Visitor {
 public:
     virtual ~Visitor() = default;
@@ -128,6 +130,7 @@ struct TypeDecl : Node {
 };
 
 struct Type : Node {
+    virtual TypeKind getTypeKind() { return TypeKind::Integer; };
     virtual void accept(Visitor& v) override = 0;
 };
 
@@ -141,6 +144,7 @@ struct AliasedType : Type {
         return Node::operator==(other) && name == other.name;
     }
     void accept(Visitor& v) override { v.visit(this); }
+    TypeKind getTypeKind() { return this->actualType->getTypeKind(); }
 };
 
 struct PrimitiveType : Type {
@@ -152,14 +156,17 @@ struct PrimitiveType : Type {
 
 struct IntegerType : PrimitiveType {
     void accept(Visitor& v) override { v.visit(this); }
+    TypeKind getTypeKind() { return TypeKind::Integer; }
 };
 
 struct RealType : PrimitiveType {
     void accept(Visitor& v) override { v.visit(this); }
+    TypeKind getTypeKind() { return TypeKind::Real; }
 };
 
 struct BooleanType : PrimitiveType {
     void accept(Visitor& v) override { v.visit(this); }
+    TypeKind getTypeKind() { return TypeKind::Boolean; }
 };
 
 struct ArrayType : Type {
@@ -170,6 +177,7 @@ struct ArrayType : Type {
                elementType == other.elementType;
     }
     void accept(Visitor& v) override { v.visit(this); }
+    TypeKind getTypeKind() { return TypeKind::Array; }
 };
 
 struct RecordType : Type {
@@ -178,6 +186,7 @@ struct RecordType : Type {
         return Node::operator==(other) && fields == other.fields;
     }
     void accept(Visitor& v) override { v.visit(this); }
+    TypeKind getTypeKind() { return TypeKind::Record; }
 };
 
 struct VariableDecl : Node {

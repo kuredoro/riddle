@@ -282,4 +282,74 @@ public:
     void visit(ast::RoutineCall* node) override;
 };
 
+/**
+ * This visitor is responsible for
+ * - detection of possibility of type conversion
+ * - determining the resulting type of the expression
+ * - checking that array index and range thresholds are integers
+ * - checking that dot is called only on records
+ */
+
+class TypeDeriver : public ast::Visitor {
+public:
+    void visit(ast::Program* node) override;
+    void visit(ast::RoutineDecl* node) override;
+    void visit(ast::AliasedType* node) override;
+    void visit(ast::IntegerType* node) override;
+    void visit(ast::RealType* node) override;
+    void visit(ast::BooleanType* node) override;
+    void visit(ast::ArrayType* node) override;
+    void visit(ast::RecordType* node) override;
+    void visit(ast::VariableDecl* node) override;
+    void visit(ast::TypeDecl* node) override;
+    void visit(ast::Body* node) override;
+    void visit(ast::ReturnStatement* node) override;
+    void visit(ast::Assignment* node) override;
+    void visit(ast::WhileLoop* node) override;
+    void visit(ast::ForLoop* node) override;
+    void visit(ast::IfStatement* node) override;
+    void visit(ast::UnaryExpression* node) override;
+    void visit(ast::BinaryExpression* node) override;
+    void visit(ast::IntegerLiteral* node) override;
+    void visit(ast::RealLiteral* node) override;
+    void visit(ast::BooleanLiteral* node) override;
+    void visit(ast::Identifier* node) override;
+    void visit(ast::RoutineCall* node) override;
+
+private:
+    // function, which returns the type of expression, if its lhs is of type
+    // `initialType` and rhs is of type `targetType`
+    sPtr<ast::Type> getGreaterType(sPtr<ast::Type> initialType,
+                                   sPtr<ast::Type> targetType);
+
+    // checks if the given type is an Integer, Boolean or Real
+    bool typeIsPrimitive(sPtr<ast::Type> type);
+
+    // checks if TypeKind is Integer or Boolean
+    bool typeIsBooleanconvertible(sPtr<ast::Type> type);
+
+    // if this variable is set to true, variable `m_arrayInnerType` will be
+    // set to the type of the array during array visiting
+    bool m_searchArray = false;
+    sPtr<ast::Type> m_arrayInnerType = nullptr;
+
+    // if this variable is set to true, variable `m_recordField` will be set to
+    // the name of the last visited identifier
+    bool m_searchField = false;
+    std::string m_recordField = "";
+
+    // if this variable is set to true, variable `m_recordInnerType` will be set
+    // to the type of field `m_recordField`
+    bool m_searchRecord = false;
+    sPtr<ast::Type> m_recordInnerType = nullptr;
+
+    // checks if the visitor is inside the list of routine paramenters (used for
+    // array length check)
+    bool m_inRoutineParams = false;
+
+    // bool DeriveType::checkTypesAreEqual(sPtr<ast::Type> type1,
+    //                                     sPtr<ast::Type> type2);
+    // sPtr<std::vector<ast::TypeKind>> getFullType(sPtr<ast::Type> type1);
+};
+
 } // namespace san
