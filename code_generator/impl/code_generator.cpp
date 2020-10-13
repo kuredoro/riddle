@@ -114,7 +114,24 @@ void CodeGenerator::visit(ast::ArrayType* node) {}
 
 void CodeGenerator::visit(ast::RecordType* node) {}
 
-void CodeGenerator::visit(ast::VariableDecl* node) {}
+void CodeGenerator::visit(ast::VariableDecl* node) {
+    node->type->accept(*this);
+    auto type = extractTempType();
+    auto v = m_builder.CreateAlloca(type, 0, node->name);
+
+    if (node->type->getTypeKind() == ast::TypeKind::Array ||
+        node->type->getTypeKind() == ast::TypeKind::Record) {
+        node->type->accept(*this);
+        m_builder.CreateStore(extractTempVal(), v);
+    } else {
+        if (node->initialValue != nullptr) {
+            node->initialValue->accept(*this);
+            m_builder.CreateStore(extractTempVal(), v);
+        }
+    }
+
+    tempVal = v;
+}
 
 void CodeGenerator::visit(ast::TypeDecl* node) {}
 
@@ -324,7 +341,6 @@ void CodeGenerator::visit(ast::RoutineCall* node) {
 
     std::vector<Value*> args;
     for (auto& arg : node->args) {
-
         arg->accept(*this);
         Value* argCode = extractTempVal();
         if (argCode == nullptr) {
