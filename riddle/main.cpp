@@ -136,6 +136,7 @@ int main(int argc, char* argv[]) {
         printErrors(code, errors);
     }
     codeGen.print();
+    codeGen.emitCode();
 
     return 0;
 }

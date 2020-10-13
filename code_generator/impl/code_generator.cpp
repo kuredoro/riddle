@@ -4,6 +4,37 @@ using namespace llvm;
 
 namespace cg {
 
+CodeGenerator::CodeGenerator(std::string name) : m_builder(m_context) {
+    m_module = std::make_unique<Module>(name, m_context);
+    auto TargetTriple = sys::getDefaultTargetTriple();
+    InitializeAllTargetInfos();
+    InitializeAllTargets();
+    InitializeAllTargetMCs();
+    InitializeAllAsmParsers();
+    InitializeAllAsmPrinters();
+
+    std::string Error;
+    auto Target = TargetRegistry::lookupTarget(TargetTriple, Error);
+
+    // Print an error and exit if we couldn't find the requested target.
+    // This generally occurs if we've forgotten to initialise the
+    // TargetRegistry or we have a bogus target triple.
+    if (!Target) {
+        errs() << Error;
+        return;
+    }
+    auto CPU = "generic";
+    auto Features = "";
+
+    TargetOptions opt;
+    auto RM = Optional<Reloc::Model>();
+    m_targetMachine =
+        Target->createTargetMachine(TargetTriple, CPU, Features, opt, RM);
+
+    m_module->setDataLayout(m_targetMachine->createDataLayout());
+    m_module->setTargetTriple(TargetTriple);
+}
+
 void CodeGenerator::visit(ast::Program* node) {
     for (auto& routine : node->routines) {
         routine->accept(*this);
@@ -29,7 +60,7 @@ void CodeGenerator::visit(ast::RoutineDecl* node) {
 
     // The actual function from the type, local to this module, with the
     //  given name
-    Function* F = Function::Create(FT, Function::InternalLinkage, node->name,
+    Function* F = Function::Create(FT, Function::ExternalLinkage, node->name,
                                    m_module.get());
 
     // Give the parameters their names
@@ -298,6 +329,27 @@ void CodeGenerator::visit(ast::RoutineCall* node) {
     }
 
     tempVal = m_builder.CreateCall(CalleeF, args, "calltmp");
+}
+
+void CodeGenerator::emitCode(std::string filename) {
+    std::error_code EC;
+    raw_fd_ostream dest(filename, EC, sys::fs::OF_None);
+
+    if (EC) {
+        errs() << "Could not open file: " << EC.message();
+        return;
+    }
+
+    legacy::PassManager pass;
+    auto FileType = CGFT_ObjectFile;
+
+    if (m_targetMachine->addPassesToEmitFile(pass, dest, nullptr, FileType)) {
+        errs() << "TargetMachine can't emit a file of this type";
+        return;
+    }
+
+    pass.run(*m_module);
+    dest.flush();
 }
 
 } // namespace cg
