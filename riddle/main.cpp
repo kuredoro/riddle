@@ -172,7 +172,8 @@ int main(int argc, char* argv[]) {
     system(fmt::format("clang++ {} {} -o main.out", tempCppFileName,
                        tempObjFileName)
                .c_str());
-    system(fmt::format("rm {} {}", tempCppFileName, tempObjFileName).c_str());
+    // system(fmt::format("rm {} {}", tempCppFileName,
+    // tempObjFileName).c_str());
 
     return 0;
 }
