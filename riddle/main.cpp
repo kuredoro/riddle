@@ -204,6 +204,7 @@ int main(int argc, char* argv[]) {
     }
     if (verbosity > 0) {
         fmt::print(fmt::emphasis::bold, "Code generation: ");
+        fmt::print(fmt::fg(fmt::color::green), "success\n");
     }
     if (verbosity > 1) {
         fmt::print("Generated code:\n");
