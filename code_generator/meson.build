@@ -1,6 +1,6 @@
 incdir = include_directories('.')
 
-llvm_dep = dependency('llvm', version : '>=9.0')
+llvm_dep = dependency('llvm', version : '>=10.0')
 
 libcg = static_library('code_generator',
                              sources : ['impl/code_generator.cpp', 'impl/cpp_generator.cpp'],
