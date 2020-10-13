@@ -217,16 +217,33 @@ void CodeGenerator::visit(ast::BinaryExpression* node) {
 
     switch (node->operation) {
     case lexer::TokenType::Add:
-        tempVal = m_builder.CreateFAdd(L, R, "addtmp");
+        if (anyIsFloat({R, L})) {
+            tempVal = m_builder.CreateFAdd(L, R, "addtmp");
+        } else {
+            tempVal = m_builder.CreateAdd(L, R, "addtmp");
+        }
         return;
     case lexer::TokenType::Sub:
-        tempVal = m_builder.CreateFSub(L, R, "subtmp");
+        if (anyIsFloat({R, L})) {
+            tempVal = m_builder.CreateFSub(L, R, "subtmp");
+        } else {
+            tempVal = m_builder.CreateSub(L, R, "subtmp");
+        }
         return;
     case lexer::TokenType::Mul:
-        tempVal = m_builder.CreateFMul(L, R, "multmp");
+        if (anyIsFloat({R, L})) {
+            tempVal = m_builder.CreateFMul(L, R, "multmp");
+        } else {
+            tempVal = m_builder.CreateMul(L, R, "multmp");
+        }
         return;
+    // Note: '<' requires both operands to be of the same type
     case lexer::TokenType::Less:
-        tempVal = m_builder.CreateFCmpULT(L, R, "cmptmp");
+        if (anyIsFloat({R, L})) {
+            tempVal = m_builder.CreateFCmpOLT(L, R, "cmptmp");
+        } else {
+            tempVal = m_builder.CreateICmpSLT(L, R, "cmptmp");
+        }
         return;
     // TODO: /, %, =, !=, ., [], <=, >, >=
     default:
