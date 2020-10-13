@@ -137,6 +137,20 @@ int main(int argc, char* argv[]) {
 
         return 1;
     }
-  
+
+    fmt::print(fmt::emphasis::bold, "types conformance: ");
+
+    san::TypeDeriver deriveType;
+    ast->accept(deriveType);
+
+    errors = deriveType.getErrors();
+    if (!errors.empty()) {
+        fmt::print(fmt::fg(fmt::color::indian_red), "fail\n");
+        printErrors(code, errors);
+        return 1;
+    }
+
+    fmt::print(fmt::fg(fmt::color::green), "pass\n");
+
     return 0;
 }
