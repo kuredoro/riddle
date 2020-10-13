@@ -110,9 +110,13 @@ void CodeGenerator::visit(ast::BooleanType* node) {
     tempType = Type::getInt1Ty(m_context);
 }
 
-void CodeGenerator::visit(ast::ArrayType* node) {}
+void CodeGenerator::visit(ast::ArrayType* node) {
+    // TODO
+}
 
-void CodeGenerator::visit(ast::RecordType* node) {}
+void CodeGenerator::visit(ast::RecordType* node) {
+    // TODO
+}
 
 void CodeGenerator::visit(ast::VariableDecl* node) {
     node->type->accept(*this);
@@ -129,11 +133,14 @@ void CodeGenerator::visit(ast::VariableDecl* node) {
             m_builder.CreateStore(extractTempVal(), v);
         }
     }
+    m_namedValues[node->name] = v;
 
     tempVal = v;
 }
 
-void CodeGenerator::visit(ast::TypeDecl* node) {}
+void CodeGenerator::visit(ast::TypeDecl* node) {
+    // Nothing to do here. all type aliases should have already been replaced
+}
 
 void CodeGenerator::visit(ast::Body* node) {
     for (auto& type : node->types) {
@@ -157,10 +164,10 @@ void CodeGenerator::visit(ast::ReturnStatement* node) {
 }
 
 void CodeGenerator::visit(ast::Assignment* node) {
-    node->rhs->accept(*this);
-    auto rhs = extractTempVal();
     node->lhs->accept(*this);
     auto lhs = extractTempVal();
+    node->rhs->accept(*this);
+    auto rhs = extractTempVal();
     m_builder.CreateStore(rhs, lhs);
 }
 
@@ -193,7 +200,59 @@ void CodeGenerator::visit(ast::WhileLoop* node) {
     m_builder.SetInsertPoint(endBB);
 }
 
-void CodeGenerator::visit(ast::ForLoop* node) {}
+void CodeGenerator::visit(ast::ForLoop* node) {
+    // TODO: make this function work!!
+    Function* func = m_builder.GetInsertBlock()->getParent();
+    BasicBlock* condBB = BasicBlock::Create(m_context, "forloopcond", func);
+    BasicBlock* loopBB = BasicBlock::Create(m_context, "forloop");
+    BasicBlock* endBB = BasicBlock::Create(m_context, "forloopend");
+
+    node->loopVar->accept(*this);
+    auto loopVar = extractTempVal();
+
+    node->rangeFrom->accept(*this);
+    auto rangeFrom = extractTempVal();
+    m_builder.CreateStore(rangeFrom, loopVar);
+
+    node->rangeTo->accept(*this);
+    auto rangeTo = extractTempVal();
+    auto endexpr =
+        m_builder.CreateAlloca(Type::getInt64Ty(m_context), 0, "endexpr");
+    m_builder.CreateStore(rangeTo, endexpr);
+
+    m_builder.CreateBr(condBB);
+    m_builder.SetInsertPoint(condBB);
+
+    auto i = m_builder.CreateLoad(loopVar, "loopvar");
+    auto pred = m_builder.CreateLoad(endexpr, "pred");
+    if (node->reverse) {
+        tempVal = m_builder.CreateICmpSGT(i, pred, "comp");
+    } else {
+        tempVal = m_builder.CreateICmpSLT(i, pred, "comp");
+    }
+    m_builder.CreateCondBr(tempVal, loopBB, endBB);
+
+    func->getBasicBlockList().push_back(loopBB);
+    m_builder.SetInsertPoint(loopBB);
+
+    node->body->accept(*this);
+
+    i = m_builder.CreateLoad(loopVar, "loopvarIncr");
+    llvm::Value* incr;
+    if (node->reverse) {
+        incr = m_builder.CreateSub(
+            i, ConstantInt::get(m_context, APInt(64, 1, true)));
+    } else {
+        incr = m_builder.CreateAdd(
+            i, ConstantInt::get(m_context, APInt(64, 1, true)));
+    }
+    m_builder.CreateStore(incr, loopVar);
+    m_builder.CreateBr(condBB);
+    func->getBasicBlockList().push_back(endBB);
+
+    m_namedValues.erase(node->loopVar->name);
+    m_builder.SetInsertPoint(endBB);
+}
 
 void CodeGenerator::visit(ast::IfStatement* node) {
     node->condition->accept(*this);
@@ -254,7 +313,9 @@ void CodeGenerator::visit(ast::IfStatement* node) {
     m_builder.SetInsertPoint(mergeBB);
 }
 
-void CodeGenerator::visit(ast::UnaryExpression* node) {}
+void CodeGenerator::visit(ast::UnaryExpression* node) {
+    // TODO
+}
 
 void CodeGenerator::visit(ast::BinaryExpression* node) {
     Value *L, *R;
