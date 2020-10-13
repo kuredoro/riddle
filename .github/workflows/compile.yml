@@ -8,9 +8,7 @@ jobs:
 
     steps:
       - name: Update LLVM
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y llvm
+        run: sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v1
       - uses: BSFishy/meson-build@v1.0.1
@@ -27,9 +25,7 @@ jobs:
 
     steps:
       - name: Update LLVM
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y llvm
+        run: sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v1
       - uses: BSFishy/meson-build@v1.0.1
