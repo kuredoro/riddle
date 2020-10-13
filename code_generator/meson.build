@@ -3,7 +3,7 @@ incdir = include_directories('.')
 llvm_dep = dependency('llvm', version : '>=9.0')
 
 libcg = static_library('code_generator',
-                             sources : ['impl/code_generator.cpp'],
+                             sources : ['impl/code_generator.cpp', 'impl/cpp_generator.cpp'],
                              cpp_args : riddle_cpp_args,
                              c_args : riddle_c_args,
                              link_args : riddle_link_args,
