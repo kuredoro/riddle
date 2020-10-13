@@ -7,6 +7,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Update LLVM
+        run: >
+          sudo apt-get update -y
+          sudo apt-get install -y llvm
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v1
       - uses: BSFishy/meson-build@v1.0.1
@@ -22,6 +26,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Update LLVM
+        run: >
+          sudo apt-get update -y
+          sudo apt-get install -y llvm
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v1
       - uses: BSFishy/meson-build@v1.0.1
