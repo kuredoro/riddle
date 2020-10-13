@@ -126,6 +126,33 @@ int main(int argc, char* argv[]) {
 
     fmt::print(fmt::fg(fmt::color::green), "pass\n");
 
+    // Check if amount of params is equal to record's amount of params
+    san::ParamsValidator paramsValidator;
+    ast->accept(paramsValidator);
+    errors = paramsValidator.getErrors();
+
+    if (!errors.empty()) {
+        fmt::print(fg(fmt::color::indian_red) | fmt::emphasis::bold,
+                   "Errors:\n");
+        printErrors(code, errors);
+
+        return 1;
+    }
+
+    fmt::print(fmt::emphasis::bold, "types conformance: ");
+
+    san::TypeDeriver deriveType;
+    ast->accept(deriveType);
+
+    errors = deriveType.getErrors();
+    if (!errors.empty()) {
+        fmt::print(fmt::fg(fmt::color::indian_red), "fail\n");
+        printErrors(code, errors);
+        return 1;
+    }
+
+    fmt::print(fmt::fg(fmt::color::green), "pass\n");
+
     fmt::print("\nGenerated code:\n\n");
 
     cg::CodeGenerator codeGen(argv[1]);
@@ -138,7 +165,7 @@ int main(int argc, char* argv[]) {
     codeGen.print();
 
     std::string tempCppFileName = "_temp_.cpp";
-    std::string tempObjFileName = "output.o";
+    std::string tempObjFileName = "_temp_output_.o";
 
     codeGen.emitCode(tempObjFileName);
     cg::generateIntermediateCpp(tempCppFileName, codeGen);
