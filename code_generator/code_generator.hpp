@@ -53,6 +53,7 @@ public:
 
     void print() { m_module->print(llvm::errs(), nullptr); }
     void emitCode(std::string filename = "output.o");
+    llvm::Module::FunctionListType& getFunctions();
 
 private:
     llvm::LLVMContext m_context;
@@ -84,5 +85,7 @@ private:
         return false;
     }
 };
+
+void generateIntermediateCpp(std::string, CodeGenerator&);
 
 } // namespace cg

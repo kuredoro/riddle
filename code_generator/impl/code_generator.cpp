@@ -352,4 +352,8 @@ void CodeGenerator::emitCode(std::string filename) {
     dest.flush();
 }
 
+Module::FunctionListType& CodeGenerator::getFunctions() {
+    return m_module->getFunctionList();
+}
+
 } // namespace cg

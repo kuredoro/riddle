@@ -136,7 +136,16 @@ int main(int argc, char* argv[]) {
         printErrors(code, errors);
     }
     codeGen.print();
-    codeGen.emitCode();
+
+    std::string tempCppFileName = "_temp_.cpp";
+    std::string tempObjFileName = "output.o";
+
+    codeGen.emitCode(tempObjFileName);
+    cg::generateIntermediateCpp(tempCppFileName, codeGen);
+    system(fmt::format("clang++ {} {} -o main.out", tempCppFileName,
+                       tempObjFileName)
+               .c_str());
+    system(fmt::format("rm {} {}", tempCppFileName, tempObjFileName).c_str());
 
     return 0;
 }
